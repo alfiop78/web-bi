@@ -52,7 +52,7 @@ function addFilterToSheet(token) {
 // switch tra i vari tipi di grafici (ChartWrapper) creati
 function selectWrapper(e) {
   Resource.wrapper = e.target.getAttribute('value');
-  previewReady();
+  chartWrapperReady();
   // Rivedo le colonne/metriche nascoste in questa visualizzazione e aggiorno la
   // ul #ul-columns-handler
   // Ciclo le proprietà group.key e group.columns per reimpostare la proprietà visible corrispondente
@@ -149,7 +149,8 @@ async function preview() {
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
-              google.charts.setOnLoadCallback(drawDatamart());
+              // google.charts.setOnLoadCallback(drawDatamart());
+              google.charts.setOnLoadCallback(draw());
               App.closeConsole();
               App.loaderStop();
               sheetInformations();
@@ -165,7 +166,8 @@ async function preview() {
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          google.charts.setOnLoadCallback(drawDatamart());
+          // google.charts.setOnLoadCallback(drawDatamart());
+          google.charts.setOnLoadCallback(draw());
           App.loaderStop();
           App.closeConsole();
           sheetInformations();

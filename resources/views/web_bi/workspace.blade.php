@@ -1091,7 +1091,10 @@
                             </section>
                             <section id="datatable" class="progress">
                               <div id="sheet__preview">
-                                <table id="preview-datamart"></table>
+                                <div id="preview__filters"></div>
+                                <div class="preview__content">
+                                  <table id="preview-datamart"></table>
+                                </div>
                               </div>
                               <section class="chart_options">
                                 <menu>

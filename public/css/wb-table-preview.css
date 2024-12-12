@@ -1,3 +1,7 @@
+.preview__content {
+  position: relative;
+}
+
 #preview-datamart, #preview-table {
   position: absolute;
   top: 0;
@@ -5,7 +9,6 @@
   left: 0;
   right: 0;
 }
-
 
 table {
   display: inline-block !important;

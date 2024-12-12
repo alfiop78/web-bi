@@ -30,7 +30,8 @@ observerList.observe(document.getElementById('dropzone-columns'), config);
 observerList.observe(document.getElementById('dropzone-rows'), config);
 // observerList.observe(document.getElementById('dropzone-filters'), config);
 
-google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
+// google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
+google.charts.load('current', { 'packages': ['corechart', 'controls', 'charteditor'], 'language': 'it' });
 
 function updatedSheet() {
   // la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
@@ -78,6 +79,35 @@ function createSheetColumns(data) {
   });
 }
 
+function draw() {
+  console.clear();
+  const prepareData = Resource.prepareData();
+  createSheetColumns(prepareData);
+  Resource.dataTable = new google.visualization.DataTable(prepareData);
+  // dashboard
+  Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('sheet__preview'));
+  console.log(Resource.wrapper);
+  // const wrapper = (Resource.wrapper) ? Resource.wrapperSelected : 'Table';
+  Resource.dashboardControls = Resource.drawSheetControls(document.getElementById('preview__filters'));
+
+  Resource.chartWrapper = new google.visualization.ChartWrapper();
+  Resource.chartWrapper.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
+  Resource.chartWrapper.setContainerId(Resource.ref.id);
+  Resource.chartWrapper.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
+  // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
+  Resource.groupFunctionSheet();
+  Resource.dataGroup = new google.visualization.data.group(
+    Resource.dataTable, Resource.groupKey, Resource.groupColumn
+  );
+  // creazione della DataView raggruppata
+  Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+  Resource.createDataViewSheet();
+  Resource.chartWrapper.setView(Resource.dataViewGrouped);
+  Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
+  google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
+  Resource.gdashboard.draw(Resource.dataTable);
+}
+
 function drawDatamart() {
   // Il dato iniziale non è raggruppato, la query sul datamart è eseguita con SELECT *...
   // La preview deve consentire la personalizzazione del report, quindi la possibilità
@@ -112,8 +142,8 @@ function drawDatamart() {
   // una group(), questa consente di raggruppare la visualizzazione in base ai livelli
   // dimensionali scelti (aggiunta/rimozione di livelli dimensionali)
   // tableRef.clearChart();
-  // google.visualization.events.addListener(Resource.tableRef, 'ready', previewReady);
-  google.visualization.events.addListener(Resource.chartWrapper, 'ready', previewReady);
+  // google.visualization.events.addListener(Resource.tableRef, 'ready', chartWrapperReady);
+  google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
 
   Resource.chartWrapper.draw();
   // Resource.tableRef.draw(Resource.dataTable, Resource.options);
@@ -128,7 +158,7 @@ function drawDatamart() {
   // export__csv.target = '_blank';
 }
 
-function previewReady() {
+function chartWrapperReady() {
   // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
   // Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
   // Resource.tableRefGroup = new google.visualization.Table(Resource.ref);
@@ -153,8 +183,6 @@ function previewReady() {
   // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
   Resource.dataGroup = new google.visualization.data.group(
     Resource.chartWrapper.getDataTable(), Resource.groupKey, Resource.groupColumn
-    // Resource.dataTable, Resource.groupKey, Resource.groupColumn
-    // Resource.dataTable, Resource.groupKey
   );
   console.log('dataGroup : ', Resource.dataGroup);
   Resource.chartWrapperView = new google.visualization.ChartWrapper();
@@ -239,11 +267,10 @@ function previewReady() {
   Resource.createDataViewSheet();
 
   google.visualization.events.addListener(Resource.chartWrapperView, 'ready', ready);
-  // google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
   // senza effettuare l'ordinamento.
-  console.log(Resource.wrapper);
-  console.log(Resource.specs.wrapper[Resource.wrapper].options);
+  // console.log(Resource.wrapper);
+  // console.log(Resource.specs.wrapper[Resource.wrapper].options);
   Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
   Resource.chartWrapperView.draw();
   // google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
@@ -259,7 +286,6 @@ function previewReady() {
 function ready() {
   google.visualization.events.addListener(Resource.chartWrapperView.getChart(), 'sort', sort);
 }
-
 
 function replacement(match, offset, string) {
   return `&#${match.charCodeAt()};`;
@@ -335,7 +361,6 @@ function drawToolbar() {
 };
 
 function sort(e) {
-  debugger;
   const labelRef = document.getElementById('field-label');
   const selectDataType = document.getElementById('field-datatype');
   const selectFormat = document.getElementById('field-format');
@@ -492,17 +517,17 @@ saveColumnConfig.onclick = () => {
   window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
   // window.localStorage.setItem(Resource.specs.token, JSON.stringify(Resource.specs));
   // le metriche calcolate restituisce -1 per getTableColumnIndex, quindi devo ridisegnare il report
-  // richiamando previewReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
+  // richiamando chartWrapperReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
   (Resource.dataTableIndex === -1) ?
-    // previewReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
-    previewReady() : Resource.chartWrapperView.draw();
+    // chartWrapperReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
+    chartWrapperReady() : Resource.chartWrapperView.draw();
   dlgConfig.close();
   // la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
   updatedSheet();
 }
 
 function columnHander(e) {
-  // Stessa logica della Func 'previewReady()'
+  // Stessa logica della Func 'chartWrapperReady()'
   const dataTableIndex = Resource.dataTable.getColumnIndex(e.target.dataset.columnId);
   console.log('index colonna DataTable', dataTableIndex);
   // console.log(Resource.dataTable.getColumnProperties(dataTableIndex));
@@ -531,7 +556,7 @@ function columnHander(e) {
       // Resource.specs.data.group.key[dataTableIndex - 1].properties.grouped = false;
       Resource.specs.wrapper[Resource.wrapper].group.key[dataTableIndex].properties.grouped = false;
       Resource.specs.wrapper[Resource.wrapper].group.key[dataTableIndex].properties.visible = false;
-      // OPTIMIZE: se, invece di previewReady() provassi ad impostare i metodi hideColumn/showColumn di GoogleChart?
+      // OPTIMIZE: se, invece di chartWrapperReady() provassi ad impostare i metodi hideColumn/showColumn di GoogleChart?
       // TEST: aggiorna tabella con il metodo draw()
       /* Resource.dataViewGrouped.hideColumns([dataTableIndex - 1, dataTableIndex]);
       debugger;
@@ -555,8 +580,8 @@ function columnHander(e) {
   sheet.specs = Resource.specs;
   window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
   // window.localStorage.setItem(`specs_${Resource.specs.token}`, JSON.stringify(Resource.specs));
-  // Qui dovrò sempre richiamare il previewReady() perchè devono essere ricalcolate le "colonne generate", in base al nuovo
+  // Qui dovrò sempre richiamare il chartWrapperReady() perchè devono essere ricalcolate le "colonne generate", in base al nuovo
   // raggruppamento definito qui
-  previewReady();
+  chartWrapperReady();
   updatedSheet();
 }

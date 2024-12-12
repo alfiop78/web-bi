@@ -568,6 +568,8 @@ mark.keyword {
 #sheet__preview {
   overflow-x: hidden;
   position: relative;
+  display: grid;
+  grid-template-rows: 64px 1fr;
 }
 
 .progressBar {
@@ -598,4 +600,11 @@ mark.keyword {
 
 menu {
   display: flex;
+}
+
+#preview__filters {
+  display: flex;
+  column-gap: 1em;
+  padding: 8px;
+  align-items: center;
 }

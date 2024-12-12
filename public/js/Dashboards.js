@@ -56,6 +56,7 @@ class Dashboards {
     // console.log(this.sheetSpecs);
     if (this.specs.filters) {
       this.specs.filters.forEach(filter => {
+        console.log('filters : ', filter);
         // creo qui il div class="filters" che conterrà il filtro
         // In questo modo non è necessario specificare i filtri nel template layout
         this.filterRef = document.createElement('div');
@@ -77,11 +78,47 @@ class Dashboards {
             }
           }
         });
+        console.log(this.filter);
         this.chartControls.push(this.filter);
       });
     }
     return this.chartControls;
   }
+
+  // creazione dei filtri del report, in fase di creazione della preview del report in workspace
+  drawSheetControls(ref) {
+    this.chartControls = [];
+    this.specs.wrapper[this.wrapper].group.key.forEach(filter => {
+      console.log('filters : ', filter);
+      // creo qui il div class="filters" che conterrà il filtro
+      // In questo modo non è necessario specificare i filtri nel template layout
+      // TODO: 12.12.2024 : Creare un template al posto di utilizzare il createElement
+      this.filterRef = document.createElement('div');
+      this.filterRef.className = 'filters';
+      this.filterRef.id = `filter__${filter.id}`;
+      ref.appendChild(this.filterRef);
+      this.filter = new google.visualization.ControlWrapper({
+        'controlType': 'CategoryFilter',
+        'containerId': `filter__${filter.id}`,
+        'options': {
+          // 'filterColumnIndex': filter.filterColumnIndex,
+          'filterColumnLabel': filter.label,
+          'ui': {
+            'caption': filter.label,
+            'label': '',
+            'cssClass': 'g-category-filter',
+            'selectedValuesLayout': 'aside'
+            // 'labelStacking': 'horizontal'
+          }
+        }
+      });
+      console.log(this.filter);
+      this.chartControls.push(this.filter);
+    });
+
+    return this.chartControls;
+  }
+
 
   drawControls_new(filtersRef) {
     this.controls = [];
@@ -181,7 +218,7 @@ class Resources extends Dashboards {
   constructor(ref) {
     super();
     this.ref = document.getElementById(ref);
-    // chartWrapper default è una Table
+    // chartWrapper default è una Table. indica il wrapper corrente
     this.wrapper = 'Table';
   }
 
@@ -191,26 +228,6 @@ class Resources extends Dashboards {
 
   get data() { return this.#data; }
 
-  /*
-   * Viene creato un Object Map() con il token del report e il suo elemento nel DOM corrispondente
-   * */
-  /* set resource(object) {
-    // object: contiene ref (il riferimento nel DOM), il datamart_id e lo user_id
-    this.#resource.set(this.token, {
-      token: this.token,
-      datamart_id: object.datamart_id,
-      user_id: object.userId,
-      data: this.specs.data,
-      wrappers: {
-        [this.ref.id]: {
-          containerId: this.ref.id,
-          [this.wrapper]: this.specs.wrapper[this.wrapper]
-        }
-      }
-    });
-    console.log(this.#resource);
-    debugger;
-  } */
   set resources(object) {
     // object: contiene ref (il riferimento nel DOM), il datamart_id e lo user_id
     this.#resources.set(object.token, object);
@@ -694,7 +711,9 @@ class Resources extends Dashboards {
     this.viewColumns = [], this.viewMetrics = [];
     this.specs.wrapper[this.wrapper].group.key.forEach(column => {
       if (column.properties.visible) {
-        this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
+        // this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
+        // console.log(this.dataGroup.getColumnId(this.dataGroup.getColumnIndex(column.id)));
+        this.viewColumns.push(this.dataGroup.getColumnId(this.dataGroup.getColumnIndex(column.id)));
         // imposto la classe per le colonne dimensionali
         this.dataGroup.setColumnProperty(this.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
       }
@@ -758,9 +777,10 @@ class Resources extends Dashboards {
           }
           this.viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
         } else {
-          this.viewMetrics.push(index);
+          this.viewMetrics.push(metric.alias);
         }
         this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+        // this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
         // let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
         // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
       }
