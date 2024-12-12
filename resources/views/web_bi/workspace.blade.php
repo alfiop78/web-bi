@@ -1099,7 +1099,7 @@
                               <section class="chart_options">
                                 <menu>
                                   <li><button id="btnOptions" data-popover-id="popover__chartOptions" class="material-symbols-rounded">settings</button></li>
-                                  <li><button id="btn__chartWrappers" data-popover-id="popover__chartWrappers" class="button-icons material-symbols-rounded" disabled>table_chart_view</button></li>
+                                  <li><button id="btn__chartWrapper" data-popover-id="popover__chartWrappers" class="button-icons material-symbols-rounded" disabled>table_chart_view</button></li>
                                   <!-- <li><button id="export__datatable_csv">Esport. CSV (completa)</button></li> -->
                                   <!-- <li><button id="export__dataview_csv">Esport. CSV (Visualizzazione)</button></li> -->
                                 </menu>

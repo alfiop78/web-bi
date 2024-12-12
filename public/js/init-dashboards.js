@@ -46,6 +46,11 @@ var Resource = new Resources();
       // imposto sempre Table di default
       Resource.chartWrapper.setChartType(wrapper.chartType);
       Resource.chartWrapper.setContainerId(wrapper.containerId);
+      if (wrapper.chartType === 'Table') {
+        // wrapper.options.height = 'auto';
+        wrapper.options.height = '100%';
+        wrapper.options.pageSize = 15;
+      }
       Resource.chartWrapper.setOptions(wrapper.options);
       app.getDataView();
       console.log(Resource.viewDefined);

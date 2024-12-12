@@ -20,7 +20,7 @@ const btnAdvancedMetricSave = document.getElementById('btn-metric-save');
 const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
 const btnNewCompositeMeasure = document.getElementById('btnNewCompositeMeasure');
 const btnOptions = document.getElementById('btnOptions');
-const btn__chartWrappers = document.getElementById('btn__chartWrappers');
+const btn__chartWrapper = document.getElementById('btn__chartWrapper');
 const btn__save_column = document.getElementById('btn__save_column');
 const btn__newVisualization = document.getElementById('btn__newVisualization');
 // Dialogs

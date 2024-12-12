@@ -1835,8 +1835,20 @@ function checkRemoveMetrics(token) {
 // WARN: codice ripetuto in popoverShow
 function popoverChartWrappers(e) {
   const popover = document.getElementById(e.target.dataset.popoverId);
-  popover.showPopover();
   const { top, right } = e.currentTarget.getBoundingClientRect();
+  // Aggiungo i chartWrapper presenti (proprietà wrapper dele specs) alla popover
+  const wrappers = Resource.specs.wrapper;
+  if (Object.keys(Resource.specs.wrapper).length >= 2) {
+    popover.querySelectorAll('nav>button').forEach(button => button.remove());
+    Object.keys(wrappers).forEach(chartType => {
+      const btn = document.createElement('button');
+      btn.value = chartType;
+      btn.innerText = chartType;
+      btn.addEventListener('click', selectWrapper);
+      popover.querySelector('nav').appendChild(btn);
+    });
+  }
+  popover.showPopover();
   popover.style.top = `${top - popover.offsetHeight}px`;
   popover.style.left = `${right}px`;
 }
@@ -1911,7 +1923,6 @@ function redrawChart() {
         rowNumberCell: null
       }
     }
-    debugger;
     Resource.specs.wrapper[chartType].options = options;
   } else {
     // creo la struttura della proprietà 'group'
@@ -1921,6 +1932,8 @@ function redrawChart() {
   }
   // ridisegno il grafico
   chartEditor.getChartWrapper().draw(document.getElementById(containerId));
+  debugger;
+  if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
   // aggiorno lo Sheet e tutte le proprie specifiche
   const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
   sheet.specs = Resource.specs;

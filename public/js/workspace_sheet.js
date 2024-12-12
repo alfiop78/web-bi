@@ -65,6 +65,7 @@ function selectWrapper(e) {
     const element = document.querySelector(`#ul-columns-handler>li[data-column-id='${column.alias}']`);
     element.dataset.visible = column.properties.visible;
   });
+  popover__chartWrappers.hidePopover();
 }
 
 async function preview() {
@@ -95,17 +96,7 @@ async function preview() {
 
   Resource.specs = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
   // se esistono più di un chartWrapper li visualizzo in questa popover
-  if (Object.keys(Resource.specs.wrapper).length >= 2) {
-    btn__chartWrappers.removeAttribute('disabled');
-    Object.keys(Resource.specs.wrapper).forEach(chartType => {
-      const btn = document.createElement('button');
-      btn.value = chartType;
-      // btn.dataset.value = chartType;
-      btn.innerText = chartType;
-      btn.addEventListener('click', selectWrapper);
-      popover__chartWrappers.querySelector('nav').appendChild(btn);
-    });
-  }
+  if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
 
   const progressBar = document.getElementById('progress-bar');
   const progressTo = document.getElementById('progress-to');
