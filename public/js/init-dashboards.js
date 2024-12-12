@@ -14,7 +14,6 @@ var Resource = new Resources();
   App.init();
 
   // Load the Visualization API and the corechart package.
-  // google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
   google.charts.load('current', { 'packages': ['corechart', 'controls'], 'language': 'it' });
 
   app.draw = () => {

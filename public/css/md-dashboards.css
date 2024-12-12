@@ -298,13 +298,13 @@ td.align-right {
 
 .horizontalCharts>.left {
   grid-column: 1 / 2;
-  background-color: #bfbdbd;
+  /* background-color: #bfbdbd; */
   grid-area: leftmain;
 }
 
 .horizontalCharts>.right {
   grid-column: 2 / 4;
-  background-color: #bfbdbd;
+  /* background-color: #bfbdbd; */
   grid-area: rightmain;
 }
 

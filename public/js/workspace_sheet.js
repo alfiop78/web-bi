@@ -38,6 +38,9 @@ async function sheetSelected(e) {
   document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
 }
 
+/*
+ * agiunta di un filtro allo Sheet
+ * */
 function addFilterToSheet(token) {
   // aggiungo, sulla <li> del filtro selezionato, la class 'added' per evidenziare che il filtro
   // è stato aggiunto al report, non può essere aggiunto di nuovo.
@@ -108,7 +111,6 @@ async function preview() {
   const progressTo = document.getElementById('progress-to');
   const progressTotal = document.getElementById('progress-total');
   const progressLabel = document.querySelector("label[for='progress-bar']");
-  // App.loaderStart();
   App.showConsole('Recupero dati in corso...', null, null);
   await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview`)
     .then((response) => {
