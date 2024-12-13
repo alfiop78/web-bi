@@ -164,7 +164,6 @@ const template__li = document.getElementById('template__li');
       })
       .then((response) => response.json())
       .then(data => {
-        // console.log(data);
         // imposto il titolo della dashboard
         app.dashboardName.textContent = data.name;
         app.dashboardName.dataset.value = data.name;
@@ -172,19 +171,21 @@ const template__li = document.getElementById('template__li');
         // imposto il token sul tasto "Salva" per poter aggiornare la dashboard e non inserirla nel DB
         app.btnSave.dataset.token = data.token;
 
+        // Resource.open(JSON.parse(data.json_value));
+        // debugger;
         Resource.json = JSON.parse(data.json_value);
         console.log(Resource.json);
         // imposto il template della dashboard selezionata
         Template.id = Resource.json.layout;
         // creo l'anteprima nel DOM
         Template.create();
-        app.dlgDashboard.close();
         // salvo la dashboard nel session storage, in questo modo posso tenere conto delle modifiche fatte e
         // abilitare/disabilitare di conseguenza il tasto btnSave in base al MutationObserver
         window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
         App.closeConsole();
         // promise.all per recuperare tutti gli oggetti della dashboard
         // TODO: provare la promise.race per poter recuperare i dati
+        app.dlgDashboard.close();
         app.getResources();
       })
       .catch(err => {
@@ -216,28 +217,47 @@ const template__li = document.getElementById('template__li');
     popover.style.left = `${right}px`;
   }
 
-  app.getResources = () => {
-    console.log(Resource.json);
-    let urls = [];
-    // ciclo le resources
-    for (const [token, value] of Object.entries(Resource.json.resources)) {
-      // NOTE: logica utilizzata in app.sheetSelected()
-      Resource.token = token;
-      // il ref corrente, appena aggiunto
-      Resource.ref = document.getElementById(value.ref);
-      // aggiungo un token per identificare, in publish(), il report (datamart_id)
-      Resource.ref.dataset.token = token;
-      // recupero le specifiche dello sheet dallo storage, TODO: da valutare se meglio recuperarlo dal DB
-      Resource.specs = JSON.parse(window.localStorage.getItem(token)).specs;
-      Resource.resource = {
-        datamart_id: value.datamart_id,
-        userId: value.user_id
-      };
-      urls.push(`/fetch_api/${value.datamart_id}_${value.user_id}/preview?page=1`)
-      // aggiungo la class 'defined' nel div che contiene il grafico/tabella
-      Resource.ref.classList.add('defined');
+  app.getResources = async () => {
+
+    for (const resource of Object.values(Resource.json.resources)) {
+      Resource.resources = resource;
     }
-    app.getAllData(urls);
+    let urls = [];
+    Resource.arrResources = [];
+    // Resource.resourceSpecs = [];
+    Resource.wrapperSpecs = [];
+    // Resource.dataColumns = [];
+    Resource.refs = [];
+    // ciclo le resources
+    for (const [token, value] of Resource.resources) {
+      // Resource.token = token;
+      Resource.arrResources.push(token);
+      const specs = Resource.json.resources[token];
+      // const specsColumns = Resource.json.resources[token].data.columns;
+      // il ref corrente, appena aggiunto
+      // ciclo sui wrappers per popolare tutti gli elementi della dashboard
+      Resource.wrapperSpecs.push(specs);
+      // Resource.dataColumns.push(specsColumns);
+      Object.keys(value.wrappers).forEach(ref => {
+        // ref : id nel DOM (chart__1)
+        Resource.ref = document.getElementById(ref);
+        Resource.refs.push(ref);
+        // aggiungo un token per identificare, in publish(), il report (datamart_id)
+        Resource.ref.dataset.token = token;
+        Resource.ref.dataset.datamartId = value.datamartId;
+        Resource.ref.dataset.userId = value.userId;
+        // recupero le specifiche dello sheet dallo storage
+        // WARN: 13.12.2024 da valutare se meglio recuperarlo dal DB
+        // Resource.specs = JSON.parse(window.localStorage.getItem(token)).specs;
+        // aggiungo la class 'defined' nel div che contiene il grafico/tabella
+        Resource.ref.classList.add('defined');
+      });
+      urls.push(`/fetch_api/${value.datamartId}_${value.userId}/preview?page=1`)
+    }
+    console.log(urls);
+    await app.getAllData(urls);
+    console.log(Resource.multiData);
+    google.charts.setOnLoadCallback(newDraw());
   }
 
   app.workbookSelected = async (e) => {
@@ -362,6 +382,7 @@ const template__li = document.getElementById('template__li');
     // TODO: aggiungere la prop 'published' (bool). Questa mi consentirà
     // di visualizzare la dashboard, solo le dashboards pubblicate possono
     // essere visualizzate
+    // Qui salvo anche le resources di questa dashboard
     Resource.dashboard = {
       title: app.dashboardName.dataset.value,
       note,
@@ -466,6 +487,7 @@ const template__li = document.getElementById('template__li');
   }
 
   app.getAllData = async (urls) => {
+    Resource.multiData = [];
     let partialData = [];
     await Promise.all(urls.map(url => fetch(url)))
       .then(responses => {
@@ -476,9 +498,11 @@ const template__li = document.getElementById('template__li');
       })
       .then(async (paginateData) => {
         paginateData.forEach((pagData, index) => {
-          console.log(pagData.data);
+          // index: indica il numero delle promise, in questo caso, per ogni datamart recuperato incremento l'indice
+          // console.log(pagData.data);
+          // console.log(index);
           let recursivePaginate = async (url, index) => {
-            // console.log(url);
+            console.log(url);
             await fetch(url).then((response) => {
               // console.log(response);
               if (!response.ok) { throw Error(response.statusText); }
@@ -492,7 +516,10 @@ const template__li = document.getElementById('template__li');
                 } else {
                   // Non sono presenti altre pagine, visualizzo la dashboard
                   console.log('tutte le paginate completate :', partialData[index]);
-                  Resource.data = partialData[index];
+                  // Resource.data = partialData[index];
+                  Resource.multiData[index] = partialData[index];
+                  // console.log(Resource.data);
+                  console.log(Resource.multiData);
                   // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
                   // google.charts.setOnLoadCallback(app.draw__new());
                   google.charts.setOnLoadCallback(draw());
@@ -506,10 +533,18 @@ const template__li = document.getElementById('template__li');
           if (pagData.next_page_url) {
             recursivePaginate(pagData.next_page_url, index);
           } else {
-            // Non sono presenti altre pagine, visualizzo il dashboard
-            Resource.data = partialData[index];
+            // Non sono presenti altre pagine, visualizzo la dashboard
+            // Resource.data = partialData[index];
+            Resource.multiData[index] = {
+              data: partialData[index],
+              token: Resource.arrResources[index],
+              ref: Resource.refs[index],
+              specs: Resource.wrapperSpecs[index]
+            };
+            // console.log(Resource.data);
+            // console.log(Resource.multiData);
             // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-            google.charts.setOnLoadCallback(draw());
+            // google.charts.setOnLoadCallback(draw());
             // abilito alcuni tasti dopo aver aperto la dashboard
           }
         });

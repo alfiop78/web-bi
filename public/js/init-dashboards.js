@@ -60,13 +60,6 @@ var Resource = new Resources();
       // return;
       let v = new google.visualization.DataView(Resource.dataTable);
       v.setColumns(Resource.viewDefined);
-      /* if (wrapper.chartType === 'Table') {
-        // v.setColumns([1, 2, 3]); // dataTable
-        v.setColumns(['CodAziendaSId', 'dealer', 'NettoRiga']); // dataTable
-      } else {
-        // v.setColumns([2, 3]); // datatable
-        v.setColumns(['sede', 'NettoRiga']); // datatable
-      } */
       Resource.chartWrapper.setView(v);
       // Resource.chartWrapper.setView(Resource.dataViewGrouped);
       console.log(Resource.chartWrapper.getView());
