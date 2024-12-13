@@ -991,7 +991,7 @@
                           </section>
                         </section>
                       </div>
-                      <div class="report-area">
+                      <div class="report-area" id="report__area">
                         <div class="local-loader" hidden="true">
                           <svg viewBox="0 0 32 32" width="32" height="32">
                             <circle id="local-spinner" cx="16" cy="16" r="14" fill="none"></circle>
@@ -1010,6 +1010,7 @@
                             </section>
                           </div>
                         </section>
+                        <section id="preview__filters"></section>
                         <section class="sheet-preview">
                           <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="absolute moveable">
                             <section class="dlg-grid">
@@ -1091,10 +1092,7 @@
                             </section>
                             <section id="datatable" class="progress">
                               <div id="sheet__preview">
-                                <div id="preview__filters"></div>
-                                <div class="preview__content">
-                                  <table id="preview-datamart"></table>
-                                </div>
+                                <table id="preview-datamart"></table>
                               </div>
                               <section class="chart_options">
                                 <menu>

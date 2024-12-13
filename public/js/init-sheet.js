@@ -81,15 +81,23 @@ function createSheetColumns(data) {
 
 function draw() {
   console.clear();
+  console.log('TIMER START', new Date());
   const prepareData = Resource.prepareData();
+  // Creo l'elenco di colonne/metriche elaborate dallo Sheet. Da qui
+  // potranno essere visualizzate/nascoste le colonne o le metriche per poter
+  // creare diverse "visualizzazioni"
   createSheetColumns(prepareData);
   Resource.dataTable = new google.visualization.DataTable(prepareData);
   // dashboard
-  Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('sheet__preview'));
+  // Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('sheet__preview'));
+  Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('report__area'));
   console.log(Resource.wrapper);
   // const wrapper = (Resource.wrapper) ? Resource.wrapperSelected : 'Table';
+  // I controlli, in questa fase, vengono recuperati dall'oggetto 'key', all'interno di
+  // specs[wrapper].group
   Resource.dashboardControls = Resource.drawSheetControls(document.getElementById('preview__filters'));
 
+  // Creo il ChartWrapper, le varie proprietà vengono recuperate da : specs[wrapper].chartType
   Resource.chartWrapper = new google.visualization.ChartWrapper();
   Resource.chartWrapper.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
   Resource.chartWrapper.setContainerId(Resource.ref.id);
@@ -101,11 +109,16 @@ function draw() {
   );
   // creazione della DataView raggruppata
   Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+  // nel Metodo createDataViewSheet() viene impostata la DataView 'dataViewGrouped'
   Resource.createDataViewSheet();
+  // Per impostare una determinata visualizzazione per il chartWrapper, utilizzo il Metodo setView()
   Resource.chartWrapper.setView(Resource.dataViewGrouped);
+  // Legame tra Controlli e Dashboard
   Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
+  // FIX: 13.12.2024 Valutare se questo "redraw" può essere evitato
   google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
   Resource.gdashboard.draw(Resource.dataTable);
+  console.log('TIMER END', new Date());
 }
 
 function drawDatamart() {
@@ -159,6 +172,7 @@ function drawDatamart() {
 }
 
 function chartWrapperReady() {
+  console.log('TIMER START (ready)', new Date());
   // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
   // Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
   // Resource.tableRefGroup = new google.visualization.Table(Resource.ref);
@@ -273,6 +287,7 @@ function chartWrapperReady() {
   // console.log(Resource.specs.wrapper[Resource.wrapper].options);
   Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
   Resource.chartWrapperView.draw();
+  console.log('TIMER END', new Date());
   // google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
   // Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.specs.wrapper[Resource.wrapper].options);
   // var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataViewGrouped);

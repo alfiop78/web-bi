@@ -89,7 +89,7 @@ class Dashboards {
   drawSheetControls(ref) {
     this.chartControls = [];
     this.specs.wrapper[this.wrapper].group.key.forEach(filter => {
-      console.log('filters : ', filter);
+      // console.log('filters : ', filter);
       // creo qui il div class="filters" che conterrà il filtro
       // In questo modo non è necessario specificare i filtri nel template layout
       // TODO: 12.12.2024 : Creare un template al posto di utilizzare il createElement
@@ -112,7 +112,7 @@ class Dashboards {
           }
         }
       });
-      console.log(this.filter);
+      // console.log(this.filter);
       this.chartControls.push(this.filter);
     });
 
@@ -781,12 +781,12 @@ class Resources extends Dashboards {
     });
     // concateno i due array che popoleranno la DataView.setColumns()
     this.viewDefined = this.viewColumns.concat(this.viewMetrics)
-    console.log('DataView defined:', this.viewDefined);
+    // console.log('DataView defined:', this.viewDefined);
     // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
     // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
     // console.log(Resource.dataGroup.getColumnProperties(0));
     this.dataViewGrouped.setColumns(this.viewDefined);
-    console.log('dataViewGrouped : ', this.dataViewGrouped);
+    // console.log('dataViewGrouped : ', this.dataViewGrouped);
   }
 
 }
