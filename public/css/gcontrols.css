@@ -1,0 +1,11 @@
+.goog-combobox input.label-input-label {
+  padding: 4px;
+}
+
+.goog-combobox input {
+  padding: 4px !important;
+}
+
+.goog-menuitem {
+  max-width: 200px;
+}
