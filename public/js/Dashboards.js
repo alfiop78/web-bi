@@ -13,7 +13,7 @@ class Dashboards {
     return this.#json;
   }
 
-  drawControls_create(filtersRef) {
+  drawDraggableControls(parent) {
     this.controls = [];
     // console.log(this.sheetSpecs);
     if (this.specs.filters) {
@@ -26,10 +26,10 @@ class Dashboards {
         i.dataset.sheet = filter.sheet;
         i.dataset.id = filter.containerId;
         i.dataset.name = filter.filterColumnLabel;
-        i.addEventListener('click', addDashboardFilters);
+        // i.addEventListener('click', addDashboardFilters);
         let div = content.querySelector('div');
         div.id = filter.containerId;
-        filtersRef.appendChild(content);
+        parent.appendChild(content);
         this.filter = new google.visualization.ControlWrapper({
           'controlType': 'CategoryFilter',
           'containerId': filter.containerId,
@@ -480,9 +480,9 @@ class Resources extends Dashboards {
     return this.#prepareData;
   }
 
+
   groupFunction() {
     this.groupKey = [], this.groupColumn = [];
-    debugger;
     this.specs.wrappers[this.ref.id].group.key.forEach(column => {
       // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
       // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
@@ -490,7 +490,8 @@ class Resources extends Dashboards {
       if (column.properties.grouped) {
         this.groupKey.push({
           id: column.id,
-          column: this.dataTable.getColumnIndex(column.id),
+          // column: this.dataTable.getColumnIndex(column.id),
+          column: column.id,
           label: column.label,
           type: column.type
         });
@@ -516,6 +517,7 @@ class Resources extends Dashboards {
       let object = {
         id: metric.alias,
         column: index,
+        // column: metric.alias,
         aggregation: google.visualization.data[aggregation],
         type: 'number',
         label: metric.label
@@ -689,7 +691,6 @@ class Resources extends Dashboards {
       }
     });
     // concateno i due array che popoleranno la DataView.setColumns()
-    // debugger;
     this.viewDefined = this.viewColumns.concat(this.viewMetrics)
     console.log('DataView defined:', this.viewDefined);
     // debugger;
@@ -698,7 +699,6 @@ class Resources extends Dashboards {
     // console.log(Resource.dataGroup.getColumnProperties(0));
     this.dataViewGrouped.setColumns(this.viewDefined);
     console.log('dataViewGrouped : ', this.dataViewGrouped);
-    // debugger;
   }
 
   createDataViewSheet() {

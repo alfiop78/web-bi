@@ -22,78 +22,57 @@ function newDraw() {
     console.log(Resource.specs);
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     Resource.ref = document.getElementById(datamart.ref);
-    debugger;
-    let gdashboard = new google.visualization.Dashboard(Resource.ref.parentElement);
-    const controls = Resource.drawControls_create(document.getElementById(`flt__${datamart.ref}`));
+    let gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
+    const controls = Resource.drawDraggableControls(document.getElementById('filter__dashboard'));
     let wrappers = [];
-    if (Object.keys(Resource.specs.wrappers).length === 1) {
-      debugger;
-    } else {
-      for (const [ref, wrapper] of Object.entries(Resource.specs.wrappers)) {
-        Resource.ref = document.getElementById(ref);
-        Resource.chartWrapper = new google.visualization.ChartWrapper();
-        // imposto sempre Table di default
-        Resource.chartWrapper.setChartType(Resource.specs.wrappers[ref].chartType);
-        Resource.chartWrapper.setContainerId(Resource.ref.id);
-        if (wrapper.chartType === 'Table') {
-          wrapper.options.height = 'auto%';
-          wrapper.options.pageSize = 15;
-        }
-        Resource.chartWrapper.setOptions(Resource.specs.wrappers[ref].options);
-        // Resource.chartWrapper.setOptions(wrapper.options);
-        getDataView();
-        let v = new google.visualization.DataView(Resource.dataTable);
-        v.setColumns(Resource.viewDefined);
-        Resource.chartWrapper.setView(v);
-        // Resource.chartWrapper.setView(Resource.dataViewGrouped);
-        console.log(Resource.chartWrapper.getView());
-        wrappers.push(Resource.chartWrapper);
+    for (const [ref, wrapper] of Object.entries(Resource.specs.wrappers)) {
+      Resource.ref = document.getElementById(ref);
+      Resource.chartWrapper = new google.visualization.ChartWrapper();
+      // imposto sempre Table di default
+      Resource.chartWrapper.setChartType(Resource.specs.wrappers[ref].chartType);
+      Resource.chartWrapper.setContainerId(Resource.ref.id);
+      if (wrapper.chartType === 'Table') {
+        wrapper.options.height = 'auto';
+        wrapper.options.pageSize = 15;
       }
-      gdashboard.bind(controls, wrappers);
-      gdashboard.draw(Resource.dataTable);
+      Resource.chartWrapper.setOptions(Resource.specs.wrappers[ref].options);
+      // Resource.chartWrapper.setOptions(wrapper.options);
+      getDataView();
+      console.log(Resource.viewDefined);
+      console.log(Resource.dataViewGrouped);
+      debugger;
+      // Resource.chartWrapper.setView(Resource.dataViewGrouped);
+      let v = new google.visualization.DataView(Resource.dataTable);
+      v.setColumns(Resource.viewDefined);
+      console.log(v);
+      Resource.chartWrapper.setView(v);
+      console.log(Resource.chartWrapper.getView());
+      wrappers.push(Resource.chartWrapper);
     }
-
-    /* Resource.chartWrapper.setChartType('Table');
-    Resource.chartWrapper.setContainerId(Resource.ref.id);
-    Resource.chartWrapper.setDataTable(Resource.dataTable);
-    console.log(Resource.specs.wrapper.Table.options);
-    Resource.chartWrapper.setOption('height', 'auto');
-    Resource.chartWrapper.setOption('allowHTML', true);
-    Resource.chartWrapper.setOption('page', 'enabled');
-    Resource.chartWrapper.setOption('pageSize', 15);
-    Resource.chartWrapper.setOption('width', '100%');
-    Resource.chartWrapper.setOption('cssClassNames', {
-      "headerRow": "g-table-header",
-      "tableRow": "g-table-row",
-      "oddTableRow": null,
-      "selectedTableRow": null,
-      "hoverTableRow": null,
-      "headerCell": "g-header-cell",
-      "tableCell": "g-table-cell",
-      "rowNumberCell": null
-    }); */
+    gdashboard.bind(controls, wrappers);
+    gdashboard.draw(Resource.dataTable);
 
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
     // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
-    google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
+    // google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
 
     gdashboard.bind(controls, Resource.chartWrapper);
     gdashboard.draw(Resource.dataTable);
   })
 }
 
+// invocata da sheetSelected, apertura di un singolo report
 function draw() {
   // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
   // è consentità con la DataView perchè questa è read-only
   Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
   // definisco la formattazione per le percentuali e per i valori currency
   // console.log(dataFormatted);
-  var gdashboard = new google.visualization.Dashboard(Resource.dashboardContent);
-  // imposto i filtri per questa dashboard
-  const controls = Resource.drawControls_create(document.getElementById(`flt__${Resource.ref.id}`));
-
+  let gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
+  // disegno i filtri dal template, con l'icona draggable
+  const controls = Resource.drawDraggableControls(document.getElementById('filter__dashboard'));
   // console.log(JSON.parse(Resource.view.toJSON()));
   // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.specs
   // var wrap = new google.visualization.ChartWrapper(Resource.specs.wrapper);
@@ -178,22 +157,4 @@ function onReady() {
 
   Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
   Resource.chartWrapperView.draw();
-}
-
-function addDashboardFilters(e) {
-  const parent = document.getElementById('filter__dashboard');
-  console.log(e.currentTarget.dataset.id);
-  e.currentTarget.style.color = 'red';
-  const div = document.createElement('div');
-  div.dataset.id = e.currentTarget.dataset.id;
-  div.dataset.sheet = e.currentTarget.dataset.sheet;
-  div.dataset.name = e.currentTarget.dataset.name;
-  div.innerText = e.currentTarget.dataset.name;
-  /* Resource.dashboardFilters.set(e.currentTarget.dataset.id, {
-    id : e.currentTarget.dataset.name,
-    containerId: e.currentTarget.dataset.id,
-    filterColumnLabel: e.currentTarget.dataset.name,
-    caption: e.currentTarget.dataset.name
-  }); */
-  parent.appendChild(div);
 }

@@ -23,8 +23,8 @@ var Resource = new Resources();
     // definisco la formattazione per le percentuali e per i valori currency
     // console.log(dataFormatted);
     // var gdashboard = new google.visualization.Dashboard(Resource.dashboardContent);
-    Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
-    Resource.dashboardControls = Resource.drawControls_new(document.getElementById('filter__dashboard'));
+    // Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
+    // Resource.dashboardControls = Resource.drawControls_new(document.getElementById('filter__dashboard'));
   }
 
   app.drawTestOneDatasource = () => {
@@ -33,14 +33,10 @@ var Resource = new Resources();
     // imposto i filtri per questa dashboard
     // per ogni wrapper presente in questo datamart...
     for (const [ref, wrapper] of Object.entries(Resource.specs.wrappers)) {
+      Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
+      Resource.dashboardControls = Resource.drawControls_new(document.getElementById('filter__dashboard'));
       // let controls = [];
       Resource.ref = document.getElementById(ref);
-      /* Resource.groupFunction();
-      Resource.dataGroup = new google.visualization.data.group(
-        Resource.dataTable, Resource.groupKey, Resource.groupColumn
-      );
-      console.log('group():', Resource.dataGroup);
-      debugger; */
       // Creazione dell'oggetto grafico (ChartWrapper)
       Resource.chartWrapper = new google.visualization.ChartWrapper();
       // imposto sempre Table di default
@@ -52,28 +48,54 @@ var Resource = new Resources();
         wrapper.options.pageSize = 15;
       }
       Resource.chartWrapper.setOptions(wrapper.options);
+      // Resource.chartWrapper.setView(Resource.dataViewGrouped);
+      // Resource.chartWrapper.setView(Resource.dataViewGrouped);
       app.getDataView();
-      console.log(Resource.viewDefined);
-      debugger;
-      console.log(Resource.dataViewGrouped);
-      // Resource.createDataViewDashboard();
-      // return;
       let v = new google.visualization.DataView(Resource.dataTable);
       v.setColumns(Resource.viewDefined);
+      console.log(v);
       Resource.chartWrapper.setView(v);
+      // google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady(wrapper));
       // Resource.chartWrapper.setView(Resource.dataViewGrouped);
-      console.log(Resource.chartWrapper.getView());
-      debugger;
+      // console.log(Resource.chartWrapper.getView());
       wrappers.push(Resource.chartWrapper);
+      Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
+      // google.visualization.events.addListener(Resource.gdashboard, 'ready', chartWrapperReady(wrappers));
+      Resource.gdashboard.draw(Resource.dataTable);
     }
 
-    Resource.gdashboard.bind(Resource.dashboardControls, wrappers);
-    Resource.gdashboard.draw(Resource.dataTable);
+    // Resource.gdashboard.bind(Resource.dashboardControls, wrappers);
+    // google.visualization.events.addListener(Resource.gdashboard, 'ready', chartWrapperReady(wrappers));
+    // Resource.gdashboard.draw(Resource.dataTable);
+  }
+
+  function chartWrapperReady(wrapper) {
+    // if (Resource.ref.id !== 'chart__2') return;
+    Resource.groupFunction();
+    Resource.dataGroup = new google.visualization.data.group(
+      Resource.dataTable, Resource.groupKey, Resource.groupColumn
+    );
+    Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+    // nel Metodo createDataViewSheet() viene impostata la DataView 'dataViewGrouped'
+    Resource.createDataView();
+    // Per impostare una determinata visualizzazione per il chartWrapper, utilizzo il Metodo setView()
+    // debugger;
+    // Resource.chartWrapper.setView(Resource.dataViewGrouped);
+    // console.log('dataGroup : ', Resource.dataGroup);
+    // debugger;
+    let wrap = new google.visualization.ChartWrapper();
+    wrap.setChartType(wrapper.chartType);
+    wrap.setContainerId(Resource.ref.id);
+    wrap.setOptions(wrapper.options);
+    debugger;
+    wrap.setDataTable(Resource.dataGroup);
+    // wrap.setView(Resource.dataViewGrouped);
+    debugger;
+    wrap.draw();
   }
 
   app.getDataView = () => {
     // esempio utilizzato senza impostare le metriche contenute nelle composite
-    console.log('onReady');
     // let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
     // console.log(groupColumnsIndex);
     // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
@@ -84,6 +106,8 @@ var Resource = new Resources();
     Resource.dataGroup = new google.visualization.data.group(
       Resource.dataTable, Resource.groupKey, Resource.groupColumn
     );
+    console.log(Resource.dataGroup);
+    debugger;
 
     Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
     Resource.createDataView();
@@ -178,7 +202,6 @@ var Resource = new Resources();
       // Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
       Resource.gdashboard.draw(Resource.dataTable);
     }
-
   }
 
   /* app.draw = () => {

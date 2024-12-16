@@ -42,16 +42,6 @@
           },
           "childs": [
             {
-              "tag": "section",
-              "id": "flt__chart__1",
-              "classes": [
-                "filters__chart"
-              ],
-              "attributes": {
-                "chartId": "chart__1"
-              }
-            },
-            {
               "tag": "div",
               "id": "chart__1",
               "classes": [
@@ -75,16 +65,6 @@
             "resource": true
           },
           "childs": [
-            {
-              "tag": "section",
-              "id": "flt__chart__2",
-              "classes": [
-                "filters__chart"
-              ],
-              "attributes": {
-                "chartId": "chart__2"
-              }
-            },
             {
               "tag": "div",
               "id": "chart__2",

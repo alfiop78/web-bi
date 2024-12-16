@@ -218,15 +218,12 @@ const template__li = document.getElementById('template__li');
   }
 
   app.getResources = async () => {
-
     for (const resource of Object.values(Resource.json.resources)) {
       Resource.resources = resource;
     }
     let urls = [];
     Resource.arrResources = [];
-    // Resource.resourceSpecs = [];
     Resource.wrapperSpecs = [];
-    // Resource.dataColumns = [];
     Resource.refs = [];
     // ciclo le resources
     for (const [token, value] of Resource.resources) {
@@ -337,12 +334,13 @@ const template__li = document.getElementById('template__li');
     }
 
     // TODO: filtri della Dashboard
-    document.querySelectorAll('#filter__dashboard>div[data-id]').forEach(filter => {
+    document.querySelectorAll('#filter__dashboard>.filters>i').forEach(filter => {
       Resource.dashboardFilters.set(filter.dataset.id, {
         id: filter.dataset.name,
         containerId: filter.dataset.id,
         filterColumnLabel: filter.dataset.name,
         caption: filter.dataset.name,
+        // TODO: 16.12.2024 da valorizzare
         sheet: filter.dataset.sheet
       });
     });
@@ -577,11 +575,64 @@ const template__li = document.getElementById('template__li');
     if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
 
     // TODO: qui dovrei fare una singola promise anzichè una promiseAll
-    const urls = [`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`];
-    app.getAllData(urls);
+    // const urls = [`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`];
+    app.getData(`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`);
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');
+  }
+
+  // recupero il datamrt
+  app.getData = async (url) => {
+    let partialData = [];
+    await fetch(url)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(async (paginateData) => {
+        console.log(paginateData);
+        console.log(paginateData.data);
+        // funzione ricorsiva fino a quando è presente next_page_url
+        let recursivePaginate = async (url) => {
+          // console.log(url);
+          await fetch(url).then((response) => {
+            // console.log(response);
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          }).then(response => response.json()).then((paginate) => {
+            console.log(paginate);
+            // console.log(progressBar.value);
+            partialData = partialData.concat(paginate.data);
+            if (paginate.next_page_url) {
+              recursivePaginate(paginate.next_page_url);
+            } else {
+              // Non sono presenti altre pagine, visualizzo il dashboard
+              console.log('tutte le paginate completate :', partialData);
+              Resource.data = partialData;
+              google.charts.setOnLoadCallback(draw());
+            }
+          }).catch((err) => {
+            App.showConsole(err, 'error');
+            console.error(err);
+          });
+        }
+        partialData = paginateData.data;
+        if (paginateData.next_page_url) {
+          recursivePaginate(paginateData.next_page_url);
+        } else {
+          // Non sono presenti altre pagine, visualizzo la dashboard
+          Resource.data = partialData;
+          google.charts.setOnLoadCallback(draw());
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+    // end chiamata in GET
   }
 
   function selectWrapper(e) {
