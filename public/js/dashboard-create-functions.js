@@ -15,6 +15,7 @@ function getDataView() {
   Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
   Resource.createDataView();
 }
+
 function newDraw() {
   Resource.multiData.forEach(datamart => {
     Resource.data = datamart.data;
@@ -50,15 +51,12 @@ function newDraw() {
       wrappers.push(Resource.chartWrapper);
     }
     gdashboard.bind(controls, wrappers);
-    gdashboard.draw(Resource.dataTable);
 
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
     // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
     // google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
-
-    gdashboard.bind(controls, Resource.chartWrapper);
     gdashboard.draw(Resource.dataTable);
   })
 }

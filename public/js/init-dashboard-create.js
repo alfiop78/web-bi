@@ -171,8 +171,6 @@ const template__li = document.getElementById('template__li');
         // imposto il token sul tasto "Salva" per poter aggiornare la dashboard e non inserirla nel DB
         app.btnSave.dataset.token = data.token;
 
-        // Resource.open(JSON.parse(data.json_value));
-        // debugger;
         Resource.json = JSON.parse(data.json_value);
         console.log(Resource.json);
         // imposto il template della dashboard selezionata
@@ -201,11 +199,11 @@ const template__li = document.getElementById('template__li');
     // se esistono più di un chartWrapper li visualizzo nella popover__chartWrappers
     const wrappers = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs.wrapper;
     if (Object.keys(wrappers).length >= 2) {
-      // btn__chartWrapper.removeAttribute('disabled');
+      popover.querySelectorAll('nav>button').forEach(button => button.remove());
       Object.keys(wrappers).forEach(chartType => {
         const btn = document.createElement('button');
         btn.value = chartType;
-        btn.dataset.token = Resource.token;
+        btn.dataset.token = e.currentTarget.dataset.token;
         btn.dataset.ref = e.currentTarget.dataset.id;
         btn.innerText = chartType;
         btn.addEventListener('click', selectWrapper);
@@ -218,42 +216,36 @@ const template__li = document.getElementById('template__li');
   }
 
   app.getResources = async () => {
-    for (const resource of Object.values(Resource.json.resources)) {
-      Resource.resources = resource;
-    }
     let urls = [];
     Resource.arrResources = [];
     Resource.wrapperSpecs = [];
     Resource.refs = [];
     // ciclo le resources
-    for (const [token, value] of Resource.resources) {
-      // Resource.token = token;
+    for (const [token, resource] of Object.entries(Resource.json.resources)) {
+      Resource.resources = resource;
       Resource.arrResources.push(token);
-      const specs = Resource.json.resources[token];
-      // const specsColumns = Resource.json.resources[token].data.columns;
-      // il ref corrente, appena aggiunto
+      // specifiche del chartWrapper
+      Resource.wrapperSpecs.push(resource);
       // ciclo sui wrappers per popolare tutti gli elementi della dashboard
-      Resource.wrapperSpecs.push(specs);
-      // Resource.dataColumns.push(specsColumns);
-      Object.keys(value.wrappers).forEach(ref => {
-        // ref : id nel DOM (chart__1)
+      for (const [ref, wrapper] of Object.entries(resource.wrappers)) {
         Resource.ref = document.getElementById(ref);
         Resource.refs.push(ref);
         // aggiungo un token per identificare, in publish(), il report (datamart_id)
+        Resource.ref.dataset.wrapper = wrapper.chartType;
         Resource.ref.dataset.token = token;
-        Resource.ref.dataset.datamartId = value.datamartId;
-        Resource.ref.dataset.userId = value.userId;
-        // recupero le specifiche dello sheet dallo storage
-        // WARN: 13.12.2024 da valutare se meglio recuperarlo dal DB
-        // Resource.specs = JSON.parse(window.localStorage.getItem(token)).specs;
+        Resource.ref.dataset.datamartId = resource.datamartId;
+        Resource.ref.dataset.userId = resource.userId;
         // aggiungo la class 'defined' nel div che contiene il grafico/tabella
         Resource.ref.classList.add('defined');
-      });
-      urls.push(`/fetch_api/${value.datamartId}_${value.userId}/preview?page=1`)
+        const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
+        btn__chartWrapper.dataset.id = Resource.ref.id;
+        btn__chartWrapper.dataset.token = token;
+        if (Object.keys(resource.wrappers).length >= 2) btn__chartWrapper.removeAttribute('disabled');
+      }
+      urls.push(`/fetch_api/${resource.datamartId}_${resource.userId}/preview?page=1`)
     }
-    console.log(urls);
     await app.getAllData(urls);
-    console.log(Resource.multiData);
+    // console.log(Resource.multiData);
     google.charts.setOnLoadCallback(newDraw());
   }
 
@@ -515,12 +507,18 @@ const template__li = document.getElementById('template__li');
                   // Non sono presenti altre pagine, visualizzo la dashboard
                   console.log('tutte le paginate completate :', partialData[index]);
                   // Resource.data = partialData[index];
-                  Resource.multiData[index] = partialData[index];
+                  // Resource.multiData[index] = partialData[index];
                   // console.log(Resource.data);
-                  console.log(Resource.multiData);
+                  // console.log(Resource.multiData);
                   // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
                   // google.charts.setOnLoadCallback(app.draw__new());
-                  google.charts.setOnLoadCallback(draw());
+                  // google.charts.setOnLoadCallback(draw());
+                  Resource.multiData[index] = {
+                    data: partialData[index],
+                    token: Resource.arrResources[index],
+                    ref: Resource.refs[index],
+                    specs: Resource.wrapperSpecs[index]
+                  };
                 }
               }).catch((err) => {
                 App.showConsole(err, 'error');
@@ -566,16 +564,14 @@ const template__li = document.getElementById('template__li');
     // direttamente nelle specs.wrapper dello sheet, ad esempio se salvo lo sheet come barChart
     // potrei impostare una proprietà 'default : true' nel wrapper barChart
     Resource.ref.dataset.wrapper = 'Table';
-    Resource.dashboardContent = Resource.ref.parentElement;
     Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     // imposto, sul tasto btn__chartWrapper il token di questo Sheet
-    const btn__chartWrapper = Resource.dashboardContent.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
+    const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
     btn__chartWrapper.dataset.id = Resource.ref.id;
     btn__chartWrapper.dataset.token = e.currentTarget.dataset.token;
     if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
 
-    // TODO: qui dovrei fare una singola promise anzichè una promiseAll
-    // const urls = [`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`];
+    // eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
     app.getData(`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`);
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
@@ -593,8 +589,8 @@ const template__li = document.getElementById('template__li');
       })
       .then((response) => response.json())
       .then(async (paginateData) => {
-        console.log(paginateData);
-        console.log(paginateData.data);
+        // console.log(paginateData);
+        // console.log(paginateData.data);
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
           // console.log(url);
@@ -603,14 +599,14 @@ const template__li = document.getElementById('template__li');
             if (!response.ok) { throw Error(response.statusText); }
             return response;
           }).then(response => response.json()).then((paginate) => {
-            console.log(paginate);
+            // console.log(paginate);
             // console.log(progressBar.value);
             partialData = partialData.concat(paginate.data);
             if (paginate.next_page_url) {
               recursivePaginate(paginate.next_page_url);
             } else {
               // Non sono presenti altre pagine, visualizzo il dashboard
-              console.log('tutte le paginate completate :', partialData);
+              // console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
               google.charts.setOnLoadCallback(draw());
             }
@@ -635,8 +631,10 @@ const template__li = document.getElementById('template__li');
     // end chiamata in GET
   }
 
+  // Ridisegno il report in base alle specifiche recuperate dal report
   function selectWrapper(e) {
     Resource.wrapper = e.target.getAttribute('value');
+    Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     const chartContent = document.getElementById(e.currentTarget.dataset.ref);
     onReady();
     chartContent.dataset.wrapper = Resource.wrapper;

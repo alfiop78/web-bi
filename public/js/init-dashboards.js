@@ -421,8 +421,9 @@ var Resource = new Resources();
     // gdashboard.draw(view); // utilizzo della DataView
   }
 
-  app.getLayout = async (dashboard) => {
-    await fetch(`/js/json-templates/${dashboard.layout}.json`)
+  app.getLayout = async () => {
+    debugger;
+    await fetch(`/js/json-templates/${Resource.json.layout}.json`)
       .then((response) => {
         console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -439,7 +440,7 @@ var Resource = new Resources();
         // carico le risorse (sheet) necessarie alla dashboard
         // Resource.drawControls_new(document.getElementById('filter__dashboard'));
         // console.log(Resource.controls);
-        app.loadResources(dashboard.resources);
+        app.getResources();
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -449,7 +450,7 @@ var Resource = new Resources();
 
   // recupero dati dagli Sheet collegati a questa Dashboard
   // TODO: predisporre una promise.all per scaricare tutte le risorse della Dashboard
-  /* app.loadResources = (resources) => {
+  /* app.getResources = (resources) => {
     for (const [token, value] of Object.entries(resources)) {
       Resource.datamart_id = value.datamart_id;
       // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
@@ -469,15 +470,53 @@ var Resource = new Resources();
     }
   } */
 
-  app.loadResources = async (resources) => {
-    console.log('loadResources');
+  app.getResources = async () => {
+    console.log('getResources');
+    for (const resource of Object.values(Resource.json.resources)) {
+      Resource.resources = resource;
+    }
+    let urls = [];
+    Resource.arrResources = [];
+    Resource.wrapperSpecs = [];
+    Resource.refs = [];
+    // ciclo le resources
+    for (const [token, value] of Resource.resources) {
+      // Resource.token = token;
+      Resource.arrResources.push(token);
+      const specs = Resource.json.resources[token];
+      // const specsColumns = Resource.json.resources[token].data.columns;
+      // il ref corrente, appena aggiunto
+      // ciclo sui wrappers per popolare tutti gli elementi della dashboard
+      Resource.wrapperSpecs.push(specs);
+      // Resource.dataColumns.push(specsColumns);
+      Object.keys(value.wrappers).forEach(ref => {
+        // ref : id nel DOM (chart__1)
+        Resource.ref = document.getElementById(ref);
+        Resource.refs.push(ref);
+        // aggiungo un token per identificare, in publish(), il report (datamart_id)
+        Resource.ref.dataset.token = token;
+        Resource.ref.dataset.datamartId = value.datamartId;
+        Resource.ref.dataset.userId = value.userId;
+        // recupero le specifiche dello sheet dallo storage
+        // WARN: 13.12.2024 da valutare se meglio recuperarlo dal DB
+        // Resource.specs = JSON.parse(window.localStorage.getItem(token)).specs;
+        // aggiungo la class 'defined' nel div che contiene il grafico/tabella
+        Resource.ref.classList.add('defined');
+      });
+      urls.push(`/fetch_api/${value.datamartId}/datamart?page=1`)
+    }
+    console.log(urls);
+    await app.getAllData(urls);
+    console.log(Resource.multiData);
+    google.charts.setOnLoadCallback(newDraw());
+    /* debugger;
     // preparo la dashboard e i controlli (filtri della dashboard)
     app.draw();
     for (const [token, value] of Object.entries(resources)) {
       console.log(value);
       Resource.specs = value;
       await app.getAllData();
-    }
+    } */
   }
 
   document.querySelectorAll('a[data-token]').forEach(a => {
@@ -493,9 +532,9 @@ var Resource = new Resources();
         .then(data => {
           console.log(data);
           Resource.json = JSON.parse(data.json_value);
-          // debugger;
+          debugger;
           document.querySelector('h1.title').innerHTML = Resource.json.title;
-          app.getLayout(Resource.json);
+          app.getLayout();
         })
         .catch(err => {
           App.showConsole(err, 'error');
@@ -602,7 +641,7 @@ var Resource = new Resources();
     // end chiamata in GET
   }
 
-  app.getAllData = async () => {
+  app.getAllData = async (urls) => {
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
     const progressTotal = document.getElementById('progress-total');
@@ -610,8 +649,11 @@ var Resource = new Resources();
     App.showLoader();
     App.showConsole('Apertura Dashboard in corso...', null, null);
     // TODO: implementare una lista di urls come fatto in init-dashboard-create.js
-    const urls = [`/fetch_api/${Resource.specs.datamartId}/datamart?page=1`];
+    // const urls = [`/fetch_api/${Resource.specs.datamartId}/datamart?page=1`];
+    Resource.multiData = [];
     let partialData = [];
+    console.log(urls);
+    debugger;
     await Promise.all(urls.map(url => fetch(url)))
       .then(responses => {
         return Promise.all(responses.map(response => {
@@ -642,10 +684,17 @@ var Resource = new Resources();
                 } else {
                   // Non sono presenti altre pagine, visualizzo la dashboard
                   console.log('tutte le paginate completate :', partialData[index]);
-                  Resource.data = partialData[index];
+                  Resource.multiData[index] = {
+                    data: partialData[index],
+                    token: Resource.arrResources[index],
+                    ref: Resource.refs[index],
+                    specs: Resource.wrapperSpecs[index]
+                  };
+                  // Resource.data = partialData[index];
                   // google.charts.setOnLoadCallback(app.draw());
                   // google.charts.setOnLoadCallback(app.drawResources());
-                  google.charts.setOnLoadCallback(app.drawTestOneDatasource());
+                  // google.charts.setOnLoadCallback(app.drawTestOneDatasource());
+                  // google.charts.setOnLoadCallback(draw());
                   App.closeConsole();
                   App.closeLoader();
                 }
@@ -659,9 +708,15 @@ var Resource = new Resources();
             recursivePaginate(pagData.next_page_url, index);
           } else {
             // Non sono presenti altre pagine, visualizzo il dashboard
-            Resource.data = partialData[index];
+            // Resource.data = partialData[index];
             // google.charts.setOnLoadCallback(app.drawResources());
-            google.charts.setOnLoadCallback(app.drawTestOneDatasource());
+            // google.charts.setOnLoadCallback(app.drawTestOneDatasource());
+            Resource.multiData[index] = {
+              data: partialData[index],
+              token: Resource.arrResources[index],
+              ref: Resource.refs[index],
+              specs: Resource.wrapperSpecs[index]
+            };
             App.closeConsole();
             App.closeLoader();
           }

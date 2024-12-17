@@ -115,7 +115,8 @@
       <p>Lynx International</p>
     </section>
   </footer>
-  <script type="text/javascript" src="{{ asset('/js/init-dashboards.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/init-dashboards.js') }}"></script>
+  <script type="text/javascript" src="{{ asset('/js/dashboard_functions.js') }}" defer></script>
 </body>
 
 </html>
