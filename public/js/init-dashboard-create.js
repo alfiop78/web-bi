@@ -176,7 +176,7 @@ const template__li = document.getElementById('template__li');
         // imposto il template della dashboard selezionata
         Template.id = Resource.json.layout;
         // creo l'anteprima nel DOM
-        Template.create();
+        Template.create(true);
         // salvo la dashboard nel session storage, in questo modo posso tenere conto delle modifiche fatte e
         // abilitare/disabilitare di conseguenza il tasto btnSave in base al MutationObserver
         window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
@@ -338,7 +338,8 @@ const template__li = document.getElementById('template__li');
     });
 
     // TODO: 10.12.2024 Recupero le risorse aggiunte alla dashboard
-    document.querySelectorAll('section.chartContent[data-resource]>.chart-elements').forEach(sheet => {
+    document.querySelectorAll('.chartContent[data-resource]>.chart-elements').forEach(sheet => {
+      debugger;
       const token = sheet.dataset.token;
       const specs = JSON.parse(window.localStorage.getItem(token)).specs;
       // console.log(specs);
@@ -464,7 +465,7 @@ const template__li = document.getElementById('template__li');
     // console.log(template);
     // Template.dashboardRef = document.getElementById('dashboard-preview');
     // creo l'anteprima nel DOM
-    Template.create();
+    Template.create(true);
   }
 
   // Fn invocata dal tasto + che viene creato dinamicamente dal layout-template

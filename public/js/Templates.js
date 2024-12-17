@@ -11,7 +11,8 @@ class Templates {
 
   get data() { return this.#data; }
 
-  create() {
+  create(options) {
+    // options: un boolean che indica se aggiungere al DOM anche il div delle opzioni (.resourceActions)
     // console.log(this.#data);
     // recupero l'elemento 'parent' a cui aggiungere il template json (presente in data)
     this.parent = document.getElementById(this.#data.get(this.id).parentElement_id);
@@ -30,7 +31,7 @@ class Templates {
           tag.dataset[key] = value
         }
         parent.appendChild(tag);
-        if (child.attributes.actions) {
+        if (child.attributes.actions && options) {
           this.actionsContent = this.resourceActionsTmpl.content.cloneNode(true);
           this.resourceAction = this.actionsContent.querySelector('.resourceActions');
           parent.appendChild(this.resourceAction);

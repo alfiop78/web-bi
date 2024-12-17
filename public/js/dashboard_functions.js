@@ -16,6 +16,28 @@ function getDataView() {
   Resource.createDataView();
 }
 
+function filterSelected(e) {
+  // console.log(this);
+  // console.log(e.getControl());
+  // console.log(this.getControl());
+  // console.log(this.getOption('filterColumnLabel'));
+  // console.log(e.getState());
+  const controlColumn = this.getOption('filterColumnLabel');
+  // il controllo selezionato deve essere clonato se viene trovato un altro controllo con lo stesso nome
+  const currentControl = this;
+  // valore selezionato nel Control
+  const value = e.getState().selectedValues;
+  // cerco tutti i Control che hanno la stessa colonna (es. : 'sede')
+  Resource.dashboardControls.forEach(control => {
+    if (control.getOption('filterColumnLabel') === controlColumn) {
+      control.setState({selectedValues: [value]});
+      currentControl.clone();
+      control.draw();
+    }
+  });
+
+}
+
 function newDraw() {
   Resource.multiData.forEach(datamart => {
     Resource.data = datamart.data;
@@ -23,6 +45,7 @@ function newDraw() {
     console.log(Resource.specs);
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     Resource.ref = document.getElementById(datamart.ref);
+    debugger;
     let gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     const controls = Resource.drawControls(document.getElementById('filter__dashboard'));
     let wrappers = [];
@@ -41,7 +64,7 @@ function newDraw() {
       getDataView();
       console.log(Resource.viewDefined);
       console.log(Resource.dataViewGrouped);
-      debugger;
+      // debugger;
       // Resource.chartWrapper.setView(Resource.dataViewGrouped);
       let v = new google.visualization.DataView(Resource.dataTable);
       v.setColumns(Resource.viewDefined);

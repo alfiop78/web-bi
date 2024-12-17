@@ -6,10 +6,12 @@
   "childs": [
     {
       "tag": "div",
+      "id": "layout__threeSection",
       "classes": [
         "layout",
         "threeSection"
       ],
+      "attributes": {},
       "childs": [
         {
           "tag": "section",
@@ -17,13 +19,15 @@
             "filters",
             "filterContent"
           ],
+          "attributes": {},
           "childs": [
             {
               "tag": "div",
               "id": "filter__dashboard",
               "classes": [
                 "contentObject"
-              ]
+              ],
+              "attributes": {}
             }
           ]
         },
@@ -39,13 +43,14 @@
           "childs": [
             {
               "tag": "div",
-              "id": "chart_div",
+              "id": "chart__1",
               "classes": [
                 "chart-elements",
                 "contentObject"
               ],
               "attributes": {
-                "fn": "addResource"
+                "fn": "addResource",
+                "actions": true
               }
             }
           ]
@@ -55,26 +60,29 @@
           "classes": [
             "right"
           ],
-          "attributes": {
-            "resource": true
-          },
+          "attributes": {},
           "childs": [
             {
               "tag": "div",
               "id": "object-1",
               "classes": [
-                "chartContent", "object"
+                "chartContent",
+                "object"
               ],
+              "attributes": {
+                "resource": true
+              },
               "childs": [
                 {
                   "tag": "div",
-                  "id": "chart_div",
+                  "id": "chart__2",
                   "classes": [
                     "chart-elements",
                     "contentObject"
                   ],
                   "attributes": {
-                    "fn": "addResource"
+                    "fn": "addResource",
+                    "actions": true
                   }
                 }
               ]
@@ -86,16 +94,20 @@
                 "chartContent",
                 "object"
               ],
+              "attributes": {
+                "resource": true
+              },
               "childs": [
                 {
                   "tag": "div",
-                  "id": "chart_div",
+                  "id": "chart__3",
                   "classes": [
                     "chart-elements",
                     "contentObject"
                   ],
                   "attributes": {
-                    "fn": "addResource"
+                    "fn": "addResource",
+                    "actions": true
                   }
                 }
               ]

@@ -422,7 +422,6 @@ var Resource = new Resources();
   }
 
   app.getLayout = async () => {
-    debugger;
     await fetch(`/js/json-templates/${Resource.json.layout}.json`)
       .then((response) => {
         console.log(response);
@@ -436,7 +435,7 @@ var Resource = new Resources();
         Template.data = data;
         Template.id = data.id;
         // creo il template nel DOM
-        Template.create();
+        Template.create(false);
         // carico le risorse (sheet) necessarie alla dashboard
         // Resource.drawControls_new(document.getElementById('filter__dashboard'));
         // console.log(Resource.controls);
@@ -509,14 +508,8 @@ var Resource = new Resources();
     await app.getAllData(urls);
     console.log(Resource.multiData);
     google.charts.setOnLoadCallback(newDraw());
-    /* debugger;
-    // preparo la dashboard e i controlli (filtri della dashboard)
-    app.draw();
-    for (const [token, value] of Object.entries(resources)) {
-      console.log(value);
-      Resource.specs = value;
-      await app.getAllData();
-    } */
+    App.closeConsole();
+    App.closeLoader();
   }
 
   document.querySelectorAll('a[data-token]').forEach(a => {
@@ -532,7 +525,7 @@ var Resource = new Resources();
         .then(data => {
           console.log(data);
           Resource.json = JSON.parse(data.json_value);
-          debugger;
+          // debugger;
           document.querySelector('h1.title').innerHTML = Resource.json.title;
           app.getLayout();
         })
@@ -653,7 +646,6 @@ var Resource = new Resources();
     Resource.multiData = [];
     let partialData = [];
     console.log(urls);
-    debugger;
     await Promise.all(urls.map(url => fetch(url)))
       .then(responses => {
         return Promise.all(responses.map(response => {
@@ -690,13 +682,6 @@ var Resource = new Resources();
                     ref: Resource.refs[index],
                     specs: Resource.wrapperSpecs[index]
                   };
-                  // Resource.data = partialData[index];
-                  // google.charts.setOnLoadCallback(app.draw());
-                  // google.charts.setOnLoadCallback(app.drawResources());
-                  // google.charts.setOnLoadCallback(app.drawTestOneDatasource());
-                  // google.charts.setOnLoadCallback(draw());
-                  App.closeConsole();
-                  App.closeLoader();
                 }
               }).catch((err) => {
                 App.showConsole(err, 'error');
@@ -717,8 +702,6 @@ var Resource = new Resources();
               ref: Resource.refs[index],
               specs: Resource.wrapperSpecs[index]
             };
-            App.closeConsole();
-            App.closeLoader();
           }
         });
       })

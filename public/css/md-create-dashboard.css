@@ -259,7 +259,8 @@ fieldset legend {
   flex-wrap: wrap;
 }
 
-.preview>.layout .filters__chart>.filter__container, .preview #filter__dashboard>.filter__container {
+.preview>.layout .filters__chart>.filter__container,
+.preview #filter__dashboard>.filter__container {
   display: flex;
   align-items: center;
   column-gap: 4px;
@@ -269,7 +270,8 @@ fieldset legend {
   margin: 8px;
 }
 
-.preview>.layout .filters__chart>.filter__container>span, .preview #filter__dashboard>.filter__container>span {
+.preview>.layout .filters__chart>.filter__container>span,
+.preview #filter__dashboard>.filter__container>span {
   min-width: 120px
 }
 
@@ -382,13 +384,36 @@ fieldset legend {
     "leftmain rightmain";
 }
 
+.preview>.layout.threeSection {
+  grid-template: minmax(60px, auto) 1fr / 1fr 1fr;
+  grid-template-areas:
+    "filterArea filterArea"
+    "leftmain rightmain";
+}
+
 .thumbnails>.threeSection>.left {
   grid-column: 1 / 2;
   background-color: #bfbdbd;
   grid-area: leftmain;
 }
 
+.preview>.threeSection>.left {
+  grid-column: 1 / 2;
+  background-color: #bfbdbd;
+  grid-area: leftmain;
+}
+
 .thumbnails>.threeSection>.right {
+  grid-column: 2 / 4;
+  grid-area: rightmain;
+  display: grid;
+  grid-template-areas:
+    "object-1"
+    "object-2";
+  grid-row-gap: 1em;
+}
+
+.preview>.threeSection>.right {
   grid-column: 2 / 4;
   grid-area: rightmain;
   display: grid;

@@ -3,6 +3,7 @@ class Dashboards {
   #dashboard = {};
   constructor() {
     this.dashboardFilters = new Map();
+    this.dashboardControls = [];
   }
 
   set json(value) {
@@ -23,7 +24,7 @@ class Dashboards {
         const template = document.getElementById('template__filters').content.cloneNode(true);
         let content = template.querySelector('.filters');
         let i = content.querySelector('i');
-        i.dataset.sheet = filter.sheet;
+        i.dataset.sheet = this.specs.token;
         i.dataset.id = filter.containerId;
         i.dataset.name = filter.filterColumnLabel;
         // i.addEventListener('click', addDashboardFilters);
@@ -62,24 +63,34 @@ class Dashboards {
         this.filterRef = document.createElement('div');
         this.filterRef.className = 'filters';
         this.filterRef.id = filter.containerId;
+        this.filterRef.sheet = this.specs.token;
+        // se il controllo è già presente in dashboardControls va nascosto (appratiene ad un secondo datamart)
+        this.dashboardControls.forEach(control => {
+          if (control.getOption('filterColumnLabel') === filter.filterColumnLabel) {
+            this.filterRef.setAttribute('hidden', 'true');
+          }
+        });
+
         filtersRef.appendChild(this.filterRef);
         this.filter = new google.visualization.ControlWrapper({
-          'controlType': 'CategoryFilter',
-          'containerId': filter.containerId,
-          'options': {
-            'filterColumnIndex': filter.filterColumnIndex,
-            'filterColumnLabel': filter.filterColumnLabel,
-            'ui': {
-              'caption': filter.caption,
-              'label': '',
-              'cssClass': 'g-category-filter',
-              'selectedValuesLayout': 'aside'
+          controlType: 'CategoryFilter',
+          containerId: filter.containerId,
+          options: {
+            filterColumnIndex: filter.filterColumnIndex,
+            filterColumnLabel: filter.filterColumnLabel,
+            ui: {
+              caption: filter.caption,
+              label: '',
+              cssClass: 'g-category-filter',
+              selectedValuesLayout: 'aside'
               // 'labelStacking': 'horizontal'
             }
           }
         });
+        google.visualization.events.addListener(this.filter, 'statechange', filterSelected.bind(this.filter));
         console.log(this.filter);
         this.chartControls.push(this.filter);
+        this.dashboardControls.push(this.filter);
       });
     }
     return this.chartControls;
@@ -118,7 +129,6 @@ class Dashboards {
 
     return this.chartControls;
   }
-
 
   drawControls_new(filtersRef) {
     this.controls = [];
