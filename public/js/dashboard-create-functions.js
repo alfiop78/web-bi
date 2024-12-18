@@ -1,3 +1,4 @@
+let wrappers = [];
 function getDataView() {
   // esempio utilizzato senza impostare le metriche contenute nelle composite
   console.log('onReady');
@@ -16,39 +17,39 @@ function getDataView() {
   Resource.createDataView();
 }
 
-function newDraw() {
+function drawDashboard() {
   Resource.multiData.forEach(datamart => {
     Resource.data = datamart.data;
     Resource.specs = datamart.specs;
-    console.log(Resource.specs);
+    // console.log(Resource.specs);
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     Resource.ref = document.getElementById(datamart.ref);
     let gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     const controls = Resource.drawDraggableControls(document.getElementById('filter__dashboard'));
-    let wrappers = [];
+    wrappers = [];
     for (const [ref, wrapper] of Object.entries(Resource.specs.wrappers)) {
       Resource.ref = document.getElementById(ref);
-      Resource.chartWrapper = new google.visualization.ChartWrapper();
+      const chartWrapper = new google.visualization.ChartWrapper();
       // imposto sempre Table di default
-      Resource.chartWrapper.setChartType(Resource.specs.wrappers[ref].chartType);
-      Resource.chartWrapper.setContainerId(Resource.ref.id);
+      chartWrapper.setChartType(wrapper.chartType);
+      chartWrapper.setContainerId(Resource.ref.id);
+      chartWrapper.setOptions(wrapper.options);
       if (wrapper.chartType === 'Table') {
-        wrapper.options.height = 'auto';
-        wrapper.options.pageSize = 15;
+        chartWrapper.setOption('height', 'auto');
+        chartWrapper.setOption('pageSize', 15);
       }
-      Resource.chartWrapper.setOptions(Resource.specs.wrappers[ref].options);
-      // Resource.chartWrapper.setOptions(wrapper.options);
-      getDataView();
-      console.log(Resource.viewDefined);
-      console.log(Resource.dataViewGrouped);
-      debugger;
-      // Resource.chartWrapper.setView(Resource.dataViewGrouped);
-      let v = new google.visualization.DataView(Resource.dataTable);
-      v.setColumns(Resource.viewDefined);
-      console.log(v);
-      Resource.chartWrapper.setView(v);
-      console.log(Resource.chartWrapper.getView());
-      wrappers.push(Resource.chartWrapper);
+      // effettuo il raggruppamento deciso in fase di creazione report e creo la DataViewGroup
+      Resource.group = wrapper.group;
+      const dataGroup = Resource.createDataTableGrouped();
+      Resource.createDataViewGrouped(dataGroup);
+      // ... a questo punto gli indici di colonna della Resource.dataViewGrouped non
+      // corrispondono più alla DataTable che viene disegnata dalla Dashboard (sotto, Resource.dataTable)
+      // per cui creo un ulteriore DataView che, con il setColumns(), imposta le colonne corrette riferendosi alla Resource.dataTable
+      // utilizzando i nomi di colonna anzichè gli indici (che sono diversi tra DataTable/DataGroup)
+      const dataView = new google.visualization.DataView(Resource.dataTable);
+      dataView.setColumns(Resource.viewDefined);
+      chartWrapper.setView(dataView);
+      wrappers.push(chartWrapper);
     }
     gdashboard.bind(controls, wrappers);
 
@@ -56,9 +57,31 @@ function newDraw() {
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
     // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
-    // google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
+    google.visualization.events.addListener(gdashboard, 'ready', dashboardReady);
     gdashboard.draw(Resource.dataTable);
   })
+}
+
+function dashboardReady() {
+  for (const wrapper of Object.values(Resource.specs.wrappers)) {
+    Resource.group = wrapper.group;
+    // WARN: 18.12.2024 al momento recupero il primo wrapper della dashboard, in questo modo
+    // quando si utilizzano i filtri, passo a createDataTableGrouped() una DataTable già filtrata.
+    // Valutare se utilizzare l'index del wrapper in ciclo perchè se, in una dashboard si decide che il primo
+    // grafico NON è influenzato dai filtri, qui non funzionerà con wrappers[0]
+    const dataGroup = Resource.createDataTableGrouped(wrappers[0].getDataTable());
+    Resource.createDataViewGrouped(dataGroup);
+    // console.log(dataGroup);
+    // ridisegno utilizzando il chartWrapper
+    let redraw = new google.visualization.ChartWrapper({
+      chartType: wrapper.chartType,
+      containerId: wrapper.containerId,
+      options : wrapper.options,
+      dataTable: Resource.dataViewGrouped
+      // dataTable: dataGroup
+    });
+    redraw.draw();
+  }
 }
 
 // invocata da sheetSelected, apertura di un singolo report
@@ -81,7 +104,7 @@ function draw() {
   Resource.chartWrapper.setChartType('Table');
   Resource.chartWrapper.setContainerId(Resource.ref.id);
   Resource.chartWrapper.setDataTable(Resource.dataTable);
-  console.log(Resource.specs.wrapper.Table.options);
+  // console.log(Resource.specs.wrapper.Table.options);
   Resource.chartWrapper.setOption('height', 'auto');
   Resource.chartWrapper.setOption('allowHTML', true);
   Resource.chartWrapper.setOption('page', 'enabled');
@@ -102,9 +125,9 @@ function draw() {
   // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
   // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
-  google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
 
   gdashboard.bind(controls, Resource.chartWrapper);
+  google.visualization.events.addListener(gdashboard, 'ready', onReady);
   gdashboard.draw(Resource.dataTable);
 }
 
@@ -114,14 +137,8 @@ function onReady() {
   // let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
   // console.log(groupColumnsIndex);
   // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-  Resource.groupFunctionSheet();
-  // Al momento non utilizzo il Metodo groupFunction() nella classe Dashboard
-  // perchè da qui richiamo il wrapper del ChartWrapper invece dal report non c'è il ChartWrapper
-  // TODO: potrei crearlo anche l' il ChartWrapper
-  Resource.dataGroup = new google.visualization.data.group(
-    Resource.chartWrapper.getDataTable(), Resource.groupKey, Resource.groupColumn
-  );
-  console.log('dataGroup : ', Resource.dataGroup);
+  Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
+  const dataGroup = Resource.createDataTableGrouped(Resource.chartWrapper.getDataTable());
   Resource.chartWrapperView = new google.visualization.ChartWrapper();
   Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
   Resource.chartWrapperView.setContainerId(Resource.ref.id);
@@ -150,8 +167,7 @@ function onReady() {
     formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
   }); */
 
-  Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
-  Resource.createDataViewSheet();
+  Resource.createDataViewGrouped(dataGroup);
 
   Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
   Resource.chartWrapperView.draw();

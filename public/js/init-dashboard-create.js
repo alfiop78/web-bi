@@ -246,7 +246,7 @@ const template__li = document.getElementById('template__li');
     }
     await app.getAllData(urls);
     // console.log(Resource.multiData);
-    google.charts.setOnLoadCallback(newDraw());
+    google.charts.setOnLoadCallback(drawDashboard());
   }
 
   app.workbookSelected = async (e) => {

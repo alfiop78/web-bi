@@ -103,14 +103,9 @@ function draw() {
   Resource.chartWrapper.setContainerId(Resource.ref.id);
   Resource.chartWrapper.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
   // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-  Resource.groupFunctionSheet();
-  Resource.dataGroup = new google.visualization.data.group(
-    Resource.dataTable, Resource.groupKey, Resource.groupColumn
-  );
-  // creazione della DataView raggruppata
-  Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
-  // nel Metodo createDataViewSheet() viene impostata la DataView 'dataViewGrouped'
-  Resource.createDataViewSheet();
+  Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
+  const dataGroup = Resource.createDataTableGrouped();
+  Resource.createDataViewGrouped(dataGroup);
   // Per impostare una determinata visualizzazione per il chartWrapper, utilizzo il Metodo setView()
   Resource.chartWrapper.setView(Resource.dataViewGrouped);
   // Legame tra Controlli e Dashboard
@@ -193,12 +188,9 @@ function chartWrapperReady() {
       keyColumns.push({ id: column.id, column: Resource.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
     }
   }); */
-  Resource.groupFunctionSheet();
-  // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
-  Resource.dataGroup = new google.visualization.data.group(
-    Resource.chartWrapper.getDataTable(), Resource.groupKey, Resource.groupColumn
-  );
-  console.log('dataGroup : ', Resource.dataGroup);
+  Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
+  const dataGroup = Resource.createDataTableGrouped(Resource.chartWrapper.getDataTable());
+  Resource.createDataViewGrouped(dataGroup);
   Resource.chartWrapperView = new google.visualization.ChartWrapper();
   Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
   Resource.chartWrapperView.setContainerId(Resource.ref.id);
@@ -231,7 +223,7 @@ function chartWrapperReady() {
   // }
   Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
     let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-    formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+    formatter.format(dataGroup, dataGroup.getColumnIndex(metric.alias));
   });
   // console.log('dataGroup():', Resource.dataGroup);
   // console.log(Resource.dataGroup.getColumnIndex())
@@ -252,8 +244,8 @@ function chartWrapperReady() {
 
   // DataView, mi consente di visualizzare SOLO le colonne definite nel report ed
   // effettuare eventuali calcoli per le metriche composite ('calc')
-  Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
-  console.log('DataViewGrouped :', Resource.dataViewGrouped);
+  // Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+  // console.log('DataViewGrouped :', Resource.dataViewGrouped);
 
   // TEST: recupero gli indici delle colonne area_ds, zona_ds (colonna da visualizzare)
   // console.log('costo_rapporto_6 (index):', Resource.dataGroup.getColumnIndex('costo_rapporto_6'));
@@ -278,7 +270,7 @@ function chartWrapperReady() {
   // Resource.specs.data.view.forEach(column => {
   //   if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   // });
-  Resource.createDataViewSheet();
+  // Resource.createDataViewSheet();
 
   google.visualization.events.addListener(Resource.chartWrapperView, 'ready', ready);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
