@@ -51,6 +51,7 @@ var Resource = new Resources();
       v.setColumns(Resource.viewDefined);
       console.log(v);
       Resource.chartWrapper.setView(v);
+      debugger;
       // google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
       // Resource.chartWrapper.setView(Resource.dataViewGrouped);
       // console.log(Resource.chartWrapper.getView());
