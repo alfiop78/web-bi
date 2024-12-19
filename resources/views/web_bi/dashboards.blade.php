@@ -70,27 +70,18 @@
     <div id="content" class="custom-scrollbar">
 
       <div id="body" class="raw" hidden>
+        <div id="popover__progressBar" class="center" popover>
+          <div class="progressBar">
+            <label for="progressBar" hidden>Record <b id="progressTo"></b>&nbsp;di&nbsp;<b id="progressTotal"></b>&nbsp;totali</label>
+            <progress id="progressBar" max="100" value="0"></progress>
+          </div>
+        </div>
         <div class="wrapper">
-          <!--Div that will hold the dashboard-->
-          <!-- <div id="dashboard_div"> -->
-          <!--Divs that will hold each control and chart-->
-          <!-- <div id="filter_div">
-              <div class="filters" id="filter-ubicazione"></div>
-              <div class="filters" id="filter-telaio"></div>
-            </div>
-            <div id="chart_div"></div> -->
-          <!-- </div> -->
           <div class="row">
             <div class="col">
               <div id="template-layout" class="view"></div>
-              <div class="progressBar">
-                <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
-                <progress id="progress-bar" max="100" value="0">70 %</progress>
-              </div>
-              <!-- <progress id="progress-bar" max="100" value="0"></progress> -->
             </div>
           </div>
-
         </div>
 
       </div>

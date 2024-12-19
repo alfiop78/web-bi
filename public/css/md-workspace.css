@@ -108,11 +108,11 @@ svg.dropzone.dropping {
   transform: translateY(50px);
 }
 
-path[hidden] {
+#svg path[hidden] {
   visibility: hidden;
 }
 
-path:not([data-join-id]) {
+#svg path:not([data-join-id]) {
   fill: transparent;
   stroke: darkgrey;
   /* stroke-dasharray: 4; */
@@ -120,7 +120,7 @@ path:not([data-join-id]) {
   stroke-linecap: round;
 }
 
-path[data-join-id] {
+#svg path[data-join-id] {
   fill: transparent;
   /* stroke: #aeaea9; */
   stroke: white;
@@ -128,7 +128,7 @@ path[data-join-id] {
   stroke-linecap: round;
 }
 
-path:hover {
+#svg path:hover {
   cursor: pointer;
   fill: transparent;
   stroke: var(--main-important-color);
@@ -136,7 +136,7 @@ path:hover {
   stroke-linecap: round;
 }
 
-path.fact {
+#svg path.fact {
   stroke-dasharray: 4;
   stroke-width: 2;
   stroke: grey;

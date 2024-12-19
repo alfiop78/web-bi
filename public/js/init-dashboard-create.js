@@ -244,9 +244,8 @@ const template__li = document.getElementById('template__li');
       }
       urls.push(`/fetch_api/${resource.datamartId}_${resource.userId}/preview?page=1`)
     }
-    await app.getAllData(urls);
+    app.getAllData(urls);
     // console.log(Resource.multiData);
-    google.charts.setOnLoadCallback(drawDashboard());
   }
 
   app.workbookSelected = async (e) => {
@@ -493,7 +492,7 @@ const template__li = document.getElementById('template__li');
           // console.log(pagData.data);
           // console.log(index);
           let recursivePaginate = async (url, index) => {
-            console.log(url);
+            // console.log(url);
             await fetch(url).then((response) => {
               // console.log(response);
               if (!response.ok) { throw Error(response.statusText); }
@@ -507,19 +506,13 @@ const template__li = document.getElementById('template__li');
                 } else {
                   // Non sono presenti altre pagine, visualizzo la dashboard
                   console.log('tutte le paginate completate :', partialData[index]);
-                  // Resource.data = partialData[index];
-                  // Resource.multiData[index] = partialData[index];
-                  // console.log(Resource.data);
-                  // console.log(Resource.multiData);
-                  // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-                  // google.charts.setOnLoadCallback(app.draw__new());
-                  // google.charts.setOnLoadCallback(draw());
                   Resource.multiData[index] = {
                     data: partialData[index],
                     token: Resource.arrResources[index],
                     ref: Resource.refs[index],
                     specs: Resource.wrapperSpecs[index]
                   };
+                  google.charts.setOnLoadCallback(drawDashboard());
                 }
               }).catch((err) => {
                 App.showConsole(err, 'error');
@@ -531,18 +524,13 @@ const template__li = document.getElementById('template__li');
             recursivePaginate(pagData.next_page_url, index);
           } else {
             // Non sono presenti altre pagine, visualizzo la dashboard
-            // Resource.data = partialData[index];
             Resource.multiData[index] = {
               data: partialData[index],
               token: Resource.arrResources[index],
               ref: Resource.refs[index],
               specs: Resource.wrapperSpecs[index]
             };
-            // console.log(Resource.data);
-            // console.log(Resource.multiData);
-            // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-            // google.charts.setOnLoadCallback(draw());
-            // abilito alcuni tasti dopo aver aperto la dashboard
+            google.charts.setOnLoadCallback(drawDashboard());
           }
         });
       })

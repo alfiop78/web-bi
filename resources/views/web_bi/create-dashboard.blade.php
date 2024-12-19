@@ -127,6 +127,7 @@
         <menu class="standard">
           <section>
             <button type="button" class="btn-link default" data-fn="openDashboard" value="Apri">Apri</button>
+            <button type="button" id="addLayout" class="btn-link default" data-fn="openDlgTemplateLayout" value="Crea nuova Dashboard">Crea Dashboard</button>
             <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
             <button id="btnPublish" type="button" class="btn-buttons" value="Pubblica" data-fn="publish" disabled>Pubblica</button>
           </section>
@@ -285,13 +286,9 @@
             <div class="col menu">
 
               <section class="buttons">
-                <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
-                <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="btn-link default">Seleziona Layout</button>
+                <button id="btnPreview" type="button" data-fn="preview" disabled>Anteprima</button>
               </section>
-
               <div id="template-layout" class="preview"></div>
-              <!-- <section id="dashboard-preview" class="dashboard-preview"> -->
-              <!-- </section> -->
             </div>
 
           </div>

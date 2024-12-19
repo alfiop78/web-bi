@@ -105,7 +105,7 @@ async function preview() {
   App.showConsole('Recupero dati in corso...', null, null);
   await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview`)
     .then((response) => {
-      console.log(response);
+      // console.log(response);
       if (!response.ok) { throw Error(response.statusText); }
       return response;
     })
@@ -115,7 +115,7 @@ async function preview() {
       // TODO: rivedere come utilizzare la progressBar con i dati provenienti dal cursorPaginate.
       // La progress-bar veniva correttamente utilizzata con il paginate
       if (paginateData.total !== 0) {
-        console.log(paginateData);
+        // console.log(paginateData);
         progressBar.value = +((paginateData.to / paginateData.total) * 100);
         progressLabel.hidden = false;
         progressTo.innerText = paginateData.to;
@@ -128,7 +128,7 @@ async function preview() {
             if (!response.ok) { throw Error(response.statusText); }
             return response;
           }).then(response => response.json()).then(paginate => {
-            console.log(paginate);
+            // console.log(paginate);
             progressBar.value = +((paginate.to / paginate.total) * 100);
             progressTo.innerText = paginate.to;
             progressTotal.innerText = paginate.total;

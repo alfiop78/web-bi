@@ -628,6 +628,11 @@ span.markContent {
   margin: 0;
 }
 
+:popover-open.center {
+  box-shadow: 0px 0px 4px 1px gray;
+  margin: auto;
+}
+
 [popover]>nav {
   margin: 8px 4px;
 }

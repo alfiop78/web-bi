@@ -368,6 +368,8 @@ td.align-right {
   row-gap: 1em;
   flex-direction: column;
   align-items: center;
+  color: white;
+  padding: 1em;
 }
 
 /* menu dei filtri */

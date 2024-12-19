@@ -1,6 +1,7 @@
-let dataTable;
+var Template = new Templates();
 let wrappers = [];
 
+// selezione di un filtro della Dashboard
 function filterSelected(e) {
   // console.log(this);
   // console.log(e.getControl());
@@ -22,7 +23,7 @@ function filterSelected(e) {
   });
 }
 
-function newDraw() {
+function dashboardDraw() {
   Resource.multiData.forEach(datamart => {
     Resource.data = datamart.data;
     Resource.specs = datamart.specs;
@@ -101,10 +102,153 @@ function ready() {
     let redraw = new google.visualization.ChartWrapper({
       chartType: wrapper.chartType,
       containerId: wrapper.containerId,
-      options : wrapper.options,
+      options: wrapper.options,
       dataTable: Resource.dataViewGrouped
       // dataTable: dataGroup
     });
     redraw.draw();
   }
+}
+
+// Recupero il Layout impostato per la dashboard selezionata
+async function getLayout() {
+  await fetch(`/js/json-templates/${Resource.json.layout}.json`)
+    .then((response) => {
+      // console.log(response);
+      if (!response.ok) { throw Error(response.statusText); }
+      return response;
+    })
+    .then((response) => response.json())
+    .then(data => {
+      if (!data) return;
+      console.log(data);
+      Template.data = data;
+      Template.id = data.id;
+      // creo il template nel DOM
+      Template.create(false);
+      // carico le risorse (sheet) necessarie alla dashboard
+      getResources();
+    })
+    .catch(err => {
+      App.showConsole(err, 'error');
+      console.error(err);
+    });
+}
+
+async function getResources() {
+  let urls = [];
+  Resource.arrResources = [];
+  Resource.wrapperSpecs = [];
+  Resource.refs = [];
+  // ciclo le resources
+  for (const [token, resource] of Object.entries(Resource.json.resources)) {
+    Resource.resources = resource;
+    // Resource.token = token;
+    Resource.arrResources.push(token);
+    Resource.wrapperSpecs.push(resource);
+    // il ref corrente, appena aggiunto
+    // Resource.dataColumns.push(specsColumns);
+    Object.keys(resource.wrappers).forEach(ref => {
+      // ref : id nel DOM (chart__1)
+      Resource.ref = document.getElementById(ref);
+      Resource.refs.push(ref);
+      // aggiungo un token per identificare, in publish(), il report (datamart_id)
+      Resource.ref.dataset.token = token;
+      Resource.ref.dataset.datamartId = resource.datamartId;
+      Resource.ref.dataset.userId = resource.userId;
+      // aggiungo la class 'defined' nel div che contiene il grafico/tabella
+      Resource.ref.classList.add('defined');
+    });
+    urls.push(`/fetch_api/${resource.datamartId}/datamart?page=1`)
+  }
+  console.log(urls);
+  getAllData(urls);
+}
+
+async function getAllData(urls) {
+  // const progressBar = document.getElementById('progressBar');
+  // const progressTo = document.getElementById('progressTo');
+  // const progressTotal = document.getElementById('progressTotal');
+  // const progressLabel = document.querySelector("label[for='progressBar']");
+  App.showLoader();
+  App.showConsole('Apertura Dashboard in corso...', null, null);
+  popover__progressBar.showPopover();
+  // L'array multidata ha gli stessi indici della promise.all
+  Resource.multiData = [];
+  let partialData = [];
+  // console.log(urls);
+  await Promise.all(urls.map(url => fetch(url)))
+    .then(responses => {
+      return Promise.all(responses.map(response => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response.json();
+      }))
+    })
+    .then(async (paginateData) => {
+      console.log('paginateData : ', paginateData);
+      paginateData.forEach((pagData, index) => {
+        console.log(pagData.data);
+        progressBar.value = +((pagData.to / pagData.total) * 100);
+        progressLabel.hidden = false;
+        progressTo.innerText = pagData.to;
+        progressTotal.innerText = pagData.total;
+        let recursivePaginate = async (url, index) => {
+          await fetch(url).then((response) => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          }).then(response => response.json())
+            .then((paginate) => {
+              progressBar.value = +((paginate.to / paginate.total) * 100);
+              progressTo.innerText = paginate.to;
+              progressTotal.innerText = paginate.total;
+              partialData[index] = partialData[index].concat(paginate.data);
+              if (paginate.next_page_url) {
+                recursivePaginate(paginate.next_page_url, index);
+                console.log(partialData[index]);
+              } else {
+                // Non sono presenti altre pagine, visualizzo la dashboard
+                console.log('tutte le paginate completate :', partialData[index]);
+                Resource.multiData[index] = {
+                  data: partialData[index],
+                  token: Resource.arrResources[index],
+                  ref: Resource.refs[index],
+                  specs: Resource.wrapperSpecs[index]
+                };
+                google.charts.setOnLoadCallback(dashboardDraw());
+                App.closeConsole();
+                App.closeLoader();
+                progressLabel.hidden = true;
+                progressBar.value = 0;
+                popover__progressBar.hidePopover();
+              }
+            }).catch((err) => {
+              App.showConsole(err, 'error');
+              console.error(err);
+            });
+        }
+        partialData[index] = pagData.data;
+        if (pagData.next_page_url) {
+          recursivePaginate(pagData.next_page_url, index);
+        } else {
+          // Non sono presenti altre pagine, visualizzo il dashboard
+          // Resource.data = partialData[index];
+          Resource.multiData[index] = {
+            data: partialData[index],
+            token: Resource.arrResources[index],
+            ref: Resource.refs[index],
+            specs: Resource.wrapperSpecs[index]
+          };
+          google.charts.setOnLoadCallback(dashboardDraw());
+          App.closeConsole();
+          App.closeLoader();
+          progressLabel.hidden = true;
+          progressBar.value = 0;
+          popover__progressBar.hidePopover();
+        }
+      });
+    })
+    .catch(err => {
+      App.showConsole(err, 'error');
+      console.error(err);
+    });
 }

@@ -104,8 +104,8 @@ function draw() {
   Resource.chartWrapper.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
   // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
   Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
-  const dataGroup = Resource.createDataTableGrouped();
-  Resource.createDataViewGrouped(dataGroup);
+  Resource.dataGroup = Resource.createDataTableGrouped();
+  Resource.createDataViewGrouped(Resource.dataGroup);
   // Per impostare una determinata visualizzazione per il chartWrapper, utilizzo il Metodo setView()
   Resource.chartWrapper.setView(Resource.dataViewGrouped);
   // Legame tra Controlli e Dashboard
@@ -116,6 +116,8 @@ function draw() {
   console.log('TIMER END', new Date());
 }
 
+// NOTE: qui è commentata tutta la logica utilizzata anche nelle Dashboard.
+// Ricopiare gli appunti in un altra sezinoe prima di eliminarla.
 function drawDatamart() {
   // Il dato iniziale non è raggruppato, la query sul datamart è eseguita con SELECT *...
   // La preview deve consentire la personalizzazione del report, quindi la possibilità
@@ -189,8 +191,8 @@ function chartWrapperReady() {
     }
   }); */
   Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
-  const dataGroup = Resource.createDataTableGrouped(Resource.chartWrapper.getDataTable());
-  Resource.createDataViewGrouped(dataGroup);
+  Resource.dataGroup = Resource.createDataTableGrouped(Resource.chartWrapper.getDataTable());
+  Resource.createDataViewGrouped(Resource.dataGroup);
   Resource.chartWrapperView = new google.visualization.ChartWrapper();
   Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
   Resource.chartWrapperView.setContainerId(Resource.ref.id);
@@ -223,7 +225,7 @@ function chartWrapperReady() {
   // }
   Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
     let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-    formatter.format(dataGroup, dataGroup.getColumnIndex(metric.alias));
+    formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
   });
   // console.log('dataGroup():', Resource.dataGroup);
   // console.log(Resource.dataGroup.getColumnIndex())
@@ -453,7 +455,6 @@ saveColumnConfig.onclick = () => {
   const dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
   Resource.dataGroup.setColumnLabel(dataGroupIndex, label);
   // Resource.dataGroup.setColumnLabel(Resource.colIndex, label);
-  debugger;
   // TODO: ipostazione del numero dei decimali
   switch (format) {
     case 'default':
