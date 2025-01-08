@@ -6,7 +6,7 @@
       // - installazione
       // - attivazione
       // che sono le altre due fasi del lifecycle del ServiceWorker
-      navigator.serviceWorker.register('service-worker.js').then((registration) => {
+      navigator.serviceWorker.register('sw/service-worker.js').then((registration) => {
         // console.log('registered');
         console.log(registration);
       }, (err) => {

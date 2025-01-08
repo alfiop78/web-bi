@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
   <meta http-equiv="Cache-Control" content="no-cache,must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Web-BI | HOME</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
