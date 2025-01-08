@@ -3,8 +3,10 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
   <link rel="icon" href="/favicon.png" type="image/png" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+  <meta http-equiv="Cache-Control" content="no-cache,must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <title>Gaia-BI | Workspace</title>
   <!-- TODO: tooltip e loader -->
   <!-- <link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}"> -->

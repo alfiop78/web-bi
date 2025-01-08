@@ -4,6 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+  <meta http-equiv="Cache-Control" content="no-cache,must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Gaia-BI | Dashboard</title>
   <!-- Icons -->
