@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
   <meta http-equiv="Cache-Control" content="no-cache,must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
-  <link rel="manifest" href="/sw/manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Web-BI | HOME</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
@@ -19,7 +19,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <!-- script per serviceWorker -->
-  <script src="{{ asset('/sw/registration.js') }}"></script>
+  <script src="{{ asset('/registration.js') }}"></script>
   <!-- Fonts -->
   <!-- <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;500;600&display=swap" rel="stylesheet" /> -->
   <!-- Icons -->
