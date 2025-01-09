@@ -179,10 +179,14 @@ button:not(:disabled).btn-buttons:hover {
   background-color: var(--main-primary-color);
 }
 
-button:disabled {
+button:disabled:not(.btn__drawer) {
   background-color: var(--button-disabled-bg);
   color: var(--button-disabled-fg);
   font-weight: normal;
+}
+
+button.btn__drawer:disabled {
+  color: #ababab;
 }
 
 button.button-icons:disabled {

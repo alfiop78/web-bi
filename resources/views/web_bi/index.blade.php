@@ -51,7 +51,8 @@
         </section>
       </section>
       <hr />
-      <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
+      <!-- <a href="#" title="Settings" disabled><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a> -->
+      <button class="btn__drawer" type="button" disabled><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></button>
     </nav>
   </div>
   <main>
@@ -72,8 +73,8 @@
           {{-- session()->forget('db_name') --}}
         </menu>
         <div class="wrapper flex">
-          <dialog id="dlg-new-connection" data-x="0" data-y="0">
-            <form id="form-new-connection" method="post" action="{{ route('connection.store') }}">
+          <dialog id="dialog__newConnection" data-x="0" data-y="0">
+            <form id="form__newConnection" method="post" action="{{ route('connection.store') }}">
               @csrf
               <section class="dlg-grid">
                 <h5 class="title">Crea nuova connessione</h5>
@@ -150,19 +151,16 @@
                 </section>
               </div>
               <div class="card-button">
-                <button id="new-connection" class="btn-link link">Aggiungi</button>
-                <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
-                <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
+                <button id="btn__newConnection" class="btn-link link">Aggiungi</button>
+                <button id="btn__removeConnection" class="btn-link link" disabled>Elimina</button>
+                <button id="btn__editConnection" class="btn-link link" disabled>Modifica</button>
               </div>
             </div>
             <div class="card col col-2-span">
-              <h1>Log Modifiche</h1>
-              <!-- <p>Ultime modifiche</p> -->
+              <h1>Ultime modifiche</h1>
               <div class="visual">
-                <li><i>2024.12.11</i>&nbsp;<span>Aggiunta estrazione Excel e CSV</span></li>
-                <li><i>2024.12.11</i>&nbsp;<span>Drag&Drop per spostare le colonne definite nello Sheet</span></li>
-                <li><i>2024.12.11</i>&nbsp;<span>Spostamento area Filtri definiti nello Sheet</span> </li>
-                <li>...</li>
+                <li><i>09.01.2025</i>&nbsp;<span>Aggiunta e configurazione serviceWorker per PWA features</span></li>
+                <li><i>09.01.2025</i>&nbsp;<span>App installabile (PWA features)</span></li>
               </div>
             </div>
           </div>
@@ -190,7 +188,9 @@
       <p>Lynx International</p>
     </section>
   </footer>
-  <script type="text/javascript" src="{{ asset('/js/init-home.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/home_init.js') }}"></script>
+  <script type="text/javascript" src="{{ asset('/js/home_functions.js') }}" defer></script>
+  <script type="text/javascript" src="{{ asset('/js/home_events.js') }}" defer></script>
 </body>
 
 </html>

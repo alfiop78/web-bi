@@ -14,6 +14,7 @@
       });
     });
   } else {
-    alert('No service worker support in this browser');
+    // alert('No service worker support in this browser');
+    console.error('No service worker support in this browser');
   }
 })();
