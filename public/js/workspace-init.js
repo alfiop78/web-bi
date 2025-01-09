@@ -41,6 +41,9 @@ const template__columnDefined = document.getElementById('tmpl-columns-defined');
 const template__metricDefined = document.getElementById('tmpl-metrics-defined');
 const template__filterDropped = document.getElementById('tmpl-filter-dropped-adv-metric');
 const template__createElement = document.getElementById('tmpl__createElement');
+// lists
+const detail__reports_usage = document.getElementById('details__reports_usage');
+const detail__metrics_usage = document.getElementById('details__metrics_usage');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -1295,18 +1298,21 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
   }
 
-  // la Fn deriva dal menù contestuale quindi, l'evento, viene attivato dal MutationObserver
+  // la Fn deriva dal menù contestuale quindi, l'evento viene attivato dal MutationObserver
+  // Apertura dialog per le metriche composte
   app.editCompositeMetric = (e) => {
     contextMenuRef.toggleAttribute('open');
     // const metric = WorkBook.metrics.get(e.target.dataset.token);
     const metric = WorkBook.elements.get(e.target.dataset.token);
     // ricostruisco la formula all'interno del div #textarea-composite-metric
     const inputName = document.getElementById('composite-metric-name');
+    inputName.disabled = true;
     inputName.value = metric.alias;
     btnCompositeMetricSave.dataset.token = e.target.dataset.token;
     const text = document.createTextNode(metric.formula.join(''));
     textarea__composite_metric.insertBefore(text, textarea__composite_metric.lastChild);
     dlgCompositeMetricCheck();
+    checkMetricsUsage(e.target.dataset.token);
     dlg__composite_metric.showModal();
   }
 

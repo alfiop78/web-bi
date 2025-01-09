@@ -8,6 +8,7 @@ class Storages {
 
   constructor() {
     this.storage = window.localStorage;
+    this.wbSheets;
     // this.storageKeys = Object.keys(window.localStorage);
     this.JSONData = null;
     // tutti gli workbook
@@ -120,12 +121,46 @@ class Storages {
     }
     return all;
   }
+
+  // recupero gli sheet appartenenti al workbook passato come argomento
+  static getWorkBookSheets(wbToken) {
+    this.wbSheets = {};
+    // il metodo statico non invoca il costruttore quindi non posso utilizzare this.storage
+    for (const [token, object] of Object.entries(window.localStorage)) {
+      const json = JSON.parse(object);
+      if (json.type === 'sheet' && json.workbook_ref === wbToken) this.wbSheets[token] = json;
+    }
+    return this.wbSheets;
+  }
+
+  static getMetrics(wbToken) {
+    this.metrics = {};
+    for (const [token, value] of Object.entries(window.localStorage)) {
+      const json = JSON.parse(value);
+      if (json.type === 'metric' && json.workbook_ref === wbToken) this.metrics[token] = json;
+    }
+    return this.metrics;
+  }
+
+  // restituisce tutte le metriche che, nella loro formula, contengono la metricha passata come input (token) riferendosi al
+  // workbook corrente (wbToken)
+  static getMetricsUsage(wbToken, token) {
+    this.usageMetrics = {};
+    // tra le metriche restituite controllo quelle che hanno il token di input
+    for (const [key, value] of Object.entries(this.getMetrics(wbToken))) {
+      if (value.metrics.hasOwnProperty(token)) this.usageMetrics[key] = value;
+    }
+    return this.usageMetrics;
+  }
 }
 
 class SheetStorages extends Storages {
   #sheets = {};
   #sheet;
-  constructor() { super(); }
+  constructor() {
+    super();
+    this.wbSheets;
+  }
 
   set sheet(value) {
     // value : il token dello sheet
@@ -148,16 +183,6 @@ class SheetStorages extends Storages {
     return this.#sheets;
   }
 
-  /* getSheets(workBookToken) {
-    let sheets = {};
-    for (const [token, object] of Object.entries(this.storage)) {
-      if (JSON.parse(object).type === 'Sheet' && JSON.parse(object).workBook_ref === workBookToken) {
-        sheets[token] = JSON.parse(object);
-      }
-    }
-    return sheets;
-  } */
-
   // recupero tutti gli sheets
   getSheets() {
     let sheets = {};
@@ -168,5 +193,4 @@ class SheetStorages extends Storages {
     }
     return sheets;
   }
-
 }

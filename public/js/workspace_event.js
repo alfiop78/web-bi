@@ -192,6 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // apertura dialog #dlg-composite-metric
   btnNewCompositeMeasure.onclick = () => {
     dlgCompositeMetricCheck();
+    const inputName = document.getElementById('composite-metric-name');
+    inputName.disabled = false;
     dlg__composite_metric.showModal();
   }
   // dropzone sheet rows

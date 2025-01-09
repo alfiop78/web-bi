@@ -180,7 +180,7 @@ button:not(:disabled).btn-buttons:hover {
 }
 
 button:disabled:not(.btn__drawer) {
-  background-color: var(--button-disabled-bg);
+  background-color: transparent;
   color: var(--button-disabled-fg);
   font-weight: normal;
 }
@@ -252,6 +252,7 @@ button.btn-link-context:not(:disabled):hover {
 
 button.btn-link-context:disabled {
   color: #aeaeae;
+  background-color: var();
 }
 
 button.btn-link-context:disabled:hover {

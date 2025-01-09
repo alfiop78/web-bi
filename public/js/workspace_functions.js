@@ -1067,11 +1067,10 @@ function advancedMetricSave(e) {
   dlg__advancedMetric.close();
 }
 
-// salvataggio metrica composta
+// salvataggio/modifica metrica composta
 function compositeMetricSave(e) {
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   const alias = document.getElementById('composite-metric-name').value;
-  const parent = document.getElementById('ul-metrics');
   const date = new Date().toLocaleDateString('it-IT', options);
   let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: {}, metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
   object.formula = textarea__composite_metric.firstChild.textContent.split(/\b/);
@@ -1115,15 +1114,50 @@ function compositeMetricSave(e) {
   } else {
     // la metrica già esiste, aggiorno il nome
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-    const li = document.querySelector(`li[data-id='${token}']`);
-    const dragIcon = li.querySelector('i');
-    const span = li.querySelector('.span__content>span');
-    li.dataset.label = alias;
-    dragIcon.dataset.label = alias;
-    span.textContent = alias;
-    App.showConsole(`Metrica '${alias}' modificata`, 'done', 2000);
+    // le metriche composte sono presenti nel DOM sia nell'area #workbook-objects che nella dialog dlg__composite_metric
+    document.querySelectorAll(`li[data-id='${token}']`).forEach(li => {
+      const dragIcon = li.querySelector('i');
+      const span = li.querySelector('.span__content>span');
+      li.dataset.label = alias;
+      dragIcon.dataset.label = alias;
+      span.textContent = alias;
+    });
+    App.showConsole(`Metrica <b>${alias}</b> modificata`, 'done', 2000);
   }
   dlg__composite_metric.close();
+}
+
+function checkMetricsUsage(token) {
+  // console.log(token);
+  const metric = WorkBook.elements.get(token);
+  detail__metrics_usage.querySelectorAll('li').forEach(li => li.remove());
+  detail__reports_usage.querySelectorAll('li').forEach(li => li.remove());
+  // TODO: recupero elenco metriche composte dove compare il token della metrica in input
+  const sheets = Storages.getWorkBookSheets(metric.workbook_ref);
+  // per ogni sheet restituito verifico la presenza della metrica di input nella proprietà sheet.metrics
+  for (const sheet of Object.values(sheets)) {
+    // se il report contiene la metrica di input lo aggiungo alla lista #detail__reports_usage
+    if (sheet.sheet.metrics.hasOwnProperty(token)) {
+      const tmpl = template_li.content.cloneNode(true);
+      const li = tmpl.querySelector('li.select-list');
+      const span = li.querySelector('span');
+      li.dataset.id = sheet.id;
+      li.dataset.token = sheet.token;
+      span.innerText = sheet.name;
+      detail__reports_usage.appendChild(li);
+    };
+  }
+
+  const metrics = Storages.getMetricsUsage(metric.workbook_ref, token);
+  for (const value of Object.values(metrics)) {
+    // questa metrica verrà influenzata dalla modifica della metrica in input
+    const tmpl = template_li.content.cloneNode(true);
+    const li = tmpl.querySelector('li.select-list');
+    const span = li.querySelector('span');
+    li.dataset.token = value.token;
+    span.innerText = value.alias;
+    detail__metrics_usage.appendChild(li);
+  }
 }
 
 function inputFilter(e) {

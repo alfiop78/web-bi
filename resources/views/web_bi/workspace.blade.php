@@ -655,7 +655,7 @@
             <h5 class="title moveable">Creazione Metrica Composta</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col col-4-span">
+                <section class="col col-3">
                   <div class="list-search">
                     <input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
                     <div class="relative-ul">
@@ -673,7 +673,7 @@
                     </div>
                   </div>
                 </section>
-                <section class="col col-8-span">
+                <section class="col col-6">
                   <section class="textarea-formula">
                     <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
@@ -684,6 +684,17 @@
                     </div>
                     <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
                   </section>
+                </section>
+                <section class="col col-3 list">
+                  <p>Utilizzo della metrica</p>
+                  <nav id="nav__metricUsage">
+                    <details id="details__metrics_usage" open>
+                      <summary>Metriche</summary>
+                    </details>
+                    <details id="details__reports_usage" open>
+                      <summary>Reports</summary>
+                    </details>
+                  </nav>
                 </section>
               </section>
             </section>
