@@ -421,6 +421,35 @@ details>li {
   line-height: 1.6rem;
 }
 
+#section__availableFilters,
+#section__sheetFilters,
+#section__sheetColumns {
+  overflow: auto;
+  position: relative;
+}
+
+#ul__availableFilters,
+#ul__sheetFilters,
+#ul__columnsHandler {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#section__filters {
+  position: relative;
+  display: grid;
+  border: solid thin gainsboro;
+  grid-template-rows: min-content 1fr min-content 1fr auto;
+}
+
+#section__columns {
+  position: relative;
+  border: solid thin gainsboro;
+  display: grid;
+  grid-template-rows: min-content 1fr;
+}
+
 li.drag-list>i[draggable] {
   visibility: hidden;
 }
@@ -445,7 +474,7 @@ li.drag-list.composite>i:not([draggable]) {
   color: var(--metrics-composite);
 }
 
-ul.filters>li>i {
+#ul__availableFilters>li>i {
   background-color: var(--filters-color);
   color: #494949;
   border-radius: 4px;

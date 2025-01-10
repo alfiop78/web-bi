@@ -46,6 +46,9 @@ const template__createElement = document.getElementById('tmpl__createElement');
 // lists
 const detail__reports_usage = document.getElementById('details__reports_usage');
 const detail__metrics_usage = document.getElementById('details__metrics_usage');
+const ul__availableFilters = document.getElementById('ul__availableFilters');
+const ul__sheetFilters = document.getElementById('ul__sheetFilters');
+const ul__columnsHandler = document.getElementById('ul__columnsHandler');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -664,7 +667,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
   app.newSheetDialog = () => {
     delete input__sheetName.dataset.value;
-    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul-filters-sheet > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul__sheetFilters > *, #ul__columnsHandler > *, #preview-datamart > *').forEach(element => element.remove());
     // document.querySelector('#btn-sheet-save').disabled = true;
     app.dialogNewSheet.showModal();
   }
@@ -1965,7 +1968,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.addTablesStruct = async () => {
     // reset degli elementi in #workbook-objects
     // app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
-    app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
+    app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul__availableFilters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
     // workbookMap viene creato nel Metodo createDataModel() e contiene la mappatura di tutte le tabelle del canvas

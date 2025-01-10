@@ -1,7 +1,7 @@
 // apertura nuovo Sheet, viene recuperato dal localStorage
 async function sheetSelected(e) {
   // const sheetToken = e.currentTarget.dataset.token;
-  document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul-filters-sheet > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+  document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul__sheetFilters > *, #ul__columnsHandler > *, #preview-datamart > *').forEach(element => element.remove());
   document.querySelector('#btn-sheet-save').disabled = true;
   Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
   // reimposto tutte le proprietà della Classe
@@ -57,12 +57,12 @@ function selectWrapper(e) {
   // ul #ul-columns-handler
   // Ciclo le proprietà group.key e group.columns per reimpostare la proprietà visible corrispondente
   Resource.specs.wrapper[Resource.wrapper].group.key.forEach(column => {
-    const element = document.querySelector(`#ul-columns-handler>li[data-column-id='${column.id}']`);
+    const element = ul__columnsHandler.querySelector(`li[data-column-id='${column.id}']`);
     element.dataset.visible = column.properties.visible;
   });
 
   Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(column => {
-    const element = document.querySelector(`#ul-columns-handler>li[data-column-id='${column.alias}']`);
+    const element = ul__columnsHandler.querySelector(`li[data-column-id='${column.alias}']`);
     element.dataset.visible = column.properties.visible;
   });
   popover__chartWrappers.hidePopover();

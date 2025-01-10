@@ -992,9 +992,9 @@
                   <section class="wrapper-content">
                     <section id="wrapper-sheet" class="wrapper-sheet">
                       <div id="workbook-content-area">
-                        <section id="workbook-objects" data-section-active="2">
+                        <section id="workbook-objects" data-section-active="1">
                           <p class="field-search">
-                            <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" placeholder="Ricerca" />
+                            <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" placeholder="Ricerca colonne" />
                             <!-- <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" /> -->
                             <!-- <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button> -->
                           </p>
@@ -1003,20 +1003,12 @@
                             <!-- <button class="btn-link link" id="btn__custom_column" type="button" value="Crea Colonna">Crea Colonna</button> -->
                           </section>
                           <p class="field-search">
-                            <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" placeholder="Ricerca" />
+                            <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" placeholder="Ricerca metriche" />
                             <!-- <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button> -->
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="2">
                             <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
                             <button class="btn-link link" id="btnNewCompositeMeasure" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
-                          </section>
-                          <p class="field-search">
-                            <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" placeholder="Ricerca" />
-                            <!-- <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button> -->
-                          </p>
-                          <section data-worksheet-object class="custom-scrollbar" data-section="3">
-                            <ul id="ul-filters" class="filters custom-scrollbar" data-search-id="input-search-filters"></ul>
-                            <button class="btn-link link" id="btnOpenDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
                           </section>
                         </section>
                       </div>
@@ -1099,25 +1091,27 @@
                             </section>
                           </dialog>
 
-                          <div id="table__content" class="table-content">
+                          <div id="table__content" class="table-content" open>
                             <section id="sheet__content">
-                              <button id="btnToggle_table__content" class="material-symbols-rounded">arrow_menu_open</button>
-                              <section id="sheet__filters" class="sheet__contents">
-                                <section class="custom-scrollbar">
-                                  <ul id="ul-filters-sheet" class="filters"></ul>
+                              <button id="btnToggle_table__content" class="material-symbols-rounded">arrow_menu_close</button>
+                              <section id="section__filters">
+                                <h4>Filtri disponibili</h4>
+                                <section id="section__availableFilters" class="filters">
+                                  <ul id="ul__availableFilters"></ul>
+                                </section>
+                                <h4>Filtri aggiunti</h4>
+                                <section id="section__sheetFilters" class="filters">
+                                  <ul id="ul__sheetFilters"></ul>
+                                </section>
+                                <button class="btn-link link" id="btnOpenDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
+                              </section>
+
+                              <section id="section__columns">
+                                <h4>Visualizza/Nascondi Colonne</h4>
+                                <section id="section__sheetColumns">
+                                  <ul id="ul__columnsHandler"></ul>
                                 </section>
                               </section>
-                              <section id="sheet__columns" class="sheet__contents">
-                                <section class="custom-scrollbar">
-                                  <ul id="ul-columns-handler"></ul>
-                                </section>
-                              </section>
-                              <!-- <section id="sheet__options" class="sheet__contents">
-                                <div id="toolbar_div">
-                                  <a id="export__datatable_csv" target="_blank" type="button" value="Export CSV">Export DataTable CSV</a>
-                                  <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
-                                </div>
-                              </section> -->
                             </section>
                             <section id="datatable" class="progress">
                               <div id="sheet__preview">

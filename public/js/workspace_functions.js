@@ -269,8 +269,8 @@ function removeFilterFromSheet(e) {
   if (filter.dataset.adding || (filter.dataset.added && !Sheet.edit)) {
     // quando il filtro ha attr data-adding oppure quando ha data-added e lo Sheet NON è in edit lo elimino
     filter.remove();
-    // ripristino (#ul-filters) il filtro eliminato dal report
-    const li__addedFilter = document.querySelector(`ul.filters>li.added[data-id='${token}']`);
+    // ripristino (#ul__availableFilters) il filtro eliminato dal report
+    const li__addedFilter = ul__availableFilters.querySelector(`li.added[data-id='${token}']`);
     li__addedFilter.classList.remove('added');
     const btnAddFilter = document.getElementById(token);
     btnAddFilter.removeAttribute('disabled');
@@ -288,7 +288,7 @@ function undoRemovedFilter(e) {
   // Recupero, da Sheet.removedFilters, gli elementi rimossi per poterli ripristinare
   if (Sheet.objectRemoved.has(token)) {
     delete document.querySelector(`.filter-defined[data-id='${token}']`).dataset.removed;
-    const li__selected = document.querySelector(`ul.filters>li[data-id='${token}']`);
+    const li__selected = ul__availableFilters.querySelector(`li[data-id='${token}']`);
     li__selected.classList.add('added');
     Sheet.objectRemoved.delete(token);
     Sheet.filters = token;
@@ -300,14 +300,14 @@ function filterSelected(e) {
   // console.log(e.target);
   // aggiungo, sulla <li> del filtro selezionato, la class 'added' per evidenziare che il filtro
   // è stato aggiunto al report, non può essere aggiunto di nuovo.
-  const li__selected = document.querySelector(`ul.filters>li[data-id='${e.target.id}']`);
+  const li__selected = ul__availableFilters.querySelector(`li[data-id='${e.target.id}']`);
   li__selected.classList.add('added');
   Sheet.filters = e.target.id;
   addTemplateFilter(e.target.id);
   // se nella #ul-filters-sheet è presente 1 elemento apro il table__content, in questo modo si evidenzia il fatto
   // che ho aggiunto un filtro al report
   const table__content = document.getElementById('table__content');
-  if (document.querySelector('#ul-filters-sheet>li').childElementCount >= 1) table__content.setAttribute('open', 'true');
+  if (document.querySelector('#ul__sheetFilters>li').childElementCount >= 1) table__content.setAttribute('open', 'true');
   btnToggle_table__content.innerText = (table__content.hasAttribute('open')) ? 'arrow_menu_close' : 'arrow_menu_open';
 }
 
@@ -629,7 +629,6 @@ function handleDragEnd(e) {
 
 // aggiunta del filtro alla sezione #ul-filters-sheet
 function addTemplateFilter(token) {
-  const parent = document.getElementById('ul-filters-sheet');
   const elementRef = document.getElementById(token);
   elementRef.setAttribute('disabled', 'true');
   const tmpl = template_li.content.cloneNode(true);
@@ -646,7 +645,7 @@ function addTemplateFilter(token) {
   btnUndo.addEventListener('click', undoRemovedFilter);
   span.dataset.token = elementRef.id;
   span.innerHTML = elementRef.dataset.label;
-  parent.appendChild(li);
+  ul__sheetFilters.appendChild(li);
 }
 
 /*
@@ -693,7 +692,6 @@ function appendColumn(token) {
  * quando si costruisce l'elenco #ul-filters
 */
 function appendFilter(token) {
-  const parent = document.getElementById('ul-filters');
   const tmpl = template_li.content.cloneNode(true);
   // const li = tmpl.querySelector('li.drag-list.filters');
   const li = tmpl.querySelector('li.toggle-list');
@@ -712,7 +710,7 @@ function appendFilter(token) {
   btnAdd.addEventListener('click', filterSelected);
   li.addEventListener('contextmenu', openContextMenu);
   span.innerHTML = filter.name;
-  parent.appendChild(li);
+  ul__availableFilters.appendChild(li);
 }
 
 function appendFilterToDialogAdvMetrics() {

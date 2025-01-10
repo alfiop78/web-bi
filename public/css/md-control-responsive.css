@@ -208,6 +208,11 @@ button.btn-link {
   /* font-style: italic; */
 }
 
+button.btn-link.link {
+  text-decoration: underline;
+  margin: 4px auto;
+}
+
 button:not(:disabled).btn-link:hover {
   font-weight: bold;
 }

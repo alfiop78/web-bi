@@ -58,8 +58,7 @@ let app = {
 function createSheetColumns(data) {
   // ciclo il prpareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
   // Da questo elenco si potranno nascondere/visualizzare le colonne e le metreehe
-  const ulColumnsHandler = document.getElementById('ul-columns-handler');
-  ulColumnsHandler.querySelectorAll('li').forEach(el => el.remove());
+  ul__columnsHandler.querySelectorAll('li').forEach(el => el.remove());
   data.cols.forEach((col, index) => {
     const template = template_li.content.cloneNode(true);
     const li = template.querySelector('li');
@@ -74,7 +73,7 @@ function createSheetColumns(data) {
       li.dataset.columnId = col.id;
       li.dataset.index = index;
       li.addEventListener('click', columnHander);
-      ulColumnsHandler.appendChild(li);
+      ul__columnsHandler.appendChild(li);
     }
   });
 }
