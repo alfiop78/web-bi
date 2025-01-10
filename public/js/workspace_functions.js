@@ -1067,14 +1067,29 @@ function advancedMetricSave(e) {
   dlg__advancedMetric.close();
 }
 
+async function deleteDatamart(urls) {
+  await Promise.all(urls.map(url => fetch(url)))
+    .then(responses => {
+      return Promise.all(responses.map(response => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response.text();
+      }))
+    })
+    .then((data) => {
+      (data) ? App.showConsole('Sincronizzazione completata!', 'done', 2000) : App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 2000);
+    })
+    .catch(err => console.error(err));
+}
+
 // salvataggio/modifica metrica composta
 function compositeMetricSave(e) {
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   const alias = document.getElementById('composite-metric-name').value;
   const date = new Date().toLocaleDateString('it-IT', options);
+  let urls = [];
   let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: {}, metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
   object.formula = textarea__composite_metric.firstChild.textContent.split(/\b/);
-  console.log(object.formula);
+  // console.log(object.formula);
   // ottengo i token delle metriche che compongono la metrica composta
   object.formula.forEach(el => {
     if (document.querySelector(`li.metrics[data-label='${el}']`)) {
@@ -1124,11 +1139,16 @@ function compositeMetricSave(e) {
     });
     App.showConsole(`Metrica <b>${alias}</b> modificata`, 'done', 2000);
   }
+  // verifico se sono presenti report da eliminare a causa della modifica di questa metrica
+  detail__reports_usage.querySelectorAll('li.list').forEach(li => urls.push(`/fetch_api/${li.dataset.id}/delete_datamart`));
+  if (urls) deleteDatamart(urls);
   dlg__composite_metric.close();
 }
 
-function checkMetricsUsage(token) {
+// visualizzo la popover con l'elenco dei report e metriche influenzati dalla modifica della metrica
+function checkMetricsUsage(e) {
   // console.log(token);
+  const token = e.currentTarget.dataset.token;
   const metric = WorkBook.elements.get(token);
   detail__metrics_usage.querySelectorAll('li').forEach(li => li.remove());
   detail__reports_usage.querySelectorAll('li').forEach(li => li.remove());
@@ -1139,11 +1159,10 @@ function checkMetricsUsage(token) {
     // se il report contiene la metrica di input lo aggiungo alla lista #detail__reports_usage
     if (sheet.sheet.metrics.hasOwnProperty(token)) {
       const tmpl = template_li.content.cloneNode(true);
-      const li = tmpl.querySelector('li.select-list');
-      const span = li.querySelector('span');
-      li.dataset.id = sheet.id;
+      const li = tmpl.querySelector('li.list');
+      li.dataset.id = `${sheet.id}_${sheet.userId}`;
       li.dataset.token = sheet.token;
-      span.innerText = sheet.name;
+      li.innerText = sheet.name
       detail__reports_usage.appendChild(li);
     };
   }
@@ -1152,12 +1171,13 @@ function checkMetricsUsage(token) {
   for (const value of Object.values(metrics)) {
     // questa metrica verrà influenzata dalla modifica della metrica in input
     const tmpl = template_li.content.cloneNode(true);
-    const li = tmpl.querySelector('li.select-list');
-    const span = li.querySelector('span');
+    const li = tmpl.querySelector('li.list');
     li.dataset.token = value.token;
-    span.innerText = value.alias;
+    li.innerText = value.alias;
     detail__metrics_usage.appendChild(li);
   }
+
+  popover__showReports.showPopover();
 }
 
 function inputFilter(e) {

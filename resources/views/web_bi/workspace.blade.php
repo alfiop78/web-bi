@@ -74,6 +74,8 @@
 
   <template id="tmpl-li">
     <!-- lista per la selezione di elementi -->
+    <li class="list"></li>
+
     <li class="select-list" data-element-search data-label data-searchable="true">
       <span></span>
     </li>
@@ -651,11 +653,28 @@
         </dialog>
 
         <dialog id="dlg__composite_metric" data-x="0" data-y="0" class="mediumSize absolute moveable droppable">
+          <div id="popover__showReports" class="grid popoverDefault" popover>
+            <div class="row">
+              <div class="col col-6">
+                <details id="details__metrics_usage" open>
+                  <summary>Metriche</summary>
+                </details>
+              </div>
+              <div class="col col-6">
+                <details id="details__reports_usage" open>
+                  <summary>Reports</summary>
+                </details>
+              </div>
+            </div>
+            <div class="row popoverButtons">
+              <button id="btn__popoverDone" type="button">OK</button>
+            </div>
+          </div>
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica Composta</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col col-3">
+                <section class="col col-4">
                   <div class="list-search">
                     <input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
                     <div class="relative-ul">
@@ -673,7 +692,7 @@
                     </div>
                   </div>
                 </section>
-                <section class="col col-6">
+                <section class="col col-8">
                   <section class="textarea-formula">
                     <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
@@ -683,18 +702,14 @@
                       <div id="textarea__composite-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>
                     <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
+                    <div id="integrityStatus" hidden>
+                      <div class="warning">
+                        <i class="material-symbols-rounded">warning</i>
+                        <div>I report che utilizzano questa metrica dovranno essere rielaborati</div>
+                        <button id="btn__showReports" data-token>Visualizza</button>
+                      </div>
+                    </div>
                   </section>
-                </section>
-                <section class="col col-3 list">
-                  <p>Utilizzo della metrica</p>
-                  <nav id="nav__metricUsage">
-                    <details id="details__metrics_usage" open>
-                      <summary>Metriche</summary>
-                    </details>
-                    <details id="details__reports_usage" open>
-                      <summary>Reports</summary>
-                    </details>
-                  </nav>
                 </section>
               </section>
             </section>

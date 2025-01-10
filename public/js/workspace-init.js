@@ -23,6 +23,8 @@ const btnOptions = document.getElementById('btnOptions');
 const btn__chartWrapper = document.getElementById('btn__chartWrapper');
 const btn__save_column = document.getElementById('btn__save_column');
 const btn__newVisualization = document.getElementById('btn__newVisualization');
+const btn__showReports = document.getElementById('btn__showReports');
+const btn__popoverDone = document.getElementById('btn__popoverDone');
 // Dialogs
 const dlg__filters = document.getElementById('dlg__filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
@@ -49,6 +51,8 @@ const btnToggle_table__content = document.getElementById('btnToggle_table__conte
 // dropzone
 const rowsDropzone = document.getElementById('dropzone-rows');
 const columnsDropzone = document.getElementById('dropzone-columns');
+// popover
+const popover__showReports = document.getElementById('popover__showReports');
 
 const export__datatable_xls = document.getElementById('export__datatable_xls');
 
@@ -1311,8 +1315,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     btnCompositeMetricSave.dataset.token = e.target.dataset.token;
     const text = document.createTextNode(metric.formula.join(''));
     textarea__composite_metric.insertBefore(text, textarea__composite_metric.lastChild);
+    // imposto il token della metrica anche sul #btn__showReports
+    btn__showReports.dataset.token = e.target.dataset.token;
+    // visualizzo il div #integrityStatus per poter avvisare l'utente dei report influenzati da questa metrica
+    document.getElementById('integrityStatus').removeAttribute('hidden');
     dlgCompositeMetricCheck();
-    checkMetricsUsage(e.target.dataset.token);
     dlg__composite_metric.showModal();
   }
 

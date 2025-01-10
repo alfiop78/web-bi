@@ -420,6 +420,10 @@ h1 {
   grid-column: span 4;
 }
 
+.col.col-4 {
+  grid-column: span 4;
+}
+
 .col.col-5-span {
   grid-column: span 5;
 }
@@ -441,6 +445,10 @@ h1 {
 }
 
 .col.col-8-span {
+  grid-column: span 8;
+}
+
+.col.col-8 {
   grid-column: span 8;
 }
 
@@ -631,9 +639,17 @@ span.markContent {
   padding: 8px 4px;
 }
 
+[popover].popoverDefault {
+  background-color: white;
+}
+
 :popover-open {
   box-shadow: 0px 0px 4px 1px gray;
   margin: 0;
+}
+
+:popover-open.popoverDefault {
+  margin: auto;
 }
 
 :popover-open.center {
@@ -649,7 +665,22 @@ span.markContent {
   color: white;
 }
 
+[popover] .popoverButtons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+[popover] .popoverButtons button {
+  color: unset;
+}
+
 [popover] button:disabled {
   color: grey;
   background-color: unset;
+}
+
+.warning {
+  color: var(--main-important-color);
+  display: flex;
+  align-items: center;
 }

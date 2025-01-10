@@ -192,10 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // apertura dialog #dlg-composite-metric
   btnNewCompositeMeasure.onclick = () => {
     dlgCompositeMetricCheck();
+    document.getElementById('integrityStatus').setAttribute('hidden', 'true');
     const inputName = document.getElementById('composite-metric-name');
     inputName.disabled = false;
     dlg__composite_metric.showModal();
   }
+
+  btn__showReports.addEventListener('click', checkMetricsUsage);
+  btn__popoverDone.addEventListener('click', () => {popover__showReports.hidePopover();});
   // dropzone sheet rows
   rowsDropzone.addEventListener('dragover', handleDragOver, false);
   rowsDropzone.addEventListener('drop', handleRowDrop, false);
