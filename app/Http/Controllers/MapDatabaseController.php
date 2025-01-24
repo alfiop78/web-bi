@@ -23,7 +23,9 @@ use App\Models\BIsheet;
 use App\Models\BIworkbook;
 use App\Models\BIfilter;
 use App\Models\BImetric;
+use App\Models\BIConnections;
 use PhpParser\Node\Stmt\TryCatch;
+use App\Http\Controllers\traitTest;
 
 class MapDatabaseController extends Controller
 {
@@ -892,8 +894,12 @@ class MapDatabaseController extends Controller
       // dd($json_sheet);
       // WorkBook
       if (BIworkbook::find($json_sheet->workbook_ref)) {
-        // $json_workbook = json_decode(BIworkbook::where("token", $json_sheet->workbook_ref)->first('json_value')->json_value);
-        // // dd($json_workbook);
+        // recupero il json del workbook, qui è memorizzato il databaseId al quale si collega questo
+        // sheet (il token dello sheet passato da curl o da jobScheduler)
+        $json_workbook = json_decode(BIworkbook::where("token", $json_sheet->workbook_ref)->first('json_value')->json_value);
+        // dd($json_workbook->databaseId);
+        // Call un metodo statico che imposterà le variabili di sessione che riguardano la connessione al db
+        BIConnectionsController::curlDBConnection($json_workbook->databaseId);
         // creo l'object 'process' che verrà processato da this->sheetCurlProcess()
         $process = (object)[
           'id' => $json_sheet->id,

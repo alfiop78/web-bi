@@ -81,8 +81,35 @@ class BIConnectionsController extends Controller
     // dump(config("database.connections.{$database_name}"));
   }
 
+  /*
+ * Questo metodo statico viene invocato da MapDatabaseControlle->scheduleProcess()
+ * Lo scopo di questo metodo è inizializzare le variabili di sessione che creano la connessione al DB
+ * quando viene utilizzato curl (dall'applicazione web la connessione viene effettuata sulla home).
+ * La connessione da curl viene recuperata dall'oggetto WorkBook, al cui interno c'è il campo databaseId
+ * */
+  public static function curlDBConnection($id)
+  {
+    $element = BIConnections::findOrFail($id);
+    session(['db_id' => $element->id]);
+    session(['db_name' => $element->name]);
+    session(['db_driver' => $element->driver]);
+    session(['db_dsn' => $element->dsn]);
+    session(['db_host' => $element->host]);
+    session(['db_port' => $element->port]);
+    session(['db_schema' => $element->schema]);
+    session(['db_username' => $element->username]);
+    session(['db_password' => $element->password]);
+    BIConnectionsController::getDB();
+
+    // dd(session()->get('host')); // stesso risultato di session('host')
+    // $schemaList = DB::connection('clientDatabase')->table("information_schema.SCHEMATA")->select("SCHEMA_NAME")->orderBy("SCHEMA_NAME")->get();
+    // dd($schemaList);
+    return response()->json($element);
+  }
+
   /**
    * Display the specified resource.
+   * Viene stabilita la connessione al db in base alla selezione dell'utente
    *
    * @param  \App\Models\BIConnections  $bIConnections
    * @return \Illuminate\Http\Response
