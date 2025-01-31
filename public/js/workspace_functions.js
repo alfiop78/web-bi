@@ -1717,7 +1717,7 @@ function createCustomMetric(e) {
 }
 
 function createCustomColumn(e) {
-  createTableStruct('wbColumns');
+  createTableStruct();
   WorkBook.activeTable = e.currentTarget.dataset.tableId;
   dlg__custom_columns.showModal();
   input__column_name.focus();
