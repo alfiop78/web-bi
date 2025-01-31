@@ -209,6 +209,17 @@ document.addEventListener('DOMContentLoaded', () => {
   //excel
   export__datatable_xls.addEventListener('click', export_datatable_XLS_new);
 
+  dlg__custom_columns.addEventListener('close', closeDialogCustomColumn);
+
+  /* dlg__custom_columns.addEventListener('close', () => {
+    // console.log('close');
+    // reset della textarea, input, note
+    // effettuo un controllo sul firstChild perchè la textarea viene ripulita anche quando si
+    // salva un filtro, in quel caso, qui, non viene trovato il firstChild
+    debugger;
+    textarea__custom_column.firstChild?.remove();
+  }); */
+
 }); // end DOMContentLoaded
 
 console.info('END workspace_event');

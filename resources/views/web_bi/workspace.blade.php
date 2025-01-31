@@ -849,7 +849,7 @@
                   </section>
                   <section class="col col-8-span">
                     <section class="textarea-formula">
-                      <input type="text" id="input__column_name" placeholder="Nome" autocomplete="off" tabindex="2">
+                      <input type="text" id="input__column_name" placeholder="Nome" autocomplete="off" tabindex="1">
                       <div class="textarea__container">
                         <div class="popup__suggestions">
                           <ul></ul>
