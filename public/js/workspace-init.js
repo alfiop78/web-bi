@@ -13,6 +13,7 @@ var textarea__composite_metric = document.getElementById('textarea__composite-me
 // inputs
 const input__sheetName = document.getElementById('sheet-name');
 const input__column_name = document.getElementById('input__column_name');
+const input__filter_name = document.getElementById('input__filter_name');
 // Buttons
 const btnFilterSave = document.getElementById('btn-filter-save');
 const btnCustomMetricSave = document.getElementById('btn-custom-metric-save');
@@ -44,6 +45,7 @@ const template__filterDropped = document.getElementById('tmpl-filter-dropped-adv
 const template__createElement = document.getElementById('tmpl__createElement');
 // nav
 const wbColumns = document.getElementById('wbColumns');
+const wbFilters = document.getElementById('wbFilters');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -1205,8 +1207,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // il context-menu è sempre aperto in questo caso, lo chiudo
     contextMenuRef.toggleAttribute('open');
     const filter = WorkBook.filters.get(e.target.dataset.token);
-    const inputName = document.getElementById('input-filter-name');
-    inputName.value = filter.name;
+    input__filter_name.value = filter.name;
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     btnFilterSave.dataset.token = e.target.dataset.token;
     // const text = document.createTextNode(filter.formula.join(''));
@@ -1235,7 +1236,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     const text = document.createTextNode(element.formula);
     // aggiungo il testo della formula prima del tag <br>
     textarea__custom_column.insertBefore(text, textarea__custom_column.lastChild);
-    createTableStruct();
+    createTableStruct(wbColumns);
     WorkBook.activeTable = element.tableId;
     console.log(WorkBook.activeTable);
     dlg__custom_columns.showModal();

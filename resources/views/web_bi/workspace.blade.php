@@ -813,7 +813,7 @@
                 </section>
                 <section class="col col-8-span">
                   <section class="textarea-formula">
-                    <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
+                    <input type="text" id="input__filter_name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
                       <div class="popup__suggestions">
                         <ul></ul>

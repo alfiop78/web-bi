@@ -187,6 +187,22 @@ document.addEventListener('DOMContentLoaded', () => {
   textareaCustomMetric.addEventListener('input', inputCustomMetric);
   // textarea__custom_column
   textarea__custom_column.addEventListener('input', inputCustomColumn);
+  textarea__custom_column.addEventListener('drop', (e) => {
+    // impedisco che venga droppato l'id dell'elemento
+    e.preventDefault();
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
+    // elementRef : è l'elemento draggato
+    WorkBook.activeTable = elementRef.dataset.tableId;
+    const text = document.createTextNode(`${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`);
+    appendDropped(caretPosition, text);
+    // INFO: normalize consente di riunificare tutti i nodeText e li mette tutti in un unico nodeText
+    e.target.normalize();
+    // posiziono il cursore alla fine della stringa
+    sel.setPosition(e.target.firstChild, caretPosition.offset + text.textContent.length);
+    e.target.appendChild(document.createElement('br'));
+  });
   // textarea-composite-metric
   textarea__composite_metric.addEventListener('input', inputCompositeMetric);
   // apertura dialog #dlg-composite-metric
@@ -210,15 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
   export__datatable_xls.addEventListener('click', export_datatable_XLS_new);
 
   dlg__custom_columns.addEventListener('close', closeDialogCustomColumn);
-
-  /* dlg__custom_columns.addEventListener('close', () => {
-    // console.log('close');
-    // reset della textarea, input, note
-    // effettuo un controllo sul firstChild perchè la textarea viene ripulita anche quando si
-    // salva un filtro, in quel caso, qui, non viene trovato il firstChild
-    debugger;
-    textarea__custom_column.firstChild?.remove();
-  }); */
 
 }); // end DOMContentLoaded
 

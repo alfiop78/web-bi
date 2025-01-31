@@ -147,7 +147,7 @@ async function getTables(urls) {
 
   dlg__filters.addEventListener('close', (e) => {
     e.target.querySelectorAll('nav > details').forEach(element => element.remove());
-    document.getElementById('input-filter-name').value = '';
+    input__filter_name.value = '';
     document.querySelectorAll('#textarea-filter *').forEach(element => element.remove());
     delete document.querySelector('#btn-filter-save').dataset.token;
     document.getElementById('filter-note').value = '';

@@ -58,8 +58,7 @@ const findIndexOfCurrentWord = (textarea, caretPosition) => {
 */
 function filterSave(e) {
   if (textareaFilter.firstChild.nodeType !== 3) return;
-  const input = document.getElementById('input-filter-name');
-  const name = input.value;
+  const name = input__filter_name.value;
   // in edit recupero il token presente sul tasto
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   let tables = new Set();
@@ -131,8 +130,8 @@ function filterSave(e) {
   // completato il salvataggio rimuovo l'attributo data-token da e.target
   if (!e.target.dataset.token) {
     appendFilter(token);
-    input.value = '';
-    input.focus();
+    input__filter_name.value = '';
+    input__filter_name.focus();
   } else {
     // filtro modificato, aggiorno solo il nome eventualmente modificato
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById() in questo caso
@@ -163,8 +162,10 @@ function columnSave(e) {
   const token = (e.target.dataset.token) ? e.target.dataset.token : `__${token_string}_${generated_token}`;
   let tables = new Set();
   // separo ogni parola/elemento della formula con \b
-  const formula = textarea__custom_column.firstChild.textContent.split(/\b/);
-  const formulaJoined = textarea__custom_column.firstChild.textContent.split(/\b/).join('');
+  // const formula_ = textarea__custom_column.firstChild.textContent.split(/\b/);
+  // const formulaJoined_ = textarea__custom_column.firstChild.textContent.split(/\b/).join('');
+  const formula = textarea__custom_column.firstChild.parentNode.innerText.split(/\b/);
+  const formulaJoined = textarea__custom_column.firstChild.parentNode.innerText.split(/\b/).join('');
   // console.log(formula);
   // estraggo dalla formula solo le tabelle, che devono essere convertite in alias
   // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
@@ -842,7 +843,6 @@ function appendCompositeMetric(token) {
 // NOTE: funzioni Drag&Drop
 
 function elementDragStart(e) {
-  debugger;
   // console.log('column drag start');
   console.log(e.currentTarget);
   // console.log('e.target : ', e.target.id);
@@ -884,7 +884,7 @@ function openContextMenu(e) {
 }
 
 function openDialogFilter() {
-  createTableStruct('wbFilters');
+  createTableStruct(wbFilters);
   dlg__filters.showModal();
 }
 
@@ -893,10 +893,9 @@ dlg__filters.addEventListener('close', () => {
   // reset della textarea, input, note
   // effettuo un controllo sul firstChild perchè la textarea viene ripulita anche quando si
   // salva un filtro, in quel caso, qui, non viene trovato il firstChild
+  input__filter_name.value = '';
   textareaFilter.firstChild?.remove();
-  /* if (textareaFilter.firstChild) {
-    if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
-  } */
+  wbColumns.querySelectorAll('details').forEach(element => element.remove());
 });
 
 function closeDialogCustomColumn() {
@@ -912,7 +911,7 @@ dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?
 
 // elementi della dialog filters
 // WARN: codice molto simile a app.addTableStruct, da ottimizzare
-function createTableStruct() {
+function createTableStruct(parent) {
   for (const [alias, objects] of WorkBook.workbookMap) {
     const tmpl = tmplDetails.content.cloneNode(true);
     const details = tmpl.querySelector("details");
@@ -929,7 +928,7 @@ function createTableStruct() {
     details.dataset.searchId = 'column-search';
     summary.innerHTML = objects.props.name;
     summary.dataset.tableId = objects.props.key;
-    wbColumns.appendChild(details);
+    parent.appendChild(details);
     columns.forEach(column => {
       const content = template_li.content.cloneNode(true);
       const li = content.querySelector('li.drag-list.default');
@@ -1717,7 +1716,7 @@ function createCustomMetric(e) {
 }
 
 function createCustomColumn(e) {
-  createTableStruct();
+  createTableStruct(wbColumns);
   WorkBook.activeTable = e.currentTarget.dataset.tableId;
   dlg__custom_columns.showModal();
   input__column_name.focus();
