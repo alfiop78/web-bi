@@ -813,16 +813,25 @@ class MapDatabaseController extends Controller
         $metrics = (array) $metric->metrics;
         // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
         foreach ($metric->SQL as $element) {
-          // se l'elemento in ciclo è un array si tratta di una metrica composta nidificata, effettuo la stessa operazione
+          // dd($element);
+          // se l'elemento in ciclo è un array si tratta di una metrica composta NIDIFICATA, effettuo la stessa operazione
           // dump($element);
           if (is_array($element)) {
+            // metrica composta nidificata
             foreach ($element as $el) {
               $sql[] = (in_array($el, $metrics)) ? "{$this->query->ifNullOperator}({$el}, 0)" : trim($el);
             }
           } else {
-            $sql[] = (in_array($element, $metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);
+            // metrica composta "semplice"
+            // se nella formula è presente il simbolo della divisione, tutte le metriche susseguenti avranno il CASE...WHEN
+            if (in_array("/", $sql)) {
+              $sql[] = (in_array($element, $metrics)) ? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$element} END" : trim($element);
+            } else {
+              $sql[] = (in_array($element, $metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);
+            }
           }
         }
+        // dd($sql);
         // WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
         $sql_string = implode(' ', $sql);
         // if ($metric->alias === 'test_issue245_1') dd($sql_string);
