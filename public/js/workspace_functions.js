@@ -58,8 +58,7 @@ const findIndexOfCurrentWord = (textarea, caretPosition) => {
 */
 function filterSave(e) {
   if (textareaFilter.firstChild.nodeType !== 3) return;
-  const input = document.getElementById('input-filter-name');
-  const name = input.value;
+  const name = input__filter_name.value;
   // in edit recupero il token presente sul tasto
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   let tables = new Set();
@@ -131,8 +130,8 @@ function filterSave(e) {
   // completato il salvataggio rimuovo l'attributo data-token da e.target
   if (!e.target.dataset.token) {
     appendFilter(token);
-    input.value = '';
-    input.focus();
+    input__filter_name.value = '';
+    input__filter_name.focus();
   } else {
     // filtro modificato, aggiorno solo il nome eventualmente modificato
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById() in questo caso
@@ -163,17 +162,23 @@ function columnSave(e) {
   const token = (e.target.dataset.token) ? e.target.dataset.token : `__${token_string}_${generated_token}`;
   let tables = new Set();
   // separo ogni parola/elemento della formula con \b
-  const formula = textarea__custom_column.firstChild.textContent.split(/\b/);
-  const formulaJoined = textarea__custom_column.firstChild.textContent.split(/\b/).join('');
+  // const formula_ = textarea__custom_column.firstChild.textContent.split(/\b/);
+  // const formulaJoined_ = textarea__custom_column.firstChild.textContent.split(/\b/).join('');
+  const formula = textarea__custom_column.firstChild.parentNode.innerText.split(/\b/);
+  const formulaJoined = textarea__custom_column.firstChild.parentNode.innerText.split(/\b/).join('');
   // console.log(formula);
   // estraggo dalla formula solo le tabelle, che devono essere convertite in alias
   // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
   const tablesFounded = textarea__custom_column.firstChild.textContent.match(/\w+.(?=\.)/g);
+  // console.log(WorkBook.activeTable);
   let object = {
     token,
     type: 'column',
     name,
     tableId: WorkBook.activeTable.id,
+    table: WorkBook.activeTable.dataset.table,
+    tableAlias: WorkBook.activeTable.dataset.alias,
+    schema: WorkBook.activeTable.dataset.schema,
     cssClass: 'custom',
     datatype: 'varchar',
     tables: [],
@@ -182,12 +187,16 @@ function columnSave(e) {
   };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbColumns
   object.SQL = formula.map(element => {
-    if (tablesFounded.includes(element)) {
-      // recupero l'alias della tabella che mi servirà per creare l'sql
-      const alias = document.querySelector(`#wbColumns>details[data-table='${element}']`).dataset.alias;
-      tables.add(alias);
-      // const regex = new RegExp(`${ element } `, 'i');
-      return element.replace(new RegExp(`${element}`, 'i'), alias);
+    if (tablesFounded) {
+      if (tablesFounded.includes(element)) {
+        // recupero l'alias della tabella che mi servirà per creare l'sql
+        const alias = document.querySelector(`#wbColumns>details[data-table='${element}']`).dataset.alias;
+        tables.add(alias);
+        // const regex = new RegExp(`${ element } `, 'i');
+        return element.replace(new RegExp(`${element}`, 'i'), alias);
+      } else {
+        return element;
+      }
     } else {
       return element;
     }
@@ -653,21 +662,22 @@ function addTemplateFilter(token) {
  * Creazione elenco colonne nella ##workbook-objects
  * Viene invocata quando si Salva una nuova colonna custom
  * e quando si costruisce l'elenco in #workbook-objects
+ * TODO: 31.01.2025 al momento non viene utilizzata nella costruzione del #workbook-objects
+ * ma solo in fase di creazione nuova metrica
 */
 function appendColumn(token) {
   // creo la <li> per la nuova colonna dopo l'ultima colonna "originale" della tabella
   console.log(WorkBook.activeTable);
-  const columnsCount = document.querySelectorAll(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns`).length;
-  const referenceElement = document.querySelector(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns:nth-child(${columnsCount + 1})`);
-  console.log(referenceElement);
-  debugger;
+  // riferimento all'ultima colonna (:last-child), il nuovo elemento verrà aggiunto dopo l'ultima colonna
+  // NOTE: :has https://developer.mozilla.org/en-US/docs/Web/CSS/:has#syntax
+  const lastElement = document.querySelector(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns:has(+ li[data-id='li__new_metric'])`);
+  console.log(lastElement);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector('li.drag-list.columns');
   const span__content = li.querySelector('.span__content');
   const span = span__content.querySelector('span');
   const i = span__content.querySelector('i[draggable]');
   const value = WorkBook.elements.get(token);
-  debugger;
   // const filter = WorkBook.filters.get(token);
   li.dataset.id = token;
   i.id = token;
@@ -679,12 +689,16 @@ function appendColumn(token) {
   li.dataset.table = value.table;
   li.dataset.alias = value.tableAlias;
   li.dataset.field = value.name;
+  // proprietà dei custom column
+  li.classList.add(value.cssClass);
+  li.dataset.contextmenu = 'ul__contextmenu_custom_column';
+  li.addEventListener('contextmenu', openContextMenu);
   i.addEventListener('dragstart', handleDragStart);
   i.addEventListener('dragend', handleDragEnd);
   i.addEventListener('dragenter', handleDragEnter);
   i.addEventListener('dragleave', handleDragLeave);
   span.innerText = value.name;
-  referenceElement.after(li);
+  lastElement.after(li);
 }
 
 /*
@@ -829,7 +843,6 @@ function appendCompositeMetric(token) {
 // NOTE: funzioni Drag&Drop
 
 function elementDragStart(e) {
-  debugger;
   // console.log('column drag start');
   console.log(e.currentTarget);
   // console.log('e.target : ', e.target.id);
@@ -871,7 +884,7 @@ function openContextMenu(e) {
 }
 
 function openDialogFilter() {
-  createTableStruct('wbFilters');
+  createTableStruct(wbFilters);
   dlg__filters.showModal();
 }
 
@@ -880,11 +893,17 @@ dlg__filters.addEventListener('close', () => {
   // reset della textarea, input, note
   // effettuo un controllo sul firstChild perchè la textarea viene ripulita anche quando si
   // salva un filtro, in quel caso, qui, non viene trovato il firstChild
+  input__filter_name.value = '';
   textareaFilter.firstChild?.remove();
-  /* if (textareaFilter.firstChild) {
-    if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
-  } */
+  wbColumns.querySelectorAll('details').forEach(element => element.remove());
 });
+
+function closeDialogCustomColumn() {
+  input__column_name.value = '';
+  textarea__custom_column.firstChild?.remove();
+  // ripulisco la struttura se presente
+  wbColumns.querySelectorAll('details').forEach(element => element.remove());
+}
 
 dlg__composite_metric.addEventListener('close', () => textarea__composite_metric.firstChild?.remove());
 
@@ -892,10 +911,7 @@ dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?
 
 // elementi della dialog filters
 // WARN: codice molto simile a app.addTableStruct, da ottimizzare
-function createTableStruct(parent_id) {
-  const parent = document.getElementById(parent_id);
-  // ripulisco la struttura se presente
-  parent.querySelectorAll('dl').forEach(element => element.remove());
+function createTableStruct(parent) {
   for (const [alias, objects] of WorkBook.workbookMap) {
     const tmpl = tmplDetails.content.cloneNode(true);
     const details = tmpl.querySelector("details");
@@ -1664,22 +1680,32 @@ function addFields(parent, fields) {
     li.dataset.table = value.table;
     li.dataset.alias = value.tableAlias;
     li.dataset.field = value.name;
-    if (value.cssClass === 'custom') {
-      li.classList.add(value.cssClass);
-      li.dataset.contextmenu = 'ul__contextmenu_custom_column';
-      li.addEventListener('contextmenu', openContextMenu);
-    }
     i.addEventListener('dragstart', handleDragStart);
     i.addEventListener('dragend', handleDragEnd);
     i.addEventListener('dragenter', handleDragEnter);
     i.addEventListener('dragleave', handleDragLeave);
     // sulle colonne custom questa icona viene nascosta da CSS
+    // WARN: il btnConvertToMetric viene inserito solo qui (in fase di creazione di #workbook-objects)
+    // e non in appendColumn() (in fase di creazione di una nuova colonna custom)
     btnConvertToMetric.dataset.tableId = value.tableId;
     btnConvertToMetric.dataset.token = token;
     btnConvertToMetric.addEventListener('click', convertToMetric);
     // btnConvertToMetric.addEventListener('click', createCustomMetric);
     span.innerText = value.name;
-    parent.appendChild(li);
+    if (value.cssClass === 'custom') {
+      li.classList.add(value.cssClass);
+      li.dataset.contextmenu = 'ul__contextmenu_custom_column';
+      li.addEventListener('contextmenu', openContextMenu);
+      // la colonna custom deve essere aggiunta sempre alla fine dell'elenco delle colonne
+      // parent.insertAdjacentElement('beforeend', li)
+      // NOTE: https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+      parent.insertAdjacentElement('beforeend', li);
+    } else {
+      // se è presente una colonna custom, la colonna default va inserita prima della custom
+      // recupero il firstChild tra le colonne custom
+      (parent.querySelector('.columns.custom')) ? parent.querySelector('.columns.custom').before(li) : parent.appendChild(li);
+      // parent.appendChild(li);
+    }
   }
 }
 
@@ -1690,9 +1716,10 @@ function createCustomMetric(e) {
 }
 
 function createCustomColumn(e) {
-  createTableStruct('wbColumns');
+  createTableStruct(wbColumns);
   WorkBook.activeTable = e.currentTarget.dataset.tableId;
   dlg__custom_columns.showModal();
+  input__column_name.focus();
 }
 
 function convertToMetric(e) {

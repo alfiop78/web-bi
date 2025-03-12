@@ -12,6 +12,8 @@ var textarea__custom_column = document.getElementById('textarea__custom_column')
 var textarea__composite_metric = document.getElementById('textarea__composite-metric');
 // inputs
 const input__sheetName = document.getElementById('sheet-name');
+const input__column_name = document.getElementById('input__column_name');
+const input__filter_name = document.getElementById('input__filter_name');
 // Buttons
 const btnFilterSave = document.getElementById('btn-filter-save');
 const btnCustomMetricSave = document.getElementById('btn-custom-metric-save');
@@ -41,6 +43,9 @@ const template__columnDefined = document.getElementById('tmpl-columns-defined');
 const template__metricDefined = document.getElementById('tmpl-metrics-defined');
 const template__filterDropped = document.getElementById('tmpl-filter-dropped-adv-metric');
 const template__createElement = document.getElementById('tmpl__createElement');
+// nav
+const wbColumns = document.getElementById('wbColumns');
+const wbFilters = document.getElementById('wbFilters');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -1202,8 +1207,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // il context-menu è sempre aperto in questo caso, lo chiudo
     contextMenuRef.toggleAttribute('open');
     const filter = WorkBook.filters.get(e.target.dataset.token);
-    const inputName = document.getElementById('input-filter-name');
-    inputName.value = filter.name;
+    input__filter_name.value = filter.name;
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     btnFilterSave.dataset.token = e.target.dataset.token;
     // const text = document.createTextNode(filter.formula.join(''));
@@ -1232,11 +1236,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     const text = document.createTextNode(element.formula);
     // aggiungo il testo della formula prima del tag <br>
     textarea__custom_column.insertBefore(text, textarea__custom_column.lastChild);
-    createTableStruct('wbColumns');
+    createTableStruct(wbColumns);
     WorkBook.activeTable = element.tableId;
     console.log(WorkBook.activeTable);
-    debugger;
     dlg__custom_columns.showModal();
+    input__column_name.focus();
   }
 
   // sezione drop per i filtri nelle metriche avanzate
@@ -2009,7 +2013,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         span.innerText = metric.alias;
         details.appendChild(li);
       }
-      // al termine della lista aggiungo i tasti "Nuova Metrica" e "Nuova Colonna"
+      // al termine della lista aggiungo i tasti "Nuova Metrica" e "Nuova Colonna" nelle tabelle !== da 'time'
       if (WorkBook.activeTable.dataset.type !== 'time') {
         const content = template__createElement.content.cloneNode(true);
         const li__createMetric = content.querySelector("li[data-id='li__new_metric']");
