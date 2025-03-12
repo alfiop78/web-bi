@@ -73,7 +73,6 @@ class MyVerticaGrammar extends Grammar
    */
   public function compileTableExists()
   {
-    // dd("compileTableExists");
     // return "select * from information_schema.tables where table_schema = ? and table_name = ? and table_type = 'BASE TABLE'";
     // al momento imposto fisso lo schema perchè mi serve solo per creare i datamart su decisyon_cache
     // return "SELECT * FROM v_catalog.all_tables WHERE TABLE_NAME = ? AND SCHEMA_NAME = 'decisyon_cache'";

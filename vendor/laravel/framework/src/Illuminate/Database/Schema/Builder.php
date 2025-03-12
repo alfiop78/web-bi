@@ -150,7 +150,6 @@ class Builder
     // $table = $this->connection->getTablePrefix() . $table;
     // dump($table);
     // dd($this->grammar);
-
     // return count($this->connection->selectFromWriteConnection(
     //   $this->grammar->compileTableExists(),
     //   [$table]
