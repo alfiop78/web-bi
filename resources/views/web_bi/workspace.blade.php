@@ -285,7 +285,7 @@
         <i class="button-icon material-symbols-rounded md-18" draggable="true">drag_indicator</i>
         <div class="defined_contents">
           <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code>
-          <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricAlias" spellcheck="false"></code>
+          <code data-field data-token data-value contenteditable="false" data-blur-fn="editMetricAlias" spellcheck="false"></code>
           <button type="button" data-remove class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
           <button type="button" data-undo class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
         </div>

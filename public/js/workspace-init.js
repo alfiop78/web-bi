@@ -509,12 +509,15 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   }
 
   app.editMetricAlias = (e) => {
-    const token = e.target.dataset.token;
+    // BUG: 13.03.2025 Disattivato:
+    // Si verifica un bug quando viene modificato il nome di una metrica utilizzata nelle metriche composte.
+    // La formula della metrica composta cerca la metrica originale (nome colonna) e non l'alias della metrica modificato
+    /* const token = e.target.dataset.token;
     console.log(Sheet.metrics.get(token));
     if (Sheet.metrics.get(token).alias !== e.target.innerText) e.target.dataset.modified = true;
     Sheet.metrics.get(token).alias = e.target.innerText;
     document.querySelector(`.defined[data-id='${token}']`).dataset.label = e.target.innerText;
-    console.log('alias metrica modificato :', Sheet.metrics.get(token));
+    console.log('alias metrica modificato :', Sheet.metrics.get(token)); */
   }
 
   // apertura dialog con lista WorkBooks

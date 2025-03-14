@@ -157,7 +157,6 @@ header h1 {
 main {
   display: flex;
   position: relative;
-  background: coral;
   grid-column: 2 / 3;
 }
 
@@ -235,25 +234,25 @@ footer>.footerContent {
   bottom: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--main-bg-color);
+  /* background: var(--main-bg-color); */
   transition: all 500ms;
-  box-shadow: 0px 1px 3px 2px gainsboro;
+  /* box-shadow: 0px 1px 3px 2px gainsboro; */
 }
 
 #body {
-  padding: 1em;
+  /* padding: 1em; */
   border-radius: 4px;
-  background-color: white;
+  /* background-color: white; */
   display: grid;
 }
 
-#body.raw {
+/* #body.raw {
   background-color: var(--main-bg-color);
-}
+} */
 
 #content>#body.menu {
   grid-template-rows: auto 1fr;
-  grid-row-gap: 1em;
+  grid-row-gap: .5rem;
 }
 
 .wrapper {
@@ -297,7 +296,7 @@ menu.standard {
   border-radius: 4px;
   /* justify-content: space-between; */
   background-color: white;
-  box-shadow: 0px 1px 6px 1px #cac6c6;
+  box-shadow: 0px 0px 4px -1px #cac6c6;
 }
 
 menu.standard.onlyStatus {
