@@ -83,14 +83,14 @@ td.align-right {
   text-align: right;
 }
 
-.g-category-filter {
+/* .g-category-filter {
   color: #494949;
   display: flex;
   align-items: center;
   margin: 8px;
-}
+} */
 
-.g-category-filter ul {
+/* .g-category-filter ul {
   padding-inline-start: 0px;
   padding-inline-end: 0px;
   margin-block-start: 4px;
@@ -99,14 +99,14 @@ td.align-right {
   background-color: #494949;
   color: white;
   border-radius: 4px;
-}
+} */
 
 .g-category-filter li {
   /* background-color: #494949; */
   /* padding: 6px; */
   /* margin: 0px 2px; */
   /* color: white; */
-  line-height: unset;
+  /* line-height: unset; */
 }
 
 .g-category-filter li div {
@@ -117,7 +117,7 @@ td.align-right {
   vertical-align: middle;
 } */
 
-.goog-combobox {
+/* .goog-combobox {
   padding: 6px;
   background: #e1e1e1 !important;
   border: unset !important;
@@ -125,7 +125,7 @@ td.align-right {
   border-radius: 4px;
   display: flex !important;
   align-items: center;
-}
+} */
 
 .goog-combobox input {
   padding: 8px !important;
@@ -373,7 +373,7 @@ td.align-right {
 }
 
 /* menu dei filtri */
-.goog-combobox .goog-menu {
+/* .goog-combobox .goog-menu {
   background-color: #494949;
   border-radius: 2px;
   margin-top: 8px !important;
@@ -381,7 +381,7 @@ td.align-right {
 
 div.goog-menuitem-content {
   color: white;
-}
+} */
 
 /* hover sugli elementi dei filtri */
 .goog-menuitem-highlight,
@@ -395,10 +395,10 @@ div.goog-menuitem-content {
 }
 
 /* filtro aperto */
-.goog-combobox-active .goog-menu.goog-menu-vertical {
+/* .goog-combobox-active .goog-menu.goog-menu-vertical {
   top: 30px;
   max-height: 600px;
   overflow-y: auto;
-}
+} */
 
 /* TEST: nuovi layout */

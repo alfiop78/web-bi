@@ -14,6 +14,7 @@ use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIdashboardController;
 use App\Http\Controllers\BIConnectionsController;
+use App\Models\BIdashboard;
 // uso i Model BIsheet, BIworkbook, BImetric e BIfilter che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
@@ -444,6 +445,15 @@ Route::prefix('/fetch_api/json/')->group(function () {
 Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetController::class, 'indexByWorkbook']);
 // recupero le dashboards della connessione corrente
 Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
+
+// Route::get('/dashboards/dashboard/{token}', [BIdashboardController::class, 'show'])->name('dashboards.dashboard');
+Route::get('/dashboards/dashboard/{token}', function ($token) {
+  // recupero il campo connectionId relativa alla dashboard ricevuta come parametro
+  $dashboard = BIdashboard::findOrFail($token);
+  // effettuo la connessione al DB, impostando le variabili di sessione (session('db_driver'))
+  BIConnectionsController::curlDBConnection($dashboard->connectionId);
+  return view('web_bi.dashboards.dashboard')->with('token', $token);
+});
 
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP

@@ -654,7 +654,7 @@ class MapDatabaseController extends Controller
       case 'mysql':
         $queryColumns = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')->select('column_name');
         break;
-        // TODO: implementazione altri DB
+      // TODO: implementazione altri DB
       default:
         break;
     }
@@ -713,7 +713,7 @@ class MapDatabaseController extends Controller
       case 'mysql':
         $queryColumns = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')->select('column_name');
         break;
-        // TODO: implementazione altri DB
+      // TODO: implementazione altri DB
       default:
         break;
     }
