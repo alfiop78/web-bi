@@ -24,6 +24,7 @@ use App\Models\BImetric;
 // NOTE: 30.09.2024 spostate le funzioni per /fetch_api/dimension/time in MapDatabaseController
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -456,7 +457,8 @@ Route::get('/dashboards/dashboard/{token}', function ($token) {
 })->name('web_bi.dashboards.dashboard');
 
 // generare il link per raggiungere la dashboard dall'esterno
-Route::get('/dashboards/test/{token}', function($token) {
+Route::get('/dashboards/test/{token}/params/{params?}', function(Request $request, $token, $params = NULL) {
+  // dd($params);
   // return route('web_bi.dashboards.dashboard', ['token' => 't424xsx', 'customer_id_field' => 'cem_azienda_id', 'customer_id_value' => 437]);
   return route('web_bi.dashboards.dashboard', ['token' => $token, 'cem_azienda_id' => 437]);
   // http://example.com/post/1?search=rocket

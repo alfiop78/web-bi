@@ -19,6 +19,8 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboards.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-create-dashboard.css') }}" />
+  <!-- layout temporaneo, verrà eliminato dopo aver aggiunto i css del progetto exampleCollection/gridsystem2/ -->
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/temp__layout.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
@@ -96,6 +98,14 @@
     </section>
   </template>
 
+  <template id="tmpl__url_params">
+    <section class="flex-row">
+      <input type="checkbox" id name />
+      <label for></label>
+      <input type="text" placeholder="Nome parametro" />
+    </section>
+  </template>
+
   <main>
 
     <div id="content" class="grid custom-scrollbar">
@@ -131,18 +141,19 @@
             <h5 class="title">Aggiungi parametri della url</h5>
             <section class="dlg-content">
               <section class="row">
+                <section id="url_params" class="col">
+                  <!-- <div id="url"></div> -->
+                </section>
+              </section>
+              <section class="row">
                 <section class="col">
-                  <input type="url" />
-                  <input type="url" />
-                  <input type="url" />
-                  <input type="url" />
-                  <input type="url" />
                   <div id="url"></div>
                 </section>
               </section>
             </section>
             <section class="dlg-buttons">
               <button name="cancel" value="chiudi">Chiudi</button>
+              <button id="btn__url_generate" value="chiudi">Genera</button>
             </section>
           </section>
         </dialog>
@@ -152,7 +163,7 @@
             <button type="button" id="addLayout" class="btn-link default" data-fn="openDlgTemplateLayout" value="Crea nuova Dashboard">Crea Dashboard</button>
             <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
             <button id="btnPublish" type="button" class="btn-buttons" value="Pubblica" data-fn="publish" disabled>Pubblica</button>
-            <button id="btn__create_url" type="button" class="btn-buttons" value="Genera URL" disabled>Genera URL</button>
+            <!-- <button id="btn__create_url" type="button" class="btn-buttons" value="Genera URL" disabled>Genera URL</button> -->
           </section>
           <section>
             <div id="dashboardTitle" class="name" contenteditable="true" data-default-value="Titolo Dashboard" data-mutation-observer="title">Titolo Dashboard</div>

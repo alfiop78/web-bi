@@ -12,6 +12,8 @@ let dlg__config_filterDashboard = document.getElementById('dlg__config_dashboard
 const template__li = document.getElementById('template__li');
 const dlg__create_url = document.getElementById('dlg__create_url');
 const btn__create_url = document.getElementById('btn__create_url');
+const btn__url_generate = document.getElementById('btn__url_generate');
+const tmpl__url_params = document.getElementById('tmpl__url_params');
 (() => {
   var app = {
     layoutRef: document.getElementById('template-layout'),
@@ -187,8 +189,8 @@ const btn__create_url = document.getElementById('btn__create_url');
         // TODO: provare la promise.race per poter recuperare i dati
         app.dlgDashboard.close();
         // abilito il tasto Genera Url
-        btn__create_url.dataset.token = data.token;
-        btn__create_url.disabled = false;
+        // btn__create_url.dataset.token = data.token;
+        // btn__create_url.disabled = false;
         app.getResources();
       })
       .catch(err => {
