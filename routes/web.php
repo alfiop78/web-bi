@@ -457,10 +457,21 @@ Route::get('/dashboards/dashboard/{token}', function ($token) {
 })->name('web_bi.dashboards.dashboard');
 
 // generare il link per raggiungere la dashboard dall'esterno
-Route::get('/dashboards/test/{token}/params/{params?}', function(Request $request, $token, $params = NULL) {
-  // dd($params);
+Route::get('/dashboards/test/{token}', function (Request $request, $token) {
+  // dd($request->query());
+  $querystring = $request->query();
+  // il token è un parametro richiesto dalla route 'web_bi.dashboards.dashboard', i successivi parametri vengono
+  // interpretati come querystring
+  $params = ['token' => $token];
+  foreach ($querystring as $field => $value) {
+    $params[$field] = '_value_';
+    // WARN: se il valore è NULL il parametro non viene aggiunto nel secondo argomento dell'Helper route
+    // $params[$field] = $value;
+  }
+  // dump($params);
   // return route('web_bi.dashboards.dashboard', ['token' => 't424xsx', 'customer_id_field' => 'cem_azienda_id', 'customer_id_value' => 437]);
-  return route('web_bi.dashboards.dashboard', ['token' => $token, 'cem_azienda_id' => 437]);
+  // return route('web_bi.dashboards.dashboard', ['token' => $token, 'test' => 4]);
+  return route('web_bi.dashboards.dashboard', $params);
   // http://example.com/post/1?search=rocket
 });
 

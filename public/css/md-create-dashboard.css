@@ -449,3 +449,11 @@ fieldset legend {
   display: flex;
   align-items: center;
 }
+
+#url {
+  padding: 1em;
+  background-color: #494949;
+  color: white;
+  font-family: monospace, sans-serif;
+  font-style: 1rem;
+}

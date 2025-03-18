@@ -178,19 +178,21 @@ function openGenerateUrl(e) {
   btn__url_generate.dataset.token = e.target.dataset.token;
   // recupero la proprietà 'resources[token].data.columns[nome_colonna]' di tutti gli sheets presenti nella dashboard
   const url_params = document.getElementById('url_params');
-  for (const value of Resource.resources.values()) {
-    console.log(value.data.columns);
-    for (const column of Object.values(value.data.columns)) {
-      // escludo le metriche
-      if (column.p.data === 'column') {
-        const template = tmpl__url_params.content.cloneNode(true);
-        const section = template.querySelector('section');
-        const checkbox = section.querySelector("input[type='checkbox']");
-        const label = section.querySelector('label');
-        checkbox.id = column.id;
-        label.innerText = column.id;
-        label.setAttribute('for', column.id);
-        url_params.appendChild(section);
+  if (url_params.childElementCount === 0) {
+    for (const value of Resource.resources.values()) {
+      console.log(value.data.columns);
+      for (const column of Object.values(value.data.columns)) {
+        // escludo le metriche
+        if (column.p.data === 'column') {
+          const template = tmpl__url_params.content.cloneNode(true);
+          const section = template.querySelector('section');
+          const checkbox = section.querySelector("input[type='checkbox']");
+          const label = section.querySelector('label');
+          checkbox.id = column.id;
+          label.innerText = column.id;
+          label.setAttribute('for', column.id);
+          url_params.appendChild(section);
+        }
       }
     }
   }
@@ -202,22 +204,14 @@ function urlGenerate(e) {
   // TODO: recupero i parametri inseriti dall'utente
   let params = [];
   document.querySelectorAll("#url_params>section>input:checked").forEach(param => {
-    console.log(param);
+    // console.log(param);
     const param_label = param.parentElement.querySelector('label').innerText;
-    const param_name = param.parentElement.querySelector("input[type='text']").value;
-    (param_name.length === 0) ? params.push(param_label) : params.push(param_name);
+    // const param_name = param.parentElement.querySelector("input[type='text']").value;
+    // (param_name.length === 0) ? params.push(param_label) : params.push(param_name);
+    params.push(param_label)
   });
   console.log(params);
-  /* const url = `/dashboards/test/${e.target.dataset.token}`;
-  const init = {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    method: 'POST',
-    body: new URLSearchParams({ customer_code: e.target.id, host: e.target.dataset.ref })
-  };
-  const req = new Request(url, init); */
-  debugger;
-  // const url = document.getElementById('url');
-  fetch(`/dashboards/test/${e.target.dataset.token}/params/${params}`)
+  fetch(`/dashboards/test/${e.target.dataset.token}?${params.join('&')}`)
     .then((response) => {
       // console.log(response);
       if (!response.ok) { throw Error(response.statusText); }

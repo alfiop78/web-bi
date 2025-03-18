@@ -189,8 +189,8 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
         // TODO: provare la promise.race per poter recuperare i dati
         app.dlgDashboard.close();
         // abilito il tasto Genera Url
-        // btn__create_url.dataset.token = data.token;
-        // btn__create_url.disabled = false;
+        btn__create_url.dataset.token = data.token;
+        btn__create_url.disabled = false;
         app.getResources();
       })
       .catch(err => {

@@ -102,7 +102,7 @@
     <section class="flex-row">
       <input type="checkbox" id name />
       <label for></label>
-      <input type="text" placeholder="Nome parametro" />
+      <!-- <input type="text" placeholder="Nome parametro" /> -->
     </section>
   </template>
 
@@ -163,7 +163,7 @@
             <button type="button" id="addLayout" class="btn-link default" data-fn="openDlgTemplateLayout" value="Crea nuova Dashboard">Crea Dashboard</button>
             <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
             <button id="btnPublish" type="button" class="btn-buttons" value="Pubblica" data-fn="publish" disabled>Pubblica</button>
-            <!-- <button id="btn__create_url" type="button" class="btn-buttons" value="Genera URL" disabled>Genera URL</button> -->
+            <button id="btn__create_url" type="button" class="btn-buttons" value="Genera URL" disabled>Genera URL</button>
           </section>
           <section>
             <div id="dashboardTitle" class="name" contenteditable="true" data-default-value="Titolo Dashboard" data-mutation-observer="title">Titolo Dashboard</div>
