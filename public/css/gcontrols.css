@@ -1,9 +1,12 @@
-.goog-combobox input.label-input-label {
-  padding: 4px;
-}
-
 .goog-combobox input {
   padding: 4px !important;
+  font: normal 1rem 'Barlow', sans-serif !important;
+}
+
+.goog-combobox.goog-combobox-active input {
+  border: unset !important;
+  outline: none;
+  font: normal 1rem 'Barlow', sans-serif !important;
 }
 
 .goog-menuitem {
@@ -30,43 +33,45 @@
   border-radius: 4px;
 }
 
-.g-category-filter li {
-  /* background-color: #494949; */
-  /* padding: 6px; */
-  /* margin: 0px 2px; */
-  /* color: white; */
+/* .g-category-filter li {
   line-height: auto;
-}
+} */
 
 .goog-combobox {
   padding: 6px;
-  background: #e1e1e1 !important;
+  background: #eee !important;
   border: unset !important;
-  font-family: 'Barlow', sans-serif!important;
-  /* font: normal small 'Barlow', sans-serif !important; */
-  border-radius: 4px;
+  font-family: 'Barlow', sans-serif !important;
+  border-radius: 2px;
   display: flex !important;
   align-items: center;
+}
+
+.goog-combobox input.label-input-label {
+  background: none !important;
+  box-shadow: none;
+  border: unset;
+  color: #494949 !important;
+  font: normal 1rem 'Barlow', sans-serif;
 }
 
 /* menu dei filtri */
 .goog-combobox .goog-menu {
   background-color: #eee;
   border-radius: 2px;
-  margin-top: 8px !important;
-  box-shadow: 0px 0px 4px -1px;
+  margin-top: 6px !important;
+  box-shadow: 0px 0px 5px -2px black;
   border: unset !important;
 }
 
 div.goog-menuitem-content {
   color: #494949;
-  font-style: 'Barlow', sans-serif;
-  font-size: 1rem;
+  font: normal 1rem 'Barlow', sans-serif;
 }
 
 .goog-menuitem-highlight,
 .goog-menuitem-hover {
-  background-color: lightgray !important;
+  background-color: #494949 !important;
   border: unset !important;
   /* margin: 2px 6px !important; */
   border-radius: 2px;
@@ -74,9 +79,9 @@ div.goog-menuitem-content {
   /* padding-top: 6px !important; */
 }
 
-.goog-menuitem-highlight > .goog-menuitem-content {
+.goog-menuitem-highlight>.goog-menuitem-content {
   /* color: white !important; */
-  color: #494949 !important;
+  color: #eee !important;
 }
 
 /* filtro aperto */

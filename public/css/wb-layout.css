@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;500;600&display=swap');
 
 :root {
-  --main-bg-color: #e2e2e2;
+  --main-bg-color: #eee;
   --main-fg-color: #494949;
   --text-default: #494949;
   --main-primary-color: #2a3e59;
@@ -237,7 +237,7 @@ footer>.footerContent {
   overflow-x: hidden;
   background: var(--main-bg-color);
   transition: all 500ms;
-  box-shadow: 0px 1px 3px 2px gainsboro;
+  /* box-shadow: 0px 1px 3px 2px gainsboro; */
 }
 
 #body {

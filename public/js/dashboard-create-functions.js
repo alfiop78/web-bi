@@ -76,7 +76,7 @@ function dashboardReady() {
     let redraw = new google.visualization.ChartWrapper({
       chartType: wrapper.chartType,
       containerId: wrapper.containerId,
-      options : wrapper.options,
+      options: wrapper.options,
       dataTable: Resource.dataViewGrouped
       // dataTable: dataGroup
     });
@@ -171,4 +171,30 @@ function onReady() {
 
   Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
   Resource.chartWrapperView.draw();
+}
+
+function openGenerateUrl(e) {
+  // carico elenco campi de aggiungere come parametri
+  // dashboard token
+  const token = e.target.dataset.token;
+  const url = document.getElementById('url');
+  debugger;
+
+  dlg__create_url.showModal();
+
+  fetch(`/dashboards/test/${token}`)
+    .then((response) => {
+      // console.log(response);
+      if (!response.ok) { throw Error(response.statusText); }
+      return response;
+    })
+    .then((response) => response.text())
+    .then(data => {
+      console.log(data);
+      url.innerHTML = data;
+    })
+    .catch(err => {
+      App.showConsole(err, 'error');
+      console.error(err);
+    });
 }

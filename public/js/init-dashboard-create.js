@@ -10,6 +10,8 @@ let popover__chartWrappers = document.getElementById('popover__chartWrappers');
 let dlg__config_filterDashboard = document.getElementById('dlg__config_dashboardFilters');
 // templates
 const template__li = document.getElementById('template__li');
+const dlg__create_url = document.getElementById('dlg__create_url');
+const btn__create_url = document.getElementById('btn__create_url');
 (() => {
   var app = {
     layoutRef: document.getElementById('template-layout'),
@@ -184,6 +186,9 @@ const template__li = document.getElementById('template__li');
         // promise.all per recuperare tutti gli oggetti della dashboard
         // TODO: provare la promise.race per poter recuperare i dati
         app.dlgDashboard.close();
+        // abilito il tasto Genera Url
+        btn__create_url.dataset.token = data.token;
+        btn__create_url.disabled = false;
         app.getResources();
       })
       .catch(err => {

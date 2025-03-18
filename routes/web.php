@@ -446,13 +446,20 @@ Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetCon
 // recupero le dashboards della connessione corrente
 Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
 
-// Route::get('/dashboards/dashboard/{token}', [BIdashboardController::class, 'show'])->name('dashboards.dashboard');
 Route::get('/dashboards/dashboard/{token}', function ($token) {
   // recupero il campo connectionId relativa alla dashboard ricevuta come parametro
   $dashboard = BIdashboard::findOrFail($token);
   // effettuo la connessione al DB, impostando le variabili di sessione (session('db_driver'))
   BIConnectionsController::curlDBConnection($dashboard->connectionId);
+  // restituisco il token alla view per poter recuperare il json della dashboard tramite la route dashboard_show
   return view('web_bi.dashboards.dashboard')->with('token', $token);
+})->name('web_bi.dashboards.dashboard');
+
+// generare il link per raggiungere la dashboard dall'esterno
+Route::get('/dashboards/test/{token}', function($token) {
+  // return route('web_bi.dashboards.dashboard', ['token' => 't424xsx', 'customer_id_field' => 'cem_azienda_id', 'customer_id_value' => 437]);
+  return route('web_bi.dashboards.dashboard', ['token' => $token, 'cem_azienda_id' => 437]);
+  // http://example.com/post/1?search=rocket
 });
 
 // test vertica

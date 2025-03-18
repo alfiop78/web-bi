@@ -61,12 +61,12 @@
     </li>
   </template>
 
-    <template id="template__filters">
-      <div class="filters draggable">
-        <i class="material-symbols-rounded" draggable="true">drag_indicator</i>
-        <div></div>
-      </div>
-    </template>
+  <template id="template__filters">
+    <div class="filters draggable">
+      <i class="material-symbols-rounded" draggable="true">drag_indicator</i>
+      <div></div>
+    </div>
+  </template>
 
   <template id="template__filter">
     <!-- <div class="filter-container dropzone">
@@ -126,12 +126,33 @@
             </section>
           </section>
         </dialog>
+        <dialog id="dlg__create_url">
+          <section class="dlg-grid">
+            <h5 class="title">Aggiungi parametri della url</h5>
+            <section class="dlg-content">
+              <section class="row">
+                <section class="col">
+                  <input type="url" />
+                  <input type="url" />
+                  <input type="url" />
+                  <input type="url" />
+                  <input type="url" />
+                  <div id="url"></div>
+                </section>
+              </section>
+            </section>
+            <section class="dlg-buttons">
+              <button name="cancel" value="chiudi">Chiudi</button>
+            </section>
+          </section>
+        </dialog>
         <menu class="standard">
           <section>
             <button type="button" class="btn-link default" data-fn="openDashboard" value="Apri">Apri</button>
             <button type="button" id="addLayout" class="btn-link default" data-fn="openDlgTemplateLayout" value="Crea nuova Dashboard">Crea Dashboard</button>
             <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
             <button id="btnPublish" type="button" class="btn-buttons" value="Pubblica" data-fn="publish" disabled>Pubblica</button>
+            <button id="btn__create_url" type="button" class="btn-buttons" value="Genera URL" disabled>Genera URL</button>
           </section>
           <section>
             <div id="dashboardTitle" class="name" contenteditable="true" data-default-value="Titolo Dashboard" data-mutation-observer="title">Titolo Dashboard</div>
