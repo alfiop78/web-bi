@@ -112,6 +112,7 @@ function ready() {
 
 // Recupero il Layout impostato per la dashboard selezionata
 async function getLayout() {
+  console.log('getLayout');
   await fetch(`/js/json-templates/${Resource.json.layout}.json`)
     .then((response) => {
       // console.log(response);
@@ -161,11 +162,11 @@ async function getResources() {
     });
     urls.push(`/fetch_api/${resource.datamartId}/datamart?page=1`)
   }
-  console.log(urls);
-  getAllData(urls);
+  await getAllData(urls);
 }
 
 async function getAllData(urls) {
+  console.log('getAllData');
   // const progressBar = document.getElementById('progressBar');
   // const progressTo = document.getElementById('progressTo');
   // const progressTotal = document.getElementById('progressTotal');
@@ -251,4 +252,29 @@ async function getAllData(urls) {
       App.showConsole(err, 'error');
       console.error(err);
     });
+}
+
+/*
+  * Utilizzata per recuperare le formule delle metriche composte
+  * Viene chiamata quando si utilizza una url raggiungibile dall'esterno.
+  * In questi casi, le metriche composte venivano recuperate dal localStorage.
+  */
+async function getCompositeMetrics(urls) {
+  await Promise.all(urls.map(url => fetch(url)))
+    .then(responses => {
+      return Promise.all(responses.map(response => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response.json();
+      }))
+    })
+    .then((data) => {
+      console.log('getCompositeMetrics', data);
+      // memorizzo in localstorage
+      data.forEach(metric => {
+        const json = JSON.parse(metric.json_value);
+        console.log(JSON.stringify(json));
+        window.localStorage.setItem(metric.token, JSON.stringify(json));
+      });
+    })
+    .catch(err => console.error(err));
 }

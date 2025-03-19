@@ -18,12 +18,24 @@ const progressLabel = document.querySelector("label[for='progressBar']");
       return response;
     })
     .then((response) => response.json())
-    .then(data => {
+    .then(async data => {
       Resource = new Resources();
       // console.log(data);
       Resource.json = JSON.parse(data.json_value);
-      // debugger;
+      let urls = [];
+      // TODO: recupero le metriche composte per scaricarle in sessionStorage, queste vengono utilizzate in CreateDataViewGrouped()
+      for (const value of Object.values(Resource.json.resources)) {
+        // key : il token del report
+        for (const wrapper of Object.values(value.wrappers)) {
+          wrapper.group.columns.forEach(column => {
+            if (column.type === 'composite') {
+              urls.push(`/fetch_api/name/${column.token}/metric_show`);
+            }
+          });
+        }
+      }
       document.querySelector('h1.title').innerHTML = Resource.json.title;
+      await getCompositeMetrics(urls);
       getLayout();
     })
     .catch(err => {
