@@ -11,7 +11,7 @@
   <!-- Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-layout.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-layout-external-url.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
@@ -32,22 +32,6 @@
     </li>
   </template>
 
-  <header>
-    <div class="nav-button">
-      <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
-    </div>
-    <h1 class="title">Dashboard</h1>
-  </header>
-
-  <div id="drawer" class="left-sidebar">
-    <section class="account">
-      <h5>user</h5>
-      <i class="material-symbols-rounded">person</i>
-    </section>
-
-    <nav>
-    </nav>
-  </div>
   <template id="tmpl-actions-resource">
     <section class="resourceActions">
       <button class="material-symbols-rounded" data-fn="resourceSettings">settings</button>
@@ -88,13 +72,6 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
-  <div class="right-sidebar"></div>
-  <footer>
-    <section class="footerContent">
-      <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
-      <p>Lynx International</p>
-    </section>
-  </footer>
   <script type="text/javascript" src="{{ asset('/js/dashboards/init.js') }}"></script>
   <script type="text/javascript" src="{{ asset('/js/dashboard_functions.js') }}" defer></script>
 </body>

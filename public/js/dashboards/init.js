@@ -34,7 +34,7 @@ const progressLabel = document.querySelector("label[for='progressBar']");
           });
         }
       }
-      document.querySelector('h1.title').innerHTML = Resource.json.title;
+      document.getElementsByTagName('title')[0].innerText = Resource.json.title;
       await getCompositeMetrics(urls);
       getLayout();
     })
