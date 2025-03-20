@@ -141,6 +141,8 @@ async function getResources() {
   Resource.arrResources = [];
   Resource.wrapperSpecs = [];
   Resource.refs = [];
+  // recupero la querystring (quando provenego da un link esterno)
+  const querystring = Template.parent.dataset.querystring;
   // ciclo le resources
   for (const [token, resource] of Object.entries(Resource.json.resources)) {
     Resource.resources = resource;
@@ -160,7 +162,11 @@ async function getResources() {
       // aggiungo la class 'defined' nel div che contiene il grafico/tabella
       Resource.ref.classList.add('defined');
     });
-    urls.push(`/fetch_api/${resource.datamartId}/datamart?page=1`)
+    // urls.push(`/fetch_api/${resource.datamartId}/datamart?page=1`)
+    (querystring === undefined) ?
+      // urls.push(`/fetch_api/${resource.datamartId}/datamart?page=1`) :
+      urls.push(`/fetch_api/${resource.datamartId}/datamart`) :
+      urls.push(`/fetch_api/${resource.datamartId}/datamart?${querystring}`)
   }
   await getAllData(urls);
 }

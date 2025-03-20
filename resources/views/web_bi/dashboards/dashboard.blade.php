@@ -52,7 +52,7 @@
         <div class="wrapper">
           <div class="row">
             <div class="col">
-              <div id="template-layout" data-token="{{ $token }}" class="view"></div>
+              <div id="template-layout" data-token="{{ $token }}" data-url="{{ $url ?? '' }}" data-querystring="{{ $querystring }}" class="view"></div>
             </div>
           </div>
         </div>

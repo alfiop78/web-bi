@@ -447,13 +447,19 @@ Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetCon
 // recupero le dashboards della connessione corrente
 Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
 
-Route::get('/dashboards/dashboard/{token}', function ($token) {
+Route::get('/dashboards/dashboard/{token}', function (Request $request, $token) {
+  // INFO: recupero url compresa di querystring
+  // dd($request->fullUrl());
+  // INFO: recupero la querystring convertita in un array
+  // dd($request->query());
+  $querystring = $request->query();
   // recupero il campo connectionId relativa alla dashboard ricevuta come parametro
   $dashboard = BIdashboard::findOrFail($token);
   // effettuo la connessione al DB, impostando le variabili di sessione (session('db_driver'))
   BIConnectionsController::curlDBConnection($dashboard->connectionId);
   // restituisco il token alla view per poter recuperare il json della dashboard tramite la route dashboard_show
-  return view('web_bi.dashboards.dashboard')->with('token', $token);
+  // return view('web_bi.dashboards.dashboard')->with('token', $token);
+  return view('web_bi.dashboards.dashboard')->with('token', $token)->with('url', $request->fullUrl())->with('querystring', http_build_query($querystring));
 })->name('web_bi.dashboards.dashboard');
 
 // generare il link per raggiungere la dashboard dall'esterno

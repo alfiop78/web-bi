@@ -686,7 +686,7 @@ class MapDatabaseController extends Controller
   }
 
   // viene invocata da init-dashboards.js
-  public function datamart($id)
+  public function datamart(Request $request, $id)
   {
     /* $data = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
     return $data; */
@@ -719,13 +719,23 @@ class MapDatabaseController extends Controller
     }
     $columnsData = $queryColumns->where('TABLE_SCHEMA', "decisyon_cache")
       ->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
+    // if (count($request->query()) !== 0) {
+    //   dd($request->query());
+
+    // }
 
     $query = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}");
+    foreach ($request->query() as $key => $value) {
+      $query->where($key, $value);
+    }
+
     foreach ($columnsData as $columns) {
       foreach ($columns as $column) {
         $query->orderBy($column);
       }
     }
+    // $query->toSql();
+    // $query->dd();
 
     // $data = $query->cursorPaginate(10000);
     // NOTE: il cursorPaginate dovrebbe essere più performante (da testare) ma non contiene i dati relativi al
