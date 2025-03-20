@@ -11,7 +11,8 @@ const progressLabel = document.querySelector("label[for='progressBar']");
 
   // scarico il json dal DB, lo salvo in sessionStorage
   const template__layout = document.getElementById('template-layout');
-  fetch(`/fetch_api/name/${template__layout.dataset.token}/dashboard_show`, {method: 'GET', headers: {'Authorization': 'Basic ' + btoa('lynxuser:4x3dlynx53')}})
+  // {method: 'GET', headers: {'Authorization': 'Basic ' + btoa('lynxuser:password')}}
+  fetch(`/fetch_api/name/${template__layout.dataset.token}/dashboard_show`)
     .then((response) => {
       // console.log(response);
       if (!response.ok) { throw Error(response.statusText); }
