@@ -670,7 +670,7 @@ function appendColumn(token) {
   console.log(WorkBook.activeTable);
   // riferimento all'ultima colonna (:last-child), il nuovo elemento verrà aggiunto dopo l'ultima colonna
   // NOTE: :has https://developer.mozilla.org/en-US/docs/Web/CSS/:has#syntax
-  const lastElement = document.querySelector(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns:has(+ li[data-id='li__new_metric'])`);
+  const lastElement = document.querySelector(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns:has(+ li:not(.columns))`);
   console.log(lastElement);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector('li.drag-list.columns');
