@@ -43,7 +43,7 @@
     </section>
 
     <nav>
-      <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+      <a href="{{ route('web_bi.connections') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
       <hr />
       <section class="navOverflow">
         <section class="navContent">
