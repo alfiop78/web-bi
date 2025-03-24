@@ -76,31 +76,6 @@ class Sheets {
     this.sheet.sheet.filters = [...this.filters];
 
     this.sheet.sheet.metrics = Object.fromEntries(this.metrics);
-
-    /* for (const [token, value] of this.metrics) {
-      this.sheet.sheet.metrics[token] = value;
-    } */
-    debugger;
-    // reset delle metriche
-    /* delete this.sheet.sheet.metrics;
-    delete this.sheet.sheet.advMetrics;
-    delete this.sheet.sheet.compositeMetrics;
-
-    for (const [token, metric] of this.metrics) {
-      switch (metric.type) {
-        case 'basic':
-          (!this.sheet.sheet.hasOwnProperty('metrics')) ? this.sheet.sheet.metrics = { [token]: metric } : this.sheet.sheet.metrics[token] = metric;
-          break;
-        case 'advanced':
-          (!this.sheet.sheet.hasOwnProperty('advMetrics')) ? this.sheet.sheet.advMetrics = { [token]: metric } : this.sheet.sheet.advMetrics[token] = metric;
-          break;
-        default:
-          // compositeMetrics
-          (!this.sheet.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.sheet.compositeMetrics = { [token]: metric } : this.sheet.sheet.compositeMetrics[token] = metric;
-          // this.sheet.compositeMetrics[token] = metric;
-          break;
-      }
-    } */
   }
 
   // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte
