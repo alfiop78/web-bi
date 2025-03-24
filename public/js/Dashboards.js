@@ -445,49 +445,49 @@ class Resources extends Dashboards {
     }
 
     // --------------------------------
-    // for (const key of Object.keys(this.data[0])) {
-    //   // prepareData.cols.push({ id: key, label: key });
-    //   // console.log('prepareData : ', key);
-    //   this.#prepareData.cols.push({
-    //     id: key,
-    //     label: key,
-    //     type: this.specs.data.columns[key].type,
-    //     p: this.specs.data.columns[key].p
-    //   });
-    //   // debugger;
-    // }
+    /* for (const key of Object.keys(this.data[0])) {
+      // prepareData.cols.push({ id: key, label: key });
+      // console.log('prepareData : ', key);
+      this.#prepareData.cols.push({
+        id: key,
+        label: key,
+        type: this.specs.data.columns[key].type,
+        p: this.specs.data.columns[key].p
+      });
+      // debugger;
+    }
 
-    // aggiungo le righe
-    // this.data.forEach(row => {
-    //   let v = [];
-    //   for (const [key, value] of Object.entries(row)) {
-    //     switch (this.specs.data.columns[key].type) {
-    //       case 'date':
-    //         if (value.length === 8) {
-    //           // console.log('Data di 8 cifre (YYYYMMDD)', value);
-    //           const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
-    //           // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
-    //           v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
-    //         } else {
-    //           v.push({ v: null });
-    //         }
-    //         break;
-    //       case 'number':
-    //         // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
-    //         // di GoogleChart
-    //         (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
-    //         // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
-    //         break;
-    //       default:
-    //         // (!this.specs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.specs.data.columns[key].p } });
-    //         v.push({ v: value });
-    //         break;
-    //     }
-    //     // v.push({ v: value });
-    //   }
-    //   this.#prepareData.rows.push({ c: v });
-    // });
-    // console.log(this.#prepareData);
+    aggiungo le righe
+    this.data.forEach(row => {
+      let v = [];
+      for (const [key, value] of Object.entries(row)) {
+        switch (this.specs.data.columns[key].type) {
+          case 'date':
+            if (value.length === 8) {
+              // console.log('Data di 8 cifre (YYYYMMDD)', value);
+              const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
+              // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
+              v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
+            } else {
+              v.push({ v: null });
+            }
+            break;
+          case 'number':
+            // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
+            // di GoogleChart
+            (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
+            // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
+            break;
+          default:
+            // (!this.specs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.specs.data.columns[key].p } });
+            v.push({ v: value });
+            break;
+        }
+        // v.push({ v: value });
+      }
+      this.#prepareData.rows.push({ c: v });
+    });
+    console.log(this.#prepareData); */
     // --------------------------------
     return this.#prepareData;
   }
@@ -614,6 +614,7 @@ class Resources extends Dashboards {
               }
             }
             let formulaJoined = [];
+            debugger;
             // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
             // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
             formula.forEach(formulaEl => {
@@ -627,6 +628,7 @@ class Resources extends Dashboards {
             // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
             // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
             // effettuo un controllo sul risultato in caso fosse NaN
+            debugger;
             const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
             let total = (result) ? { v: result } : { v: result, f: '-' };
             console.log(result);
@@ -639,6 +641,7 @@ class Resources extends Dashboards {
             // total = (result) ? { v: result } : { v: result, f: '-' };
             return total;
           }
+          debugger;
           metrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
         } else {
           // this.viewMetrics.push(index);

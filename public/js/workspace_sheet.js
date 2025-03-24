@@ -155,7 +155,7 @@ async function preview() {
         if (paginateData.next_page_url) {
           recursivePaginate(paginateData.next_page_url);
         } else {
-          // Non sono presenti altre pagine, visualizzo il dashboard
+          // Non sono presenti altre pagine, visualizzo la dashboard
           Resource.data = partialData;
           // google.charts.setOnLoadCallback(drawDatamart());
           google.charts.setOnLoadCallback(draw());
