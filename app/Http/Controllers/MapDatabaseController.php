@@ -844,6 +844,8 @@ class MapDatabaseController extends Controller
         // dd($sql);
         // WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
         $sql_string = implode(' ', $sql);
+        // $sql_string = implode($sql);
+        // dd($sql_string);
         // if ($metric->alias === 'test_issue245_1') dd($sql_string);
         // racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
         // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)

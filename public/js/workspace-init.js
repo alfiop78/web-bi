@@ -1462,6 +1462,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
               }
             }
           });
+        } else {
+          // è presente solo la fact, nel DataModel, senza nessun livello dimensionale, a parte il livello TIME
+          // devo comunque creare la proprietà 'from'
+          from[data.alias] = { schema: data.schema, table: data.table };
         }
       });
       Sheet.from[factId] = from;

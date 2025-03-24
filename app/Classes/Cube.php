@@ -317,16 +317,21 @@ class Cube
       // aggiungo, alla clausola SELECT di $this->baseQuerySQL, le metriche di base da calcolare
       if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
       $sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
+      // dd(empty($this->where_clause));
       if (array_key_exists($this->factId, $this->where_time_clause)) {
         $sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
-      } else {
+      } elseif (!empty($this->where_clause)) {
         $sql .= self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
+      } else {
+        $sql .= self::WHERE . "TRUE";
       }
+      // dd($sql);
       if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
       $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
       $this->queries[$this->baseTableName] = $this->datamart_fields;
       $comment = "/*\nCreazione tabella per calcolo ... :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
       // dump($sql);
+      // dd($sql);
       // ob_flush()
       switch (session('db_driver')) {
         case 'odbc':

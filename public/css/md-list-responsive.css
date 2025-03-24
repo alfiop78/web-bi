@@ -135,6 +135,7 @@ li.drag-list.metrics>i {
 }
 
 li.drag-list.columns[data-datatype="integer"]:hover>i,
+li.drag-list.columns[data-datatype="int"]:hover>i,
 li.drag-list.metrics:hover>i {
   visibility: visible;
   cursor: pointer;

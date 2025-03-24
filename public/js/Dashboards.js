@@ -629,7 +629,7 @@ class Resources extends Dashboards {
             // effettuo un controllo sul risultato in caso fosse NaN
             const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
             let total = (result) ? { v: result } : { v: result, f: '-' };
-            // console.log(result);
+            console.log(result);
             // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
             // formattazione della cella con formatValue()
             const formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
