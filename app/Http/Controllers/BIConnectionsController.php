@@ -25,7 +25,7 @@ class BIConnectionsController extends Controller
       // dd($das->name);
       $names[] = $connection;
     }
-    return view('web_bi.index')->with('connections', $names);
+    return view('web_bi.connections')->with('connections', $names);
   }
 
   /**

@@ -9,7 +9,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
   <link rel="icon" href="/favicon.png" type="image/png" />
-  <title>Web-BI | HOME</title>
+  <title>Web-BI | Selezione Database</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
@@ -40,7 +40,7 @@
     </section>
 
     <nav>
-      <a href="#" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+      <a href="{{ route('dashboard') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
       <hr />
       <section class="navOverflow">
         <section class="navContent">
