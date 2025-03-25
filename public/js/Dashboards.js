@@ -614,7 +614,6 @@ class Resources extends Dashboards {
               }
             }
             let formulaJoined = [];
-            debugger;
             // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
             // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
             formula.forEach(formulaEl => {
@@ -628,7 +627,6 @@ class Resources extends Dashboards {
             // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
             // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
             // effettuo un controllo sul risultato in caso fosse NaN
-            debugger;
             const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
             let total = (result) ? { v: result } : { v: result, f: '-' };
             console.log(result);
@@ -641,7 +639,6 @@ class Resources extends Dashboards {
             // total = (result) ? { v: result } : { v: result, f: '-' };
             return total;
           }
-          debugger;
           metrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
         } else {
           // this.viewMetrics.push(index);

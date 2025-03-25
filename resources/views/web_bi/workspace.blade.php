@@ -48,12 +48,12 @@
   </header>
   <div id="drawer" class="left-sidebar">
     <section class="account">
-      <h5>user</h5>
+      <h5 data-uid="{{ auth()->user()->id }}">{{ auth()->user()->name }}</h5>
       <i class="material-symbols-rounded md-light">person</i>
     </section>
 
     <nav>
-      <a href="{{ route('web_bi.connections') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+      <a href="{{ route('dashboard') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
       <hr />
       <section class="navOverflow">
         <section class="navContent">
