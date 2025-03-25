@@ -50,7 +50,11 @@
     </section>
 
     <nav>
+<<<<<<< HEAD
       <a href="{{ route('dashboard') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+=======
+      <a href="{{ route('web_bi.connections') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+>>>>>>> a5f1953f8a4121d7002f9426df007186ba90823c
       <hr />
       <section class="navOverflow">
         <section class="navContent">

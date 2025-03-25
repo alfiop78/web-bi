@@ -33,16 +33,29 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/', function () {
+<<<<<<< HEAD
 	return view('welcome');
 });
 
 Route::get('/dashboard', function () {
 	return view('dashboard');
+=======
+  return view('welcome');
+});
+
+
+Route::get('/dashboard', function () {
+  return view('dashboard');
+>>>>>>> a5f1953f8a4121d7002f9426df007186ba90823c
 })->middleware(['auth'])->name('dashboard');
 
 // routes
 Route::get('/connections', [BIConnectionsController::class, 'index'])->middleware(['auth'])->name('web_bi.connections');
+<<<<<<< HEAD
 Route::get('/workspace', [MapDatabaseController::class, 'workspace'])->middleware(['auth'])->name('web_bi.workspace');
+=======
+Route::get('/workspace', [MapDatabaseController::class, 'workspace'])->name('web_bi.workspace');
+>>>>>>> a5f1953f8a4121d7002f9426df007186ba90823c
 Route::get('/versioning', function () {
 	// TODO: recuperare solo gli Workbook del DB collegato
 	return view('web_bi.versioning');
@@ -105,15 +118,24 @@ Route::get('fetch_api/{id}/show', [BIConnectionsController::class, 'show']);
 
 // show
 Route::prefix('/fetch_api/name/')->group(function () {
+<<<<<<< HEAD
 	Route::get('{token}/metric_show', [BImetricController::class, 'show']);
 	Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
 	Route::get('{token}/workbook_show', [BIworkbookController::class, 'show']);
 	Route::get('{token}/sheet_show', [BIsheetController::class, 'show']);
 	Route::get('{token}/dashboard_show', [BIdashboardController::class, 'show']);
+=======
+  Route::get('{token}/metric_show', [BImetricController::class, 'show']);
+  Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
+  Route::get('{token}/workbook_show', [BIworkbookController::class, 'show']);
+  Route::get('{token}/sheet_show', [BIsheetController::class, 'show']);
+  Route::get('{token}/dashboard_show', [BIdashboardController::class, 'show']);
+>>>>>>> a5f1953f8a4121d7002f9426df007186ba90823c
 });
 
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
+<<<<<<< HEAD
 	Route::get('{token}/workbook_destroy', [BIworkbookController::class, 'destroy']);
 	Route::get('{token}/sheet_destroy', [BIsheetController::class, 'destroy']);
 	Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
@@ -126,17 +148,39 @@ Route::prefix('/fetch_api/versioning/')->group(function () {
 	Route::get('metrics', [BImetricController::class, 'index']);
 	Route::get('filters', [BIfilterController::class, 'index']);
 	Route::get('dashboards', [BIdashboardController::class, 'index']);
+=======
+  Route::get('{token}/workbook_destroy', [BIworkbookController::class, 'destroy']);
+  Route::get('{token}/sheet_destroy', [BIsheetController::class, 'destroy']);
+  Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
+  Route::get('{token}/filter_destroy', [BIfilterController::class, 'destroy']);
+});
+// index
+Route::prefix('/fetch_api/versioning/')->group(function () {
+  Route::get('workbooks', [BIworkbookController::class, 'index']);
+  Route::get('sheets', [BIsheetController::class, 'index']);
+  Route::get('metrics', [BImetricController::class, 'index']);
+  Route::get('filters', [BIfilterController::class, 'index']);
+  Route::get('dashboards', [BIdashboardController::class, 'index']);
+>>>>>>> a5f1953f8a4121d7002f9426df007186ba90823c
 });
 
 // store
 Route::post('/fetch_api/connections/store', [BIConnectionsController::class, 'store'])->name('connection.store');
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
+<<<<<<< HEAD
 	Route::post('/workbook_store', [BIworkbookController::class, 'store']);
 	Route::post('/sheet_store', [BIsheetController::class, 'store']);
 	Route::post('/metric_store', [BImetricController::class, 'store']);
 	Route::post('/filter_store', [BIfilterController::class, 'store']);
 	Route::post('/dashboard_store', [BIdashboardController::class, 'store']);
+=======
+  Route::post('/workbook_store', [BIworkbookController::class, 'store']);
+  Route::post('/sheet_store', [BIsheetController::class, 'store']);
+  Route::post('/metric_store', [BImetricController::class, 'store']);
+  Route::post('/filter_store', [BIfilterController::class, 'store']);
+  Route::post('/dashboard_store', [BIdashboardController::class, 'store']);
+>>>>>>> a5f1953f8a4121d7002f9426df007186ba90823c
 });
 
 // update
@@ -148,7 +192,11 @@ Route::prefix('/fetch_api/json/')->group(function () {
 	Route::post('/dashboard_update', [BIdashboardController::class, 'update']);
 });
 
+<<<<<<< HEAD
 Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'scheduleProcess'])->middleware(['guest'])->name('web_bi.schedule');
+=======
+Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'scheduleProcess'])->name('web_bi.schedule');
+>>>>>>> a5f1953f8a4121d7002f9426df007186ba90823c
 
 // recupero degli sheets appartenenti a un determinato workbooks
 Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetController::class, 'indexByWorkbook']);
