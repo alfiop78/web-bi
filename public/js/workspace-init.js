@@ -110,7 +110,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		workbookName: document.getElementById('workbook-name')
 	}
 	const userId = +document.querySelector('h5[data-uid]').dataset.uid;
-	debugger;
 	console.info('workspace-init');
 
 	document.body.addEventListener('mousemove', (e) => {
@@ -913,12 +912,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			}
 		}
 		process.fields = fields;
-		// BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
-		// della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
-
-		console.log(process.hierarchiesTimeLevel);
 
 		process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
+		// flag per verifica presenza metriche con funzioni temporali
+		let timingFunctionsFlag = false;
 		try {
 			Sheet.fact.forEach(factId => {
 				let advancedMeasures = new Map(), baseMeasures = new Map();
@@ -956,6 +953,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 										if (['last-year', 'last-month', 'year-to-month'].includes(filterToken)) {
 											// advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
 											obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
+											timingFunctionsFlag = true;
 										} else {
 											obj.filters[filterToken] = WorkBook.filters.get(filterToken);
 										}
@@ -986,6 +984,16 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			console.log(error);
 			throw error;
 		}
+		// BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
+		// della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
+		console.log(process.hierarchiesTimeLevel);
+		debugger;
+		// se NON sono presenti livelli TIME && sono presenti metriche con timing function interrompo l'operazione
+		if (!process.hierarchiesTimeLevel && timingFunctionsFlag) {
+			App.showConsole('Nessun livello della dimensione <b>TIME</b> presente nel report', 'error', 3000);
+			return false;
+		}
+
 		// se non ci sono filtri nel Report bisogna far comparire un avviso
 		// perchè l'elaborazione potrebbe essere troppo onerosa
 		if (Sheet.filters.size === 0) {

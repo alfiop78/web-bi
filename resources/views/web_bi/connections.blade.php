@@ -35,7 +35,7 @@
   </header>
   <div id="drawer" class="left-sidebar" open>
     <section class="account">
-      <h5>user</h5>
+      <h5 data-uid="{{ auth()->user()->id }}">{{ auth()->user()->name }}</h5>
       <i class="material-symbols-rounded md-light">person</i>
     </section>
 
