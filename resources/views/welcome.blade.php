@@ -10,7 +10,8 @@
 	<title>{{ config('app.name', 'Laravel') }}</title>
 
 	<!-- Fonts -->
-	<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+	<!-- <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"> -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;500;600&display=swap">
 
 	<!-- Styles -->
 	<style>
@@ -401,7 +402,7 @@
 
 	<style>
 		body {
-			font-family: 'Nunito', sans-serif;
+			font-family: 'Barlow', sans-serif;
 		}
 	</style>
 </head>
@@ -428,7 +429,7 @@
 					<div class="p-6">
 						<div class="flex items-center">
 							<div class="ml-4 text-lg leading-7 font-semibold">
-								<a href="{{ route('web_bi.dashboards') }}" class="underline text-gray-900 dark:text-white">Test</a>
+								<a href="{{ route('dashboard') }}" class="underline text-gray-900 dark:text-white">Test</a>
 							</div>
 						</div>
 
