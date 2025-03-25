@@ -6,8 +6,8 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 	<meta http-equiv="Cache-Control" content="no-cache,must-revalidate">
 	<meta http-equiv="Pragma" content="no-cache">
-	<link rel="icon" href="/favicon.png" type="image/png" />
-	<title>Gaia-BI | Dashboard</title>
+	<link rel="icon" href="/logo.svg" type="image/svg" />
+	<title>{{ config('app.name', 'Laravel') }} | Dashboard</title>
 	<!-- Icons -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
