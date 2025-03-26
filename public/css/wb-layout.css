@@ -645,3 +645,7 @@ span.markContent {
   color: grey;
   background-color: unset;
 }
+
+code.code {
+	font-family: 'Source Code Pro', monospace!important;
+}
