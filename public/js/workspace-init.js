@@ -987,7 +987,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		// BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
 		// della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
 		console.log(process.hierarchiesTimeLevel);
-		debugger;
 		// se NON sono presenti livelli TIME && sono presenti metriche con timing function interrompo l'operazione
 		if (!process.hierarchiesTimeLevel && timingFunctionsFlag) {
 			App.showConsole('Nessun livello della dimensione <b>TIME</b> presente nel report', 'error', 3000);
