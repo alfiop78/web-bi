@@ -180,7 +180,7 @@ Route::get('/dashboards/dashboard/{token}', function (Request $request, $token) 
 	BIConnectionsController::curlDBConnection($dashboard->connectionId);
 	// restituisco il token alla view per poter recuperare il json della dashboard tramite la route dashboard_show
 	// return view('web_bi.dashboards.dashboard')->with('token', $token);
-	return view('web_bi.dashboards.dashboard')->with('token', $token)->with('url', $request->fullUrl())->with('querystring', http_build_query($querystring));
+	return view('web_bi.dashboards.dashboard')->with('dashboard_token', $token)->with('url', $request->fullUrl())->with('querystring', http_build_query($querystring));
 })->middleware(['guest'])->name('web_bi.dashboards.dashboard');
 
 // generare il link per raggiungere la dashboard dall'esterno
