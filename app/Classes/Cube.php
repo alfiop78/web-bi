@@ -86,9 +86,9 @@ class Cube
 	public function datamartFields()
 	{
 		// dd($this->fields);
-		foreach ($this->fields as $column) {
+		foreach ($this->fields as $token => $column) {
 			// $this->datamart_fields[] = $column->name;
-			$this->datamart_fields[] = "\"{$column->name}\"";
+			$this->datamart_fields[$token] = $column->name;
 		}
 		// dd($this->datamart_fields);
 	}
@@ -99,14 +99,11 @@ class Cube
 		// per ogni tabella
 		foreach ($this->fields as $token => $column) {
 			// dd($column);
-			$this->select_clause[$this->factId][$token] = "{$column->SQL} AS '{$column->name}'";
+			$this->select_clause[$this->factId][$token] = "{$column->SQL} AS {$column->token}";
 			// $this->select_clause[$this->factId][$token] = "{$column->SQL} AS '{$column->name}'";
 
-			// questo viene utilizzato nella clausola ON della LEFT JOIN
-			// WARN: al posto di _columns[], in createDatamart(), può essere utilizzato $this->datamart_fields[]
-			// $this->_columns[] = "{$column->name}_id";
 			if (property_exists($this, 'sql_info')) {
-				$this->sql_info->{'SELECT'}->{$token} = "{$column->SQL} AS '{$column->name}'";
+				$this->sql_info->{'SELECT'}->{$token} = "{$column->SQL} AS {$column->token}";
 				// $this->sql_info->{'SELECT'}->{$token} = "{$column->SQL} AS '{$column->name}'";
 				// dd($this->sql_info);
 			}
@@ -121,23 +118,20 @@ class Cube
 		$this->report_metrics = [];
 		// dd(SELF::ifNullOperator());
 		// dd($this->baseMeasures);
-		foreach ($this->baseMeasures as $value) {
+		foreach ($this->baseMeasures as $token => $value) {
 			// dd($value);
 			// $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
-			$metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+			$metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS {$value->token}";
 			// dd($metric);
 			$this->report_metrics[$this->factId][] = $metric;
 			// $metrics_base[] = $metric;
 			if (property_exists($this, 'sql_info')) {
 				$this->sql_info->{'METRICS'}->{$value->alias} = $metric;
 			}
-			$this->datamart_baseMeasures[] = "{$this->ifNullOperator}({$this->baseTableName}.\"{$value->alias}\", 0) AS '{$value->alias}'";
-			// $this->datamart_baseMeasures[] = "{$this->ifNullOperator}(\"{$value->alias}\", 0) AS '{$value->alias}'";
+			$this->datamart_baseMeasures[] = "{$this->ifNullOperator}({$this->baseTableName}.{$token}, 0) AS \"{$value->alias}\"";
 		}
 		// dd($this->report_metrics);
 
-		// viene utilizzata in createDatamart()
-		// $this->datamart_baseMeasures = implode(", ", $metrics_base_datamart);
 		// dd($this->sql_info);
 		// dd($this->datamart_baseMeasures);
 	}
@@ -171,13 +165,13 @@ class Cube
 	}
 
 	/*
-	* Utilizzo della stessa logica di FROM
-	* @param joins = "token_join" : ['table.field', 'table.field']
-  * es.:
-  * Azienda_997.id = CodSedeDealer_765.id_Azienda \n
-  * AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
-  * AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
-  * AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda
+		* Utilizzo della stessa logica di FROM
+		* @param joins = "token_join" : ['table.field', 'table.field']
+		* es.:
+		* Azienda_997.id = CodSedeDealer_765.id_Azienda \n
+		* AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
+		* AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
+		* AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda
 	*/
 	public function where_new()
 	{
@@ -230,9 +224,9 @@ class Cube
 		// NOTE: caso in qui viene passato, a joins, solo la proprietà SQL
 		//
 		/* foreach ($joins as $token => $join) {
-      // dd($token, $join);
-      $this->WHERE_baseTable[$token] = implode(" = ", $join);
-    } */
+			// dd($token, $join);
+			$this->WHERE_baseTable[$token] = implode(" = ", $join);
+		} */
 		// dd($this->where_time_clause);
 		// dd($this->where_clause, $this->where_time_clause);
 	}
@@ -275,10 +269,10 @@ class Cube
 	}
 
 	/*
-  * Questo Metodo crea la struttura delle query che verrà utilizzata sia per le metriche di base che per
-  * quelle avanzate, se il report non contiene metriche di base questa struttura verrà sempre creata
-  * per poter calcolare le metriche avanzate
-  * */
+		* Questo Metodo crea la struttura delle query che verrà utilizzata sia per le metriche di base che per
+		* quelle avanzate, se il report non contiene metriche di base questa struttura verrà sempre creata
+		* per poter calcolare le metriche avanzate
+	* */
 	public function createBaseQuery()
 	{
 		// questa struttura viene utilizzata sia per le metriche di base che avanzate
@@ -325,6 +319,7 @@ class Cube
 			if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
 			$sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
 			$this->queries[$this->baseTableName] = $this->datamart_fields;
+			// dd($this->queries);
 			$comment = "/*\nCreazione tabella per calcolo ... :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
 			// dump($sql);
 			// dd($sql);
@@ -714,10 +709,17 @@ class Cube
 	private function distinct_fields()
 	{
 		$union = [];
+		// dd($this->queries);
 		foreach ($this->queries as $table => $fields) {
 			$sql = "(" . self::SELECT;
-			$sql .= implode(",\n", $fields);
-			// $sql .= implode(",\n", $fields);
+			// dd($fields);
+			$sql .= implode(",\n", array_keys($fields));
+			// WARN: 25.03.2025 da valutare se utilizzare la forma table.column quando
+			// viene utilizzata la stessa colonna più di una volta nel report
+			/* foreach ($fields as $token => $field) {
+				$sql .= "{$table}.{$token}";
+			} */
+			// dd($sql);
 			$sql .= self::FROM . "decisyon_cache.{$table})\n";
 			$union[$table] = $sql;
 		}
@@ -753,8 +755,8 @@ class Cube
 	}
 
 	/* creazione datamart finale:
- * Viene creata una query che unisce .....TODO: completare i commenti
- * */
+		* Viene creata una query che unisce .....TODO: completare i commenti
+	* */
 	public function datamart_new()
 	{
 		$this->distinct_fields();
@@ -771,8 +773,9 @@ class Cube
 		}
 		$createStmt .= self::SELECT;
 		$fields = [];
-		foreach ($this->datamart_fields as $field) {
-			$fields[] = "union_{$this->report_id}_{$this->datamart_id}.{$field}";
+		foreach ($this->datamart_fields as $token => $alias) {
+			// dd($token, $field);
+			$fields[] = "union_{$this->report_id}_{$this->datamart_id}.{$token} AS \"{$alias}\"";
 		}
 		// dd($fields);
 		// unisco i seguenti campi :
@@ -784,17 +787,16 @@ class Cube
 		$createStmt .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
 		$joinLEFT = "";
 		$ONClause = [];
-		foreach ($this->queries as $k => $v) {
-			$joinLEFT .= "\nLEFT JOIN decisyon_cache.{$k}\n\tON ";
-			foreach ($v as $field) {
-				// $ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.'$field' = $k.'$field'";
-				$ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.$field = $k.$field";
+		foreach ($this->queries as $table => $fields) {
+			$joinLEFT .= "\nLEFT JOIN decisyon_cache.{$table}\n\tON ";
+			foreach ($fields as $token => $field) {
+				$ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.$token = $table.$token";
 			}
 			$joinLEFT .= implode("\nAND ", $ONClause);
 			unset($ONClause);
 		}
 		$createStmt .= $joinLEFT;
-		// dump($createStmt);
+		// dd($createStmt);
 		if (property_exists($this, 'sql_info')) {
 			// dd($this->sql_union_clause);
 			return [

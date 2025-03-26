@@ -233,12 +233,13 @@
 			<div class="absolute-icons">
 				<button data-fn="copyToClipboard" data-copy class="material-symbols-rounded" disabled>content_copy</button>
 			</div>
-			<div class="sql-content"></div>
+			<!-- <div class="sql-content"></div> -->
+			<code class="code"></code>
 		</div>
 	</template>
 
-	<template id="tmpl-content-div">
-		<div></div>
+	<template id="template__code_tag">
+		<code class="code"></code>
 	</template>
 
 	<main data-database-id="{{ session('db_id')}}">
