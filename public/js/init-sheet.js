@@ -112,7 +112,6 @@ function draw() {
 	Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
 	// FIX: 13.12.2024 Valutare se questo "redraw" può essere evitato
 	google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
-	debugger;
 	Resource.gdashboard.draw(Resource.dataTable);
 	console.log('TIMER END', new Date());
 }
@@ -170,7 +169,6 @@ function drawDatamart() {
 }
 
 function chartWrapperReady() {
-	debugger;
 	console.log('TIMER START (ready)', new Date());
 	// Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
 	// Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
@@ -568,8 +566,7 @@ function columnHander(e) {
 			// Il report è raggruppato (dataViewGrouped) in base ai livelli dimensionali
 			// presenti, quando viene nascosta una colonna, anzichè eliminarla
 			// dalle proprietà .json.data.group... le "contrassegno" con la prop 'grouped:false'
-			// In questo modo posso ripristinarla. Insieme alla colonna che sto nascondendo, va
-			// nascosta anche la sua relativa colonna _id, quindi dataTableIndex -1
+			// In questo modo posso ripristinarla.
 			// Elimino il raggruppamento per la colonna che l'utente ha nascosto
 			// se è una colonna dimensionale cerco in .group.key
 			// altrimenti cerco in .group.columns
