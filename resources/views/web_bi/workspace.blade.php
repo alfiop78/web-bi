@@ -681,7 +681,7 @@
 											<div class="popup__suggestions">
 												<ul></ul>
 											</div>
-											<div id="textarea__composite-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+											<div id="textarea__composite-metric" contenteditable="true" class="textarea code dropzone" spellcheck="false" tabindex="2"><br /></div>
 										</div>
 										<textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
 									</section>
