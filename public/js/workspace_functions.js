@@ -483,8 +483,10 @@ function handleRowDrop(e) {
 	// droppato (colonna già droppata)
 	const element = WorkBook.elements.get(token);
 	console.log(element);
+	debugger;
 	Sheet.fields = {
-		token, SQL: element.SQL,
+		token,
+		SQL: element.SQL,
 		name: element.name,
 		datatype: element.datatype,
 		time: (element.time) ? { table: element.table } : false
@@ -521,7 +523,8 @@ function handleColumnDrop(e) {
 				if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
 				// dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
 				// ...al suo interno per consentirne l'elaborazione
-				for (const metricToken of Object.keys(Sheet.metrics.get(element.token).metrics)) {
+				// for (const metricToken of Object.keys(Sheet.metrics.get(element.token).metrics)) {
+				Sheet.metrics.get(element.token).metrics.forEach(metricToken => {
 					// nell'oggetto Sheet.metrics aggiungo una prop 'dependencies' per specificare
 					// ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
 					// verifico se la metrica all'interno di quella composta è stata già aggiunta allo Sheet
@@ -530,6 +533,7 @@ function handleColumnDrop(e) {
 						//... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
 						// NOTE: clonazione di un object con syntax ES6.
 						const nestedMetric = { ...WorkBook.elements.get(metricToken) };
+						// debugger;
 						Sheet.metrics = {
 							token: nestedMetric.token,
 							factId: nestedMetric.factId,
@@ -541,7 +545,9 @@ function handleColumnDrop(e) {
 							dependencies: true
 						};
 					}
-				}
+
+				});
+				// }
 				break;
 			default:
 				// basic, advanced
@@ -622,12 +628,18 @@ function handleDragEnd(e) {
 		if (!metricsClone.has(metric.dataset.id)) return;
 		if (metricsClone.get(metric.dataset.id).type === 'composite') {
 			// recupero le metriche che la compongono
-			Object.keys(metricsClone.get(metric.dataset.id).metrics).forEach(token => {
+			metricsClone.get(metric.dataset.id).metrics.forEach(token => {
 				// se la metrica ha dependencies = false significa che è inclusa in questo ciclo, quindi verrà
 				// aggiunta comunque, adesso la aggiungo solo se ha dependencies = true altrimenti l'ordine
 				// degli elementi nel DOM non corrisponde
 				if (metricsClone.get(token).dependencies) Sheet.metrics = metricsClone.get(token);
 			});
+			/* Object.keys(metricsClone.get(metric.dataset.id).metrics).forEach(token => {
+				// se la metrica ha dependencies = false significa che è inclusa in questo ciclo, quindi verrà
+				// aggiunta comunque, adesso la aggiungo solo se ha dependencies = true altrimenti l'ordine
+				// degli elementi nel DOM non corrisponde
+				if (metricsClone.get(token).dependencies) Sheet.metrics = metricsClone.get(token);
+			}); */
 		}
 		Sheet.metrics = metricsClone.get(metric.dataset.id);
 	});
@@ -1087,41 +1099,47 @@ function advancedMetricSave(e) {
 function compositeMetricSave(e) {
 	const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
 	const alias = document.getElementById('composite-metric-name').value;
-	const parent = document.getElementById('ul-metrics');
 	const date = new Date().toLocaleDateString('it-IT', options);
-	let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: {}, metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
+	let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: new Set(), metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
 	object.formula = textarea__composite_metric.firstChild.textContent.split(/\b/);
 	console.log(object.formula);
 	// ottengo i token delle metriche che compongono la metrica composta
 	object.formula.forEach(el => {
 		if (document.querySelector(`li.metrics[data-label='${el}']`)) {
-			console.log(`metrica ${el} trovata`);
-			const element = document.querySelector(`li.metrics[data-label='${el}']`);
-			// const metricFormula = WorkBook.metrics.get(element.dataset.id);
-			const metricFormula = WorkBook.elements.get(element.dataset.id);
+			const metric_id = document.querySelector(`li.metrics[data-label='${el}']`).dataset.id;
+			console.log(`metrica ${el} trovata con id ${metric_id}`);
+			const metricFormula = WorkBook.elements.get(metric_id);
 			switch (metricFormula.metric_type) {
 				case 'composite':
-					// object.SQL.push(metricFormula.SQL.join(''));
+					// metrica composte nidificata
 					object.SQL.push(metricFormula.SQL);
-					// for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
-					for (const [token, metric] of Object.entries(WorkBook.elements.get(metricFormula.token).metrics)) {
+					const nested_metric = WorkBook.elements.get(metricFormula.token).metrics;
+					nested_metric.forEach(metric => {
+						object.metrics.add(metric);
+					});
+					/* for (const [token, metric] of Object.entries(WorkBook.elements.get(metricFormula.token).metrics)) {
 						object.metrics[token] = metric;
-					}
+					} */
 					break;
 				default:
 					// base / advanced
-					object.metrics[metricFormula.token] = el;
-					object.SQL.push(el);
+					// object.metrics[metricFormula.token] = el;
+					object.metrics.add(metric_id);
+					object.SQL.push(metric_id);
 					break;
 			}
 		} else {
-			object.SQL.push(el.trim());
+			// object.SQL.push(el.trim());
+			object.SQL.push(el);
 		}
 	});
 	// aggiornamento/creazione della metrica imposta created_at
 	// object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
 	object.created_at = (e.target.dataset.token) ? WorkBook.elements.get(e.target.dataset.token).created_at : date;
+	// converto l'oggetto Set in array altrimenti, in localStorage, non viene salvato come array
+	object.metrics = [...object.metrics];
 	console.log('Metrica composta : ', object);
+	debugger;
 	// WorkBook.metrics = object;
 	WorkBook.elements = object;
 	window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
