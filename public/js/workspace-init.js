@@ -1130,6 +1130,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			Sheet.create();
 		}
 		Resource.specs.token = Sheet.sheet.token;
+		debugger;
 		Resource.setSpecifications();
 
 		process.id = Sheet.sheet.id;

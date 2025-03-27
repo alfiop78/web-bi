@@ -257,11 +257,11 @@ class Resources extends Dashboards {
 	get specs() { return this.#specs; }
 
 	setSpecifications() {
-		this.#specs_columns = {};
 		this.#specs_group = { key: [], columns: [] };
 		this.specs.name = Sheet.name;
+		this.specs.data.columns = {};
 		for (const [token, field] of Sheet.fields) {
-			this.#specs_columns[field.name] = {
+			this.specs.data.columns[field.name] = {
 				id: token,
 				label: field.name,
 				type: this.getDataType(field.datatype),
@@ -278,17 +278,15 @@ class Resources extends Dashboards {
 				});
 			} else {
 				// già presente ma potrebbe essere stato modificato la proprietà 'name'
-				debugger;
 				if (keyColumn.label !== field.name) keyColumn.label = field.name;
 				this.#specs_group.key.push(keyColumn);
 			}
 		}
-		console.log(this.#specs_columns);
+		// console.log(this.#specs_columns);
 		console.log(this.#specs_group.key);
 
 		for (const [token, metric] of Sheet.metrics) {
-			// debugger;
-			this.#specs_columns[metric.alias] = {
+			this.specs.data.columns[metric.alias] = {
 				id: token,
 				label: metric.alias,
 				type: this.getDataType(metric.datatype),
@@ -317,7 +315,7 @@ class Resources extends Dashboards {
 				});
 			} else {
 				// già presente
-				// imposto solo le eproprietà che potrebbero essere state modificate nello Sheet
+				// imposto solo le proprietà che potrebbero essere state modificate nello Sheet
 				findMetric.alias = metric.alias;
 				findMetric.aggregateFn = metric.aggregateFn;
 				findMetric.dependencies = metric.dependencies;
@@ -325,11 +323,10 @@ class Resources extends Dashboards {
 				this.#specs_group.columns.push(findMetric);
 			}
 		}
-		this.specs.data.columns = this.#specs_columns;
-		debugger;
+		console.log(this.specs.data.columns);
 		this.specs.wrapper[this.wrapper].group.key = this.#specs_group.key;
 		this.specs.wrapper[this.wrapper].group.columns = this.#specs_group.columns;
-		// debugger;
+		debugger;
 		this.bind();
 		const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
 		sheet.specs = this.specs;
@@ -427,7 +424,7 @@ class Resources extends Dashboards {
 						p: this.specs.data.columns[key].p
 					});
 				});
-				// debugger;
+				debugger;
 			}
 			let rowValue = [];
 			for (const [key, value] of Object.entries(row)) {
