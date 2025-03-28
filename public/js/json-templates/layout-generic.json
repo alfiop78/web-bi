@@ -1,60 +1,86 @@
 {
-  "parentElement_id": "template-layout",
-  "id": "layout-generic",
-  "name": "generic data table",
-  "comment": "Template con 2 righe, una per i filtri e una per la DataTable",
-  "childs": [
-    {
-      "tag": "div",
-      "id": "generic",
-      "classes": [
-        "layout"
-      ],
-      "attributes": {},
-      "childs": [
-        {
-          "tag": "section",
-          "classes": [
-            "filters",
-            "filterContent"
-          ],
-          "attributes": {},
-          "childs": [
-            {
-              "tag": "div",
-              "id": "filter__dashboard",
-              "classes": [
-                "contentObject"
-              ],
-              "attributes": {}
-            }
-          ]
-        },
-        {
-          "tag": "section",
-          "classes": [
-            "main",
-            "chartContent"
-          ],
-          "attributes": {
-            "resource": true
-          },
-          "childs": [
-            {
-              "tag": "div",
-              "id": "chart__1",
-              "classes": [
-                "chart-elements",
-                "contentObject"
-              ],
-              "attributes": {
-                "fn": "addResource",
-                "actions": true
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ]
+	"parentElement_id": "template-layout",
+	"id": "layout-generic",
+	"name": "generic data table",
+	"comment": "Template con 2 righe una per i filtri e una per la DataTable",
+	"childs": [
+		{
+			"tag": "div",
+			"id": "generic",
+			"classes": [
+				"layout"
+			],
+			"attributes": {},
+			"childs": [
+				{
+					"tag": "h1",
+					"id": "title__main",
+					"classes": [
+						"title"
+					],
+					"attributes": {}
+				},
+				{
+					"tag": "section",
+					"classes": [
+						"filters",
+						"filterContent"
+					],
+					"attributes": {},
+					"childs": [
+						{
+							"tag": "div",
+							"id": "filter__dashboard",
+							"classes": [
+								"contentObject"
+							],
+							"attributes": {}
+						}
+					]
+				},
+				{
+					"tag": "section",
+					"classes": [
+						"main",
+						"chartContent"
+					],
+					"attributes": {
+						"resource": true
+					},
+					"childs": [
+						{
+							"tag": "div",
+							"id": "chart__1",
+							"classes": [
+								"chart-elements",
+								"contentObject"
+							],
+							"attributes": {},
+							"actions": [
+								{
+									"template": "template__btn_export_XLS",
+									"fn": "export_datatable_XLS"
+								}
+							]
+						}
+					]
+				},
+				{
+					"tag": "section",
+					"id": "options__main",
+					"classes": [
+						"options"
+					],
+					"attributes": {},
+					"childs": [
+						{
+							"tag": "div",
+							"classes": [],
+							"attributes": {}
+						}
+					]
+				}
+			]
+		}
+	]
 }

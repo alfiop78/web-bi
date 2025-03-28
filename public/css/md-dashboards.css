@@ -288,10 +288,22 @@ td.align-right {
 }
 
 .view>#generic {
-  grid-template: minmax(60px, auto) 1fr / 1fr;
+  grid-template: auto minmax(60px, auto) 1fr auto / 1fr;
   grid-template-areas:
+    "title"
     "filterArea"
-    "mainArea";
+    "mainArea"
+	"options";
+}
+
+.layout h1.title {
+	grid-area: title;
+	margin: .5em auto;
+	font-size: xx-large;
+}
+
+section.options {
+	grid-area: options;
 }
 
 /* NOTE: horizontalCharts */

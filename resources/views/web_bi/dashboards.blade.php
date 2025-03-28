@@ -22,6 +22,8 @@
 	<script src="{{ asset('/js/Templates.js') }}"></script>
 	<script src="{{ asset('/js/Dashboards.js') }}"></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<!-- library zipcelx -->
+	<script src="{{ asset('/js/libs/zipcelx-master/lib/standalone.js') }}"></script>
 </head>
 
 <body class="antialiased">
@@ -29,6 +31,16 @@
 		<li data-li data-element-search data-label data-searchable="true">
 			<span></span>
 		</li>
+	</template>
+	<template id="tmpl-actions-resource">
+		<section class="resourceActions">
+			<!-- <button class="material-symbols-rounded" data-fn>settings</button> -->
+			<!-- <button class="material-symbols-rounded" data-fn="resourceRemove">delete</button> -->
+		</section>
+	</template>
+
+	<template id="template__btn_export_XLS">
+		<button type="button" data-fn value="Excel" onclick="export_datatable_XLS()">Excel</button>
 	</template>
 	<header>
 		<div class="nav-button">
