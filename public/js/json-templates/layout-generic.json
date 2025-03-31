@@ -55,7 +55,10 @@
 								"chart-elements",
 								"contentObject"
 							],
-							"attributes": {},
+							"attributes": {
+								"fn": "addResource",
+								"actions": true
+							},
 							"actions": [
 								{
 									"template": "template__btn_export_XLS",

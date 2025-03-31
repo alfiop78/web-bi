@@ -98,6 +98,10 @@
 		</section>
 	</template>
 
+	<template id="template__btn_export_XLS">
+		<button type="button" data-fn value="Excel" onclick="export_datatable_XLS()">Excel</button>
+	</template>
+
 	<template id="tmpl__url_params">
 		<section class="flex-row">
 			<input type="checkbox" id name />
