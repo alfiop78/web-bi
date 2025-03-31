@@ -486,11 +486,15 @@ saveColumnConfig.onclick = () => {
 			if (values.id === column.id && values.label !== label) values.label = label;
 		}
 		if (column) column.label = label;
-		// column.formatter = { type, format, prop: formatterProperties };
+		// console.log(Resource.dataGroup.getColumnId(dataGroupIndex));
+		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)]);
+		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)].getOptions());
+		// Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', label);
+		Resource.dashboardControls[dataGroupIndex].setOption('ui.caption', label);
+		// Resource.dashboardControls[dataGroupIndex].setOption('ui.label', label);
+		debugger;
 	} else {
 		const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.token === Resource.columnId);
-		// TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
-		debugger;
 		for (const values of Object.values(Resource.specs.data.columns)) {
 			if (values.id === metric.token && values.label !== label) values.label = label;
 		}
@@ -504,10 +508,10 @@ saveColumnConfig.onclick = () => {
 	// console.log('DataGroup:', Resource.dataGroup);
 
 	// filtri definiti per il report
+	const index = Resource.specs.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(dataGroupIndex));
 	if (filterColumn.checked === true) {
 		// Proprietà Resource.specs.filters
 		// Inserisco il filtro solo se non è ancora presente in Resource.specs.filters
-		const index = Resource.specs.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(dataGroupIndex));
 		if (index === -1) {
 			// non è presente, lo aggiungo
 			Resource.specs.filters.push({
@@ -520,7 +524,6 @@ saveColumnConfig.onclick = () => {
 		}
 	} else {
 		// rimozione del filtro, se presente
-		const index = Resource.specs.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(dataGroupIndex));
 		if (index !== -1) Resource.specs.filters.splice(index, 1);
 	}
 	// definisco il bind in base ai filtri impostati
@@ -539,6 +542,8 @@ saveColumnConfig.onclick = () => {
 	(Resource.dataTableIndex === -1) ?
 		// chartWrapperReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
 		chartWrapperReady() : Resource.chartWrapperView.draw();
+	Resource.dashboardControls[dataGroupIndex].draw();
+
 	dlgConfig.close();
 	// la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
 	updatedSheet();

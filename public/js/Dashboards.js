@@ -261,14 +261,16 @@ class Resources extends Dashboards {
 		this.specs.name = Sheet.name;
 		this.specs.data.columns = {};
 		for (const [token, field] of Sheet.fields) {
+			const groupKey = this.specs.wrapper[this.wrapper].group.key.find(value => value.id === token);
+			// imposto i dati di specs.data.columns
 			this.specs.data.columns[field.name] = {
 				id: token,
-				label: field.name,
+				label: groupKey.label || field.name,
 				type: this.getDataType(field.datatype),
 				p: { data: 'column' }
 			};
-			const keyColumn = this.specs.wrapper[this.wrapper].group.key.find(value => value.id === token);
-			if (!keyColumn) {
+			// imposto i dati da utilizzare nella funzione group() di GCharts, data.specs.wrapper[this.wrapper].group.key
+			if (!groupKey) {
 				// colonna non presente in json.data.group.key, la creo
 				this.#specs_group.key.push({
 					id: token,
@@ -277,25 +279,25 @@ class Resources extends Dashboards {
 					properties: { grouped: true, visible: true }
 				});
 			} else {
-				// già presente ma potrebbe essere stato modificato la proprietà 'name'
-				if (keyColumn.label !== field.name) keyColumn.label = field.name;
-				this.#specs_group.key.push(keyColumn);
+				// colonna presente in data.specs.wrapper[this.wrapper].group.key. La aggiungo all'array perchè questo viene
+				// resettato ad ogni nuova elaborazione del report.
+				this.#specs_group.key.push(groupKey);
 			}
 		}
 		// console.log(this.#specs_columns);
 		console.log(this.#specs_group.key);
 
 		for (const [token, metric] of Sheet.metrics) {
+			const groupColumns = this.specs.wrapper[this.wrapper].group.columns.find(value => value.token === metric.token);
 			this.specs.data.columns[metric.alias] = {
 				id: token,
-				label: metric.alias,
+				label: groupColumns.label || metric.alias,
 				type: this.getDataType(metric.datatype),
 				p: { data: 'measure' }
 			};
 			// debugger;
-			const findMetric = this.specs.wrapper[this.wrapper].group.columns.find(value => value.token === metric.token);
-			if (!findMetric) {
-				// non presente
+			if (!groupColumns) {
+				// non presente, la creo
 				this.#specs_group.columns.push({
 					token,
 					alias: metric.alias,
@@ -316,11 +318,12 @@ class Resources extends Dashboards {
 			} else {
 				// già presente
 				// imposto solo le proprietà che potrebbero essere state modificate nello Sheet
-				findMetric.alias = metric.alias;
-				findMetric.aggregateFn = metric.aggregateFn;
-				findMetric.dependencies = metric.dependencies;
-				findMetric.label = metric.alias;
-				this.#specs_group.columns.push(findMetric);
+				debugger;
+				groupColumns.alias = metric.alias;
+				groupColumns.aggregateFn = metric.aggregateFn;
+				groupColumns.dependencies = metric.dependencies;
+				groupColumns.label = groupColumns.label;
+				this.#specs_group.columns.push(groupColumns);
 			}
 		}
 		console.log(this.specs.data.columns);
