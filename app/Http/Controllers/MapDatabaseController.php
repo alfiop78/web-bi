@@ -827,6 +827,7 @@ class MapDatabaseController extends Controller
 					// dump($element);
 					if (is_array($element)) {
 						// metrica composta nidificata
+						// BUG: 02.04.2025 errore in metriche composte nidificate con più di un livello
 						foreach ($element as $el) {
 							$sql[] = (in_array($el, $metrics)) ? "{$this->query->ifNullOperator}({$el}, 0)" : trim($el);
 						}

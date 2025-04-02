@@ -733,23 +733,24 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		((Sheet.edit && metricRef.dataset.adding) || (!Sheet.edit && metricRef.dataset.added)) ?
 			metricRef.remove() :
 			Sheet.objectRemoved.set(token, metric);
+		debugger;
 		metricRef.dataset.removed = 'true';
 		let check;
 		if (metric.type === 'composite') {
 			// è una metrica composta che si sta eliminando.
 			// Se le metriche che la compongono sono utilizzate in altre metriche
 			// non posso eliminarle
-			Object.keys(metric.metrics).forEach(key => {
+			metric.metrics.forEach(metric_token => {
 				// le metriche presenti nello Sheet, incluse esplicitamente (dependencies:false), non posso eliminarla
-				if (Sheet.metrics.get(key).dependencies === true) {
+				if (Sheet.metrics.get(metric_token).dependencies === true) {
 					// la metrica inclusa nella composite (in ciclo) è presente nel report come dependencies:true, è stata
 					// inclusa automaticamente perchè è presente in una metrica composite
 					// Se la metrica in cui è inclusa è diversa da quella che sto eliminando, non
 					// posso eliminare la metrica (fa parte di un'altra composite)
 					// controllo tutte le metriche composite presenti in Sheet.metrics
 					// check = checkCompositeMetrics(token, key);
-					check = checkMetricsDeps(token, key);
-					if (!check) Sheet.metrics.delete(key);
+					check = checkMetricsDeps(token, metric_token);
+					if (!check) Sheet.metrics.delete(metric_token);
 				}
 			});
 			// posso eliminare dallo Sheet la metrica composta "target"
@@ -774,7 +775,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			// verifico se la metrica da ripristinare è una composite
 			if (Sheet.metrics.get(token).type === 'composite') {
 				// NOTE: codice commentato in handleColumnDrop()
-				for (const metricToken of Object.keys(Sheet.metrics.get(token).metrics)) {
+				Sheet.metrics.get(token).metrics.forEach(metricToken => {
 					if (!Sheet.metrics.has(metricToken)) {
 						const nestedMetric = { ...WorkBook.elements.get(metricToken) };
 						Sheet.metrics = {
@@ -788,7 +789,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 							dependencies: true
 						};
 					}
-				}
+
+				});
 			}
 			Sheet.objectRemoved.delete(token);
 			delete metricRef.dataset.removed;

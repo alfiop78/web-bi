@@ -123,7 +123,7 @@ class Dashboards {
 					}
 				}
 			});
-			// console.log(this.filter);
+			console.log(this.filter);
 			this.chartControls.push(this.filter);
 		});
 
@@ -265,7 +265,8 @@ class Resources extends Dashboards {
 			// imposto i dati di specs.data.columns
 			this.specs.data.columns[field.name] = {
 				id: token,
-				label: groupKey.label || field.name,
+				// label: groupKey.label || field.name,
+				label: (groupKey) ? groupKey.label : field.name,
 				type: this.getDataType(field.datatype),
 				p: { data: 'column' }
 			};
@@ -291,7 +292,7 @@ class Resources extends Dashboards {
 			const groupColumns = this.specs.wrapper[this.wrapper].group.columns.find(value => value.token === metric.token);
 			this.specs.data.columns[metric.alias] = {
 				id: token,
-				label: groupColumns.label || metric.alias,
+				label: (groupColumns) ? groupColumns.label : metric.alias,
 				type: this.getDataType(metric.datatype),
 				p: { data: 'measure' }
 			};
@@ -427,7 +428,7 @@ class Resources extends Dashboards {
 						p: this.specs.data.columns[key].p
 					});
 				});
-				debugger;
+				// debugger;
 			}
 			let rowValue = [];
 			for (const [key, value] of Object.entries(row)) {
@@ -497,7 +498,6 @@ class Resources extends Dashboards {
 		// --------------------------------
 		return this.#prepareData;
 	}
-
 
 	getDataType(datatype) {
 		this.datatype;
@@ -581,28 +581,26 @@ class Resources extends Dashboards {
 		);
 	}
 
-	createDataViewGrouped(dataGroup) {
-		this.dataViewGrouped = new google.visualization.DataView(dataGroup);
-		let columns = [], metrics = [];
+	createDataViewGrouped() {
 		this.group.key.forEach(column => {
 			if (column.properties.visible) {
 				// this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
 				// console.log(this.dataGroup.getColumnId(this.dataGroup.getColumnIndex(column.id)));
-				columns.push(column.id);
+				// columns.push(column.id);
 				// imposto la classe per le colonne dimensionali
-				dataGroup.setColumnProperty(dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
+				this.dataGroup.setColumnProperty(this.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
 			}
 		});
 		// dalla dataGroup, recupero gli indici di colonna delle metriche
 		this.group.columns.forEach(metric => {
 			if (!metric.dependencies && metric.properties.visible) {
-				const index = dataGroup.getColumnIndex(metric.token);
+				const index = this.dataGroup.getColumnIndex(metric.token);
 				// NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
 				// modo come alternativa a eval() (non l'ho testato)
 				// function evil(fn) {
 				//   return new Function('return ' + fn)();
 				// }
-				// console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Resource.dataGroup.getColumnIndex(metric.alias);
+				// console.log(evil('12/5*9+9.4*2')); // => 40.4
 
 				// Implementazione della func 'calc' per le metriche composite.
 				if (metric.type === 'composite') {
@@ -613,6 +611,7 @@ class Resources extends Dashboards {
 					// recupero la formula della metrica composta
 					// const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
 					const SQL = JSON.parse(localStorage.getItem(metric.token)).SQL;
+					// console.log(SQL);
 					// Creo una Func "dinamica"
 					let calcFunction = function(dt, row) {
 						const app = {
@@ -620,25 +619,42 @@ class Resources extends Dashboards {
 								return new google.visualization.NumberFormat(properties);
 							}
 						}
-						let formulaJoined = [];
-						// in formulaJoined ciclo tutti gli elementi della Formula, imposto i
+						let formula = [];
+						// in formula ciclo tutti gli elementi della Formula, imposto i
 						// valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
-						SQL.forEach(formulaEl => {
-							if (dt.getColumnIndex(formulaEl) !== -1) {
-								formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl)));
+						SQL.forEach(item => {
+							const recursive = (nested) => {
+								let nested_formula = [];
+								nested.forEach(item => {
+									// TEST: 02.04.2025 Da testare una metrica con più di un livello di nidificazione
+									if (Array.isArray(item)) {
+										nested_formula.push(recursive(item))
+									} else {
+										(dt.getColumnIndex(item) !== -1) ?
+											nested_formula.push(dt.getValue(row, dt.getColumnIndex(item))) :
+											nested_formula.push(item);
+									}
+								});
+								return nested_formula.join(' ');
+							}
+							if (Array.isArray(item)) {
+								formula.push(recursive(item))
 							} else {
-								// altrimenti aggiungo nella formula le altre componenti, come le parentesi ad esempio e gli operatori per il calcolo
-								formulaJoined.push(formulaEl);
+								if (dt.getColumnIndex(item) !== -1) {
+									formula.push(dt.getValue(row, dt.getColumnIndex(item)));
+								} else {
+									// altrimenti aggiungo nella formula le altre componenti, come le parentesi ad esempio e gli operatori per il calcolo
+									formula.push(item);
+								}
 							}
 						});
 						// La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
-						// Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
+						// Quindi inserisco tutto il contenuto della stringa formula in eval(), inoltre
 						// effettuo un controllo sul risultato in caso fosse NaN
-						const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
+						// console.log(eval(formula.join(' ')));
+						const result = (isNaN(eval(formula.join(' ')))) ? 0 : eval(formula.join(' '));
 						let total = (result) ? { v: result } : { v: result, f: '-' };
-						console.log(result);
-						// debugger;
-						// const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+						console.log(total);
 						// formattazione della cella con formatValue()
 						const formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
 						const resultFormatted = (result) ? formatter.formatValue(result) : '-';
@@ -647,25 +663,31 @@ class Resources extends Dashboards {
 						// total = (result) ? { v: result } : { v: result, f: '-' };
 						return total;
 					}
-					metrics.push({ id: metric.token, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
+					// metrics.push({ id: metric.token, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
 				} else {
 					// this.viewMetrics.push(index);
-					metrics.push(metric.token);
+					// metrics.push(metric.token);
 				}
-				dataGroup.setColumnProperty(index, 'className', 'col-metrics');
-				// let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-				// formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+				this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+
+				debugger;
+				let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+				formatter.format(this.dataGroup, this.dataGroup.getColumnIndex(metric.token));
 			}
 		});
 		// concateno i due array che popoleranno la DataView.setColumns()
-		this.viewDefined = columns.concat(metrics)
-		console.log('DataView defined:', this.viewDefined);
+		// this.viewDefined = columns.concat(metrics)
+		// console.log('DataView defined:', this.viewDefined);
 		// debugger;
 		// Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
 		// console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
 		// console.log(Resource.dataGroup.getColumnProperties(0));
-		this.dataViewGrouped.setColumns(this.viewDefined);
-		console.log('dataViewGrouped : ', this.dataViewGrouped);
+		// dataGroup.setColumnProperty(5, 'className', 'cssc1')
+		// this.dataViewGrouped = new google.visualization.DataView(dataGroup);
+		// this.dataViewGrouped.setColumns(columns.concat(metrics));
+		console.log('dataGroup : ', this.dataGroup);
+		// console.log('dataViewGrouped : ', this.dataViewGrouped);
+		// debugger;
 	}
 
 }

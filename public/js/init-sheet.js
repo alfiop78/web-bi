@@ -81,6 +81,7 @@ function createSheetColumns(data) {
 
 function draw() {
 	console.clear();
+	// debugger;
 	console.log('TIMER START', new Date());
 	const prepareData = Resource.prepareData();
 	// Creo l'elenco di colonne/metriche elaborate dallo Sheet. Da qui
@@ -88,11 +89,8 @@ function draw() {
 	// creare diverse "visualizzazioni"
 	createSheetColumns(prepareData);
 	Resource.dataTable = new google.visualization.DataTable(prepareData);
-	// dashboard
-	// Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('sheet__preview'));
 	Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('report__area'));
 	console.log(Resource.wrapper);
-	// const wrapper = (Resource.wrapper) ? Resource.wrapperSelected : 'Table';
 	// I controlli, in questa fase, vengono recuperati dall'oggetto 'key', all'interno di
 	// specs[wrapper].group
 	Resource.dashboardControls = Resource.drawSheetControls(document.getElementById('preview__filters'));
@@ -104,15 +102,22 @@ function draw() {
 	Resource.chartWrapper.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
 	// Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
 	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
+	// ottengo la funzione group() di GoogleChart
 	Resource.dataGroup = Resource.createDataTableGrouped();
-	Resource.createDataViewGrouped(Resource.dataGroup);
+	debugger;
+	Resource.createDataViewGrouped();
+
 	// Per impostare una determinata visualizzazione per il chartWrapper, utilizzo il Metodo setView()
-	Resource.chartWrapper.setView(Resource.dataViewGrouped);
+	// Resource.chartWrapper.setView(Resource.dataViewGrouped);
+	// Resource.chartWrapper.setView(Resource.dataGroup);
 	// Legame tra Controlli e Dashboard
 	Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
 	// FIX: 13.12.2024 Valutare se questo "redraw" può essere evitato
-	google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
-	Resource.gdashboard.draw(Resource.dataTable);
+	// google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
+	google.visualization.events.addListener(Resource.chartWrapper, 'ready', readytest);
+	// Resource.gdashboard.draw(Resource.dataTable);
+	// Resource.gdashboard.draw(Resource.dataViewGrouped);
+	Resource.gdashboard.draw(Resource.dataGroup);
 	console.log('TIMER END', new Date());
 }
 
@@ -169,6 +174,7 @@ function drawDatamart() {
 }
 
 function chartWrapperReady() {
+	// debugger;
 	console.log('TIMER START (ready)', new Date());
 	// Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
 	// Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
@@ -292,6 +298,10 @@ function chartWrapperReady() {
 	// export_dataview_CSV();
 }
 
+function readytest() {
+	google.visualization.events.addListener(Resource.chartWrapper.getChart(), 'sort', sort);
+}
+
 function ready() {
 	google.visualization.events.addListener(Resource.chartWrapperView.getChart(), 'sort', sort);
 }
@@ -377,15 +387,19 @@ function sort(e) {
 	// l'indice della colonna nella DataView
 	Resource.colIndex = e.column;
 	// recupero il nome della colonna in base al suo indice
-	Resource.columnId = Resource.dataViewGrouped.getColumnId(Resource.colIndex);
+	Resource.columnId = Resource.dataGroup.getColumnId(Resource.colIndex);
+	// Resource.columnId = Resource.dataViewGrouped.getColumnId(Resource.colIndex);
 	console.log('index della dataView', Resource.colIndex);
 	console.log('column id : ', Resource.columnId);
 	// Resource.dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
 	// Resource.dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
 	// Indice della colonna nella DataTable sottostante in base alla selezione
 	// di una colonna nella DataView
-	// BUG: non vengono trovati gli indici delle metriche composte (questo è segnalato anche su GoogleChart in getTableColumnIndex che parla di colonne generate)
-	Resource.dataTableIndex = Resource.dataViewGrouped.getTableColumnIndex(Resource.colIndex);
+	// BUG: non vengono trovati gli indici delle metriche composte (questo è
+	// segnalato anche su GoogleChart in getTableColumnIndex che parla di colonne generate)
+	// Resource.dataTableIndex = Resource.dataViewGrouped.getTableColumnIndex(Resource.colIndex);
+	Resource.dataTableIndex = Resource.dataGroup.getColumnIndex(Resource.colIndex);
+	debugger;
 
 	// NOTE: getViewColumnIndex() resituisce l'indice della DataView impostata
 	// con setColumns(), il valore passato è l'indice della dataTable
@@ -395,8 +409,10 @@ function sort(e) {
 	// console.log('index della dataGroup', Resource.dataGroupIndex);
 
 	// etichetta colonna, questa viene impostata nella dlg-sheet-config
-	console.log(Resource.dataViewGrouped.getColumnLabel(Resource.colIndex));
-	Resource.columnLabel = Resource.dataViewGrouped.getColumnLabel(Resource.colIndex);
+	// console.log(Resource.dataViewGrouped.getColumnLabel(Resource.colIndex));
+	console.log(Resource.dataGroup.getColumnLabel(Resource.colIndex));
+	// Resource.columnLabel = Resource.dataViewGrouped.getColumnLabel(Resource.colIndex);
+	Resource.columnLabel = Resource.dataGroup.getColumnLabel(Resource.colIndex);
 	labelRef.value = Resource.columnLabel;
 	// recupero il dataType della colonna selezionata dall'object Resource.specs.data.columns[columnId]
 	// selectDataType.selectedIndex = 2;
@@ -404,7 +420,8 @@ function sort(e) {
 	[...selectDataType.options].forEach((option, index) => {
 		// console.log(Resource.dataViewGrouped.getColumnType(Resource.colIndex));
 		// console.log(Resource.dataViewGrouped.getColumnProperties(Resource.colIndex));
-		if (option.value === Resource.dataViewGrouped.getColumnType(Resource.colIndex)) {
+		// if (option.value === Resource.dataViewGrouped.getColumnType(Resource.colIndex)) {
+		if (option.value === Resource.dataGroup.getColumnType(Resource.colIndex)) {
 			selectDataType.selectedIndex = index;
 		}
 	});
@@ -455,7 +472,6 @@ saveColumnConfig.onclick = () => {
 	const dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
 	Resource.dataGroup.setColumnLabel(dataGroupIndex, label);
 	// Resource.dataGroup.setColumnLabel(Resource.colIndex, label);
-	// TODO: ipostazione del numero dei decimali
 	switch (format) {
 		case 'default':
 			// numero senza decimali e con separatore migliaia
@@ -489,9 +505,10 @@ saveColumnConfig.onclick = () => {
 		// console.log(Resource.dataGroup.getColumnId(dataGroupIndex));
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)]);
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)].getOptions());
-		// Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', label);
+		Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', label);
 		Resource.dashboardControls[dataGroupIndex].setOption('ui.caption', label);
 		// Resource.dashboardControls[dataGroupIndex].setOption('ui.label', label);
+		console.log(Resource.dataGroup);
 		debugger;
 	} else {
 		const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.token === Resource.columnId);
@@ -502,7 +519,7 @@ saveColumnConfig.onclick = () => {
 		if (metric) metric.label = label;
 		metric.properties.formatter = { type, format, prop: formatterProperties };
 		let formatter = app[type](formatterProperties);
-		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
 	}
 	console.log('DataGroup:', Resource.dataGroup);
 	// console.log('DataGroup:', Resource.dataGroup);
@@ -516,7 +533,7 @@ saveColumnConfig.onclick = () => {
 			// non è presente, lo aggiungo
 			Resource.specs.filters.push({
 				id: Resource.dataGroup.getColumnId(dataGroupIndex),
-				containerId: `flt-${Resource.specs.token}-${label}`,
+				containerId: `flt-${Resource.specs.token}-${Resource.dataGroup.getColumnId(dataGroupIndex)}`,
 				sheet: Resource.specs.token,
 				filterColumnLabel: label,
 				caption: label
@@ -539,10 +556,24 @@ saveColumnConfig.onclick = () => {
 	// window.localStorage.setItem(Resource.specs.token, JSON.stringify(Resource.specs));
 	// le metriche calcolate restituisce -1 per getTableColumnIndex, quindi devo ridisegnare il report
 	// richiamando chartWrapperReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
-	(Resource.dataTableIndex === -1) ?
-		// chartWrapperReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
-		chartWrapperReady() : Resource.chartWrapperView.draw();
-	Resource.dashboardControls[dataGroupIndex].draw();
+	// FIX: 02.04.2025 Quando viene selezionata una colonna calcolata è necessario invocare chartWrapperReady()
+	// per poter rifare i calcoli, questo perchè, nella DataView (legata al chartWrapper) l'index della colonna calcolata è -1
+	// Un altro metodo che si può  utilizzare è questo commentato, converto la DataView in una DataTable, modifico la label e reimposto
+	// il chartWrapper. In questo modo potrò utilizzare sempre il metodo draw() per aggiornare il grafico
+	/* console.log(Resource.chartWrapperView);
+	const dt = Resource.dataViewGrouped.toDataTable();
+	debugger;
+	dt.setColumnLabel(dataGroupIndex, label);
+	Resource.chartWrapperView.setDataTable(dt);
+	Resource.chartWrapperView.draw(); */
+
+	debugger;
+	Resource.gdashboard.draw(Resource.dataGroup);
+	// Resource.gdashboard.draw(Resource.dataViewGrouped);
+	// Resource.chartWrapperView.draw();
+	/* (Resource.dataTableIndex === -1) ?
+		chartWrapperReady() : Resource.chartWrapperView.draw(); */
+	if (Resource.dashboardControls[dataGroupIndex]) Resource.dashboardControls[dataGroupIndex].draw();
 
 	dlgConfig.close();
 	// la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet

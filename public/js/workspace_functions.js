@@ -545,7 +545,6 @@ function handleColumnDrop(e) {
 							dependencies: true
 						};
 					}
-
 				});
 				// }
 				break;
@@ -1820,6 +1819,7 @@ function checkCompositeMetrics(token, key) {
 	// return false : elimino la metrica da Sheet.metrics
 	for (const [sheetToken, sheetMetric] of Sheet.metrics) {
 		if (sheetToken !== token && sheetMetric.type === 'composite') {
+			// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
 			if (sheetMetric.metrics.hasOwnProperty(key)) {
 				// la metrica inclusa nella composite è presente anche in un altra metrica, non
 				// posso eliminarla
@@ -1839,12 +1839,14 @@ function checkMetricsDeps(token, depsToken) {
 				// se la metrica in ciclo è una composite,
 				// ed è inclusa nella metrica composite in ciclo
 				// non la elimino
+				// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
 				if (sheetMetric.metrics.hasOwnProperty(depsToken)) {
 					// la metrica che si sta eliminando è contenuta in una metrica composta.
 					return true;
 				}
 			} else {
 				// controllo metriche basic/advanced
+				// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
 				if (sheetMetric.metrics.hasOwnProperty(token)) {
 					// la metrica che si sta eliminando è contenuta in una metrica composta.
 					return true;
@@ -1867,6 +1869,7 @@ function checkRemoveMetrics(token) {
 			// se la metrica in ciclo è una composite,
 			// ed è inclusa nella metrica composite in ciclo
 			// non la elimino
+				// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
 			if (sheetMetric.metrics.hasOwnProperty(token)) {
 				// la metrica che si sta eliminando è contenuta in una metrica composta.
 				return true;
