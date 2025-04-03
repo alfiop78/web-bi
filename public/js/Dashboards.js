@@ -582,11 +582,12 @@ class Resources extends Dashboards {
 	}
 
 	createDataViewGrouped() {
+		let columns = [], metrics = [];
 		this.group.key.forEach(column => {
 			if (column.properties.visible) {
 				// this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
 				// console.log(this.dataGroup.getColumnId(this.dataGroup.getColumnIndex(column.id)));
-				// columns.push(column.id);
+				columns.push(column.id);
 				// imposto la classe per le colonne dimensionali
 				this.dataGroup.setColumnProperty(this.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
 			}
@@ -663,31 +664,23 @@ class Resources extends Dashboards {
 						// total = (result) ? { v: result } : { v: result, f: '-' };
 						return total;
 					}
-					// metrics.push({ id: metric.token, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
+					metrics.push({ id: metric.token, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
 				} else {
-					// this.viewMetrics.push(index);
-					// metrics.push(metric.token);
+					metrics.push(metric.token);
 				}
 				this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
 
-				debugger;
-				let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-				formatter.format(this.dataGroup, this.dataGroup.getColumnIndex(metric.token));
+				// debugger;
+				// let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+				// formatter.format(this.dataGroup, this.dataGroup.getColumnIndex(metric.token));
 			}
 		});
-		// concateno i due array che popoleranno la DataView.setColumns()
-		// this.viewDefined = columns.concat(metrics)
-		// console.log('DataView defined:', this.viewDefined);
-		// debugger;
 		// Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
 		// console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
 		// console.log(Resource.dataGroup.getColumnProperties(0));
 		// dataGroup.setColumnProperty(5, 'className', 'cssc1')
-		// this.dataViewGrouped = new google.visualization.DataView(dataGroup);
-		// this.dataViewGrouped.setColumns(columns.concat(metrics));
-		console.log('dataGroup : ', this.dataGroup);
-		// console.log('dataViewGrouped : ', this.dataViewGrouped);
-		// debugger;
+		this.dataViewFinal = new google.visualization.DataView(this.dataGroup);
+		this.dataViewFinal.setColumns(columns.concat(metrics));
 	}
 
 }

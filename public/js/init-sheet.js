@@ -103,9 +103,8 @@ function draw() {
 	// Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
 	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
 	// ottengo la funzione group() di GoogleChart
-	Resource.dataGroup = Resource.createDataTableGrouped();
-	debugger;
-	Resource.createDataViewGrouped();
+	// Resource.dataGroup = Resource.createDataTableGrouped();
+	// Resource.createDataViewGrouped();
 
 	// Per impostare una determinata visualizzazione per il chartWrapper, utilizzo il Metodo setView()
 	// Resource.chartWrapper.setView(Resource.dataViewGrouped);
@@ -113,11 +112,11 @@ function draw() {
 	// Legame tra Controlli e Dashboard
 	Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
 	// FIX: 13.12.2024 Valutare se questo "redraw" può essere evitato
-	// google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
-	google.visualization.events.addListener(Resource.chartWrapper, 'ready', readytest);
-	// Resource.gdashboard.draw(Resource.dataTable);
-	// Resource.gdashboard.draw(Resource.dataViewGrouped);
-	Resource.gdashboard.draw(Resource.dataGroup);
+	google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
+	// google.visualization.events.addListener(Resource.chartWrapper, 'ready', readytest);
+	Resource.gdashboard.draw(Resource.dataTable);
+	// Resource.gdashboard.draw(Resource.dataViewFinal);
+	// Resource.gdashboard.draw(Resource.dataGroup);
 	console.log('TIMER END', new Date());
 }
 
@@ -198,7 +197,7 @@ function chartWrapperReady() {
 	}); */
 	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
 	Resource.dataGroup = Resource.createDataTableGrouped(Resource.chartWrapper.getDataTable());
-	Resource.createDataViewGrouped(Resource.dataGroup);
+	Resource.createDataViewGrouped();
 	Resource.chartWrapperView = new google.visualization.ChartWrapper();
 	Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
 	Resource.chartWrapperView.setContainerId(Resource.ref.id);
@@ -285,7 +284,7 @@ function chartWrapperReady() {
 	// senza effettuare l'ordinamento.
 	// console.log(Resource.wrapper);
 	// console.log(Resource.specs.wrapper[Resource.wrapper].options);
-	Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
+	Resource.chartWrapperView.setDataTable(Resource.dataViewFinal);
 	Resource.chartWrapperView.draw();
 	console.log('TIMER END', new Date());
 	// google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
@@ -568,8 +567,9 @@ saveColumnConfig.onclick = () => {
 	Resource.chartWrapperView.draw(); */
 
 	debugger;
-	Resource.gdashboard.draw(Resource.dataGroup);
-	// Resource.gdashboard.draw(Resource.dataViewGrouped);
+	Resource.gdashboard.draw(Resource.dataTable);
+	// Resource.gdashboard.draw(Resource.dataGroup);
+	// Resource.gdashboard.draw(Resource.dataViewFinal);
 	// Resource.chartWrapperView.draw();
 	/* (Resource.dataTableIndex === -1) ?
 		chartWrapperReady() : Resource.chartWrapperView.draw(); */
@@ -635,6 +635,7 @@ function columnHander(e) {
 	// window.localStorage.setItem(`specs_${Resource.specs.token}`, JSON.stringify(Resource.specs));
 	// Qui dovrò sempre richiamare il chartWrapperReady() perchè devono essere ricalcolate le "colonne generate", in base al nuovo
 	// raggruppamento definito qui
-	chartWrapperReady();
+	// chartWrapperReady();
+	Resource.gdashboard.draw(Resource.dataTable);
 	updatedSheet();
 }
