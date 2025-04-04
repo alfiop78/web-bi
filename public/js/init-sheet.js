@@ -297,12 +297,12 @@ function chartWrapperReady() {
 	// export_dataview_CSV();
 }
 
-function readytest() {
+/* function readytest() {
 	google.visualization.events.addListener(Resource.chartWrapper.getChart(), 'sort', sort);
-}
+} */
 
 function ready() {
-	google.visualization.events.addListener(Resource.chartWrapperView.getChart(), 'sort', sort);
+	google.visualization.events.addListener(Resource.chartWrapperView.getChart(), 'sort', handleColumn);
 }
 
 function replacement(match, offset, string) {
@@ -378,11 +378,12 @@ function drawToolbar() {
 	google.visualization.drawToolbar(container, components);
 };
 
-function sort(e) {
-	const labelRef = document.getElementById('field-label');
-	const selectDataType = document.getElementById('field-datatype');
+function handleColumn(e) {
+	const input__column_label = document.getElementById('input__column_label');
+	const selectDataType = document.getElementById('select__column_datatype');
 	const selectFormat = document.getElementById('field-format');
-	const checkboxFilter = document.getElementById('filter-column');
+	const input__fraction_digits = document.getElementById('input__fraction_digits');
+	const checkbox__column_filter = document.getElementById('checkbox__column_filter');
 	// l'indice della colonna nella DataView
 	Resource.colIndex = e.column;
 	// recupero il nome della colonna in base al suo indice
@@ -398,7 +399,6 @@ function sort(e) {
 	// segnalato anche su GoogleChart in getTableColumnIndex che parla di colonne generate)
 	// Resource.dataTableIndex = Resource.dataViewGrouped.getTableColumnIndex(Resource.colIndex);
 	Resource.dataTableIndex = Resource.dataGroup.getColumnIndex(Resource.colIndex);
-	debugger;
 
 	// NOTE: getViewColumnIndex() resituisce l'indice della DataView impostata
 	// con setColumns(), il valore passato è l'indice della dataTable
@@ -410,40 +410,33 @@ function sort(e) {
 	// etichetta colonna, questa viene impostata nella dlg-sheet-config
 	// console.log(Resource.dataViewGrouped.getColumnLabel(Resource.colIndex));
 	console.log(Resource.dataGroup.getColumnLabel(Resource.colIndex));
-	// Resource.columnLabel = Resource.dataViewGrouped.getColumnLabel(Resource.colIndex);
+	// label della colonna
 	Resource.columnLabel = Resource.dataGroup.getColumnLabel(Resource.colIndex);
-	labelRef.value = Resource.columnLabel;
-	// recupero il dataType della colonna selezionata dall'object Resource.specs.data.columns[columnId]
-	// selectDataType.selectedIndex = 2;
+	// datatype della colonna
+	Resource.columnDataType = Resource.dataGroup.getColumnType(Resource.colIndex);
+	input__column_label.value = Resource.columnLabel;
+	// recupero il dataType della colonna selezionata, la <select> è un'array di <option>
 	// console.log(selectDataType.options);
 	[...selectDataType.options].forEach((option, index) => {
-		// console.log(Resource.dataViewGrouped.getColumnType(Resource.colIndex));
 		// console.log(Resource.dataViewGrouped.getColumnProperties(Resource.colIndex));
-		// if (option.value === Resource.dataViewGrouped.getColumnType(Resource.colIndex)) {
-		if (option.value === Resource.dataGroup.getColumnType(Resource.colIndex)) {
-			selectDataType.selectedIndex = index;
-		}
+		if (option.value === Resource.columnDataType) selectDataType.selectedIndex = index;
 	});
-	// recupero la formattazione impostata per la colonna
-	// al momento la formattazionie è impostata solo sulle metriche
-	const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.alias === Resource.columnId);
+	// recupero la formattazione impostata per la colonna e il suo valore di numeri decimali
+	// TODO: 04.04.2025 al momento la formattazionie è impostata solo sulle metriche
+	const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.token === Resource.columnId);
 	if (metric) {
-		selectFormat.selectedIndex = 0; // default
-		[...selectFormat.options].forEach((option, index) => {
-			// console.log(index, option);
+		select__column_format.selectedIndex = 0; // default
+		[...select__column_format.options].forEach((option, index) => {
 			if (option.value === metric.properties.formatter.format) {
-				selectFormat.selectedIndex = index;
+				select__column_format.selectedIndex = index;
+				input__fraction_digits.value = metric.properties.formatter.prop.fractionDigits;
 			}
 		});
 	}
-	// recupero l'informazione .json.filter (colonna impostata come filtro)
-	if (Resource.specs.filters.find(name => name.filterColumnLabel === Resource.columnLabel)) {
-		// colonna impostata come filtro
-		checkboxFilter.checked = true;
-	} else {
-		checkboxFilter.checked = false;
-	}
-	dlgConfig.show();
+	// reimposto la checkbox se questa colonna è stata impostata come filtro dashboard
+	checkbox__column_filter.checked = (Resource.specs.filters.find(name => name.id === Resource.columnId)) ?
+		true : false;
+	dlgConfig.showModal();
 }
 
 // Salvataggio della configurazione colonna dalla dialog dlg-config
@@ -455,22 +448,22 @@ saveColumnConfig.onclick = () => {
 		"id": Resource.columnId, "label": Resource.columnLabel
 	});
 	// input label
-	const label = document.getElementById('field-label').value;
+	const input__column_label = document.getElementById('input__column_label').value;
 	// dataType
-	const typeRef = document.getElementById('field-datatype');
+	const select__column_datatype = document.getElementById('select__column_datatype');
 	// formattazione colonna
-	const formatterRef = document.getElementById('field-format');
-	const filterColumn = document.getElementById('filter-column');
-	const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
-	const format = formatterRef.options.item(formatterRef.selectedIndex).value;
-	const fractionDigits = +document.getElementById('frationDigits').value;
+	const select__column_format = document.getElementById('select__column_format');
+	const filterColumn = document.getElementById('checkbox__column_filter');
+	const type = select__column_datatype.options.item(select__column_datatype.selectedIndex).value.toLowerCase();
+	const format = select__column_format.options.item(select__column_format.selectedIndex).value;
+	const fractionDigits = +document.getElementById('input__fraction_digits').value;
 	let formatterProperties = {};
 
 	// Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, label);
 	console.log(Resource.dataGroup.getColumnIndex(Resource.columnId));
 	const dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
-	Resource.dataGroup.setColumnLabel(dataGroupIndex, label);
-	// Resource.dataGroup.setColumnLabel(Resource.colIndex, label);
+	Resource.dataGroup.setColumnLabel(dataGroupIndex, input__column_label);
+	// Resource.dataGroup.setColumnLabel(Resource.colIndex, input__column_label);
 	switch (format) {
 		case 'default':
 			// numero senza decimali e con separatore migliaia
@@ -498,24 +491,24 @@ saveColumnConfig.onclick = () => {
 		// Resource.specs.wrapper[].group.key, altrimenti non viene trovata. (Stesso discorso per le metriche, sotto)
 		// cerco la colonna tramite il suo id nella prop 'specs.data.columns'
 		for (const values of Object.values(Resource.specs.data.columns)) {
-			if (values.id === column.id && values.label !== label) values.label = label;
+			if (values.id === column.id && values.label !== input__column_label) values.label = input__column_label;
 		}
-		if (column) column.label = label;
+		if (column) column.label = input__column_label;
 		// console.log(Resource.dataGroup.getColumnId(dataGroupIndex));
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)]);
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)].getOptions());
-		Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', label);
-		Resource.dashboardControls[dataGroupIndex].setOption('ui.caption', label);
-		// Resource.dashboardControls[dataGroupIndex].setOption('ui.label', label);
+		Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', input__column_label);
+		Resource.dashboardControls[dataGroupIndex].setOption('ui.caption', input__column_label);
+		// Resource.dashboardControls[dataGroupIndex].setOption('ui.label', input__column_label);
 		console.log(Resource.dataGroup);
 		debugger;
 	} else {
 		const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.token === Resource.columnId);
 		for (const values of Object.values(Resource.specs.data.columns)) {
-			if (values.id === metric.token && values.label !== label) values.label = label;
+			if (values.id === metric.token && values.label !== input__column_label) values.label = input__column_label;
 		}
-		// Resource.specs.data.columns[metric.label].label = label;
-		if (metric) metric.label = label;
+		// Resource.specs.data.columns[metric.label].label = input__column_label;
+		if (metric) metric.label = input__column_label;
 		metric.properties.formatter = { type, format, prop: formatterProperties };
 		let formatter = app[type](formatterProperties);
 		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
@@ -534,8 +527,8 @@ saveColumnConfig.onclick = () => {
 				id: Resource.dataGroup.getColumnId(dataGroupIndex),
 				containerId: `flt-${Resource.specs.token}-${Resource.dataGroup.getColumnId(dataGroupIndex)}`,
 				sheet: Resource.specs.token,
-				filterColumnLabel: label,
-				caption: label
+				filterColumnLabel: input__column_label,
+				caption: input__column_label
 			});
 		}
 	} else {

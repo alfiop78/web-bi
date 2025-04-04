@@ -1022,14 +1022,14 @@
 															<section class="dlg-content">
 																<section class="row">
 																	<section class="col">
-																		<input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
+																		<input id="input__column_label" type="text" value="" placeholder="Etichetta colonna" />
 																	</section>
 																</section>
 																<section class="row">
 																	<section class="col col-5-span">
 																		<div class="field label">
-																			<label for="field-datatype">Tipo di dato</label>
-																			<select id="field-datatype">
+																			<label for="select__column_datatype">Tipo di dato</label>
+																			<select id="select__column_datatype">
 																				<option id="string" value="string">Stringa</option>
 																				<option id="number" value="number">Numero</option>
 																				<option id="date" value="date">Data</option>
@@ -1041,8 +1041,8 @@
 																	</section>
 																	<section class="col col-5-span">
 																		<div class="field label">
-																			<label for="field-format">Formattazione</label>
-																			<select id="field-format">
+																			<label for="select__column_format">Formattazione</label>
+																			<select id="select__column_format">
 																				<option value="default" selected>Default</option>
 																				<option value="currency">Valuta €</option>
 																				<option value="percent">Percentuale</option>
@@ -1051,16 +1051,16 @@
 																	</section>
 																	<section class="col col-2-span">
 																		<div class="field label">
-																			<label for="frationDigits">Decimali</label>
-																			<input id="frationDigits" type="number" value="2" />
+																			<label for="input__fraction_digits">Decimali</label>
+																			<input id="input__fraction_digits" type="number" value="0" />
 																		</div>
 																	</section>
 																</section>
 																<section class="row">
 																	<section class="col">
 																		<div class="field hr">
-																			<input type="checkbox" id="filter-column" name="filter-column" />
-																			<label for="filter-column">Imposta filtro Dashboard</label>
+																			<input type="checkbox" id="checkbox__column_filter" name="checkbox__column_filter" />
+																			<label for="checkbox__column_filter">Imposta come filtro Dashboard</label>
 																		</div>
 																	</section>
 																</section>
