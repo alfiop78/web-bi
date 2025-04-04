@@ -535,7 +535,7 @@ class Resources extends Dashboards {
 	// non c'è bisogno di passare alcun argomento a questo Metodo perchè non vi si può applicare il Metodo getDataTable()
 	// Quando invece deve essere raggruppato, ad esempio, un ChartWRapper, bisogna passare l'argomento a questo Metodo
 	// già convertito in DataTable, cioè ChartWrapper.getDataTable()
-	createDataTableGrouped(dataTable = this.dataTable) {
+	createDataTableGrouped() {
 		let keys = [], columns = [];
 		this.group.key.forEach(key => {
 			// if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
@@ -544,7 +544,7 @@ class Resources extends Dashboards {
 			if (key.properties.grouped) {
 				keys.push({
 					id: key.id,
-					column: dataTable.getColumnIndex(key.id),
+					column: this.chartWrapper.getDataTable().getColumnIndex(key.id),
 					label: key.label,
 					type: key.type
 				});
@@ -569,7 +569,7 @@ class Resources extends Dashboards {
 			}
 			columns.push({
 				id: column.token,
-				column: dataTable.getColumnIndex(column.token),
+				column: this.chartWrapper.getDataTable().getColumnIndex(column.token),
 				// column: metric.alias,
 				aggregation: google.visualization.data[aggregation],
 				type: 'number',
@@ -577,7 +577,7 @@ class Resources extends Dashboards {
 			});
 		});
 		return new google.visualization.data.group(
-			dataTable, keys, columns
+			this.chartWrapper.getDataTable(), keys, columns
 		);
 	}
 
@@ -669,10 +669,6 @@ class Resources extends Dashboards {
 					metrics.push(metric.token);
 				}
 				this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
-
-				// debugger;
-				// let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-				// formatter.format(this.dataGroup, this.dataGroup.getColumnIndex(metric.token));
 			}
 		});
 		// Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')

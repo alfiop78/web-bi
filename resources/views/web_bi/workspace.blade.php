@@ -1068,8 +1068,8 @@
 															</section>
 															<section class="dlg-buttons">
 																<button name="cancel" value="chiudi">Chiudi</button>
+																<!-- TODO: rinominare in btn__config_column_save -->
 																<button id="btn-column-save">Salva</button>
-																<!-- <button data-fn="btnSaveColumn" id="btn-column-save">Ok</button> -->
 															</section>
 														</section>
 													</dialog>

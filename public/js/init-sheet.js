@@ -1,4 +1,10 @@
 console.info('init-sheet');
+let input__column_label;
+let select__column_datatype;
+let select__column_format;
+let input__fraction_digits;
+let checkbox__column_filter;
+
 const dlgConfig = document.getElementById('dlg-sheet-config');
 const btnSheetPreview = document.getElementById("btn-sheet-preview");
 const btnSQLPreview = document.getElementById("btn-sql-preview");
@@ -80,6 +86,7 @@ function createSheetColumns(data) {
 }
 
 function draw() {
+	debugger;
 	console.clear();
 	// debugger;
 	console.log('TIMER START', new Date());
@@ -90,7 +97,7 @@ function draw() {
 	createSheetColumns(prepareData);
 	Resource.dataTable = new google.visualization.DataTable(prepareData);
 	Resource.gdashboard = new google.visualization.Dashboard(document.getElementById('report__area'));
-	console.log(Resource.wrapper);
+	// console.log(Resource.wrapper);
 	// I controlli, in questa fase, vengono recuperati dall'oggetto 'key', all'interno di
 	// specs[wrapper].group
 	Resource.dashboardControls = Resource.drawSheetControls(document.getElementById('preview__filters'));
@@ -99,24 +106,12 @@ function draw() {
 	Resource.chartWrapper = new google.visualization.ChartWrapper();
 	Resource.chartWrapper.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
 	Resource.chartWrapper.setContainerId(Resource.ref.id);
-	Resource.chartWrapper.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
-	// Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
-	// ottengo la funzione group() di GoogleChart
-	// Resource.dataGroup = Resource.createDataTableGrouped();
-	// Resource.createDataViewGrouped();
-
-	// Per impostare una determinata visualizzazione per il chartWrapper, utilizzo il Metodo setView()
-	// Resource.chartWrapper.setView(Resource.dataViewGrouped);
-	// Resource.chartWrapper.setView(Resource.dataGroup);
 	// Legame tra Controlli e Dashboard
 	Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
 	// FIX: 13.12.2024 Valutare se questo "redraw" può essere evitato
-	google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
-	// google.visualization.events.addListener(Resource.chartWrapper, 'ready', readytest);
+	// google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
+	google.visualization.events.addListener(Resource.gdashboard, 'ready', chartWrapperReady);
 	Resource.gdashboard.draw(Resource.dataTable);
-	// Resource.gdashboard.draw(Resource.dataViewFinal);
-	// Resource.gdashboard.draw(Resource.dataGroup);
 	console.log('TIMER END', new Date());
 }
 
@@ -173,7 +168,7 @@ function drawDatamart() {
 }
 
 function chartWrapperReady() {
-	// debugger;
+	debugger;
 	console.log('TIMER START (ready)', new Date());
 	// Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
 	// Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
@@ -196,7 +191,7 @@ function chartWrapperReady() {
 	  }
 	}); */
 	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
-	Resource.dataGroup = Resource.createDataTableGrouped(Resource.chartWrapper.getDataTable());
+	Resource.dataGroup = Resource.createDataTableGrouped();
 	Resource.createDataViewGrouped();
 	Resource.chartWrapperView = new google.visualization.ChartWrapper();
 	Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
@@ -228,10 +223,10 @@ function chartWrapperReady() {
 	//   let formatter = app[value.type](value.prop);
 	//   formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
 	// }
-	Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
-		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
-	});
+	// Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
+	// 	let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+	// 	formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
+	// });
 	// console.log('dataGroup():', Resource.dataGroup);
 	// console.log(Resource.dataGroup.getColumnIndex())
 	// Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
@@ -296,10 +291,6 @@ function chartWrapperReady() {
 	// export__dataview_csv.download = 'table-view-data.csv';
 	// export_dataview_CSV();
 }
-
-/* function readytest() {
-	google.visualization.events.addListener(Resource.chartWrapper.getChart(), 'sort', sort);
-} */
 
 function ready() {
 	google.visualization.events.addListener(Resource.chartWrapperView.getChart(), 'sort', handleColumn);
@@ -379,11 +370,14 @@ function drawToolbar() {
 };
 
 function handleColumn(e) {
-	const input__column_label = document.getElementById('input__column_label');
-	const selectDataType = document.getElementById('select__column_datatype');
-	const selectFormat = document.getElementById('field-format');
-	const input__fraction_digits = document.getElementById('input__fraction_digits');
-	const checkbox__column_filter = document.getElementById('checkbox__column_filter');
+	input__column_label = document.getElementById('input__column_label');
+	select__column_datatype = document.getElementById('select__column_datatype');
+	select__column_format = document.getElementById('select__column_format');
+	input__fraction_digits = document.getElementById('input__fraction_digits');
+	checkbox__column_filter = document.getElementById('checkbox__column_filter');
+	// default del valore decimale
+	input__fraction_digits.value = 0;
+
 	// l'indice della colonna nella DataView
 	Resource.colIndex = e.column;
 	// recupero il nome della colonna in base al suo indice
@@ -416,10 +410,10 @@ function handleColumn(e) {
 	Resource.columnDataType = Resource.dataGroup.getColumnType(Resource.colIndex);
 	input__column_label.value = Resource.columnLabel;
 	// recupero il dataType della colonna selezionata, la <select> è un'array di <option>
-	// console.log(selectDataType.options);
-	[...selectDataType.options].forEach((option, index) => {
+	// console.log(select__column_datatype.options);
+	[...select__column_datatype.options].forEach((option, index) => {
 		// console.log(Resource.dataViewGrouped.getColumnProperties(Resource.colIndex));
-		if (option.value === Resource.columnDataType) selectDataType.selectedIndex = index;
+		if (option.value === Resource.columnDataType) select__column_datatype.selectedIndex = index;
 	});
 	// recupero la formattazione impostata per la colonna e il suo valore di numeri decimali
 	// TODO: 04.04.2025 al momento la formattazionie è impostata solo sulle metriche
@@ -443,27 +437,23 @@ function handleColumn(e) {
 saveColumnConfig.onclick = () => {
 	// console.log(Resource.dataTable);
 	console.log({
-		"dataTable (index)": Resource.dataTableIndex,
+		"dataTable (index)": Resource.dataTable.getColumnIndex(Resource.columnId),
+		"dataGroup (index)": Resource.dataGroup.getColumnIndex(Resource.columnId),
 		"dataView (index)": Resource.colIndex,
 		"id": Resource.columnId, "label": Resource.columnLabel
 	});
-	// input label
-	const input__column_label = document.getElementById('input__column_label').value;
-	// dataType
-	const select__column_datatype = document.getElementById('select__column_datatype');
-	// formattazione colonna
-	const select__column_format = document.getElementById('select__column_format');
-	const filterColumn = document.getElementById('checkbox__column_filter');
 	const type = select__column_datatype.options.item(select__column_datatype.selectedIndex).value.toLowerCase();
 	const format = select__column_format.options.item(select__column_format.selectedIndex).value;
-	const fractionDigits = +document.getElementById('input__fraction_digits').value;
+	const fractionDigits = +input__fraction_digits.value;
 	let formatterProperties = {};
 
 	// Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, label);
 	console.log(Resource.dataGroup.getColumnIndex(Resource.columnId));
 	const dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
-	Resource.dataGroup.setColumnLabel(dataGroupIndex, input__column_label);
-	// Resource.dataGroup.setColumnLabel(Resource.colIndex, input__column_label);
+	const dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
+	debugger;
+	Resource.dataGroup.setColumnLabel(dataGroupIndex, input__column_label.value);
+	Resource.dataTable.setColumnLabel(dataTableIndex, input__column_label.value);
 	switch (format) {
 		case 'default':
 			// numero senza decimali e con separatore migliaia
@@ -483,7 +473,6 @@ saveColumnConfig.onclick = () => {
 			break;
 	}
 	// console.log(Resource.dataTable.getColumnProperties(Resource.dataTableIndex));
-	const dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
 	const columnType = Resource.dataTable.getColumnProperty(dataTableIndex, 'data');
 	if (columnType === 'column') {
 		const column = Resource.specs.wrapper[Resource.wrapper].group.key.find(col => col.id === Resource.columnId);
@@ -491,44 +480,43 @@ saveColumnConfig.onclick = () => {
 		// Resource.specs.wrapper[].group.key, altrimenti non viene trovata. (Stesso discorso per le metriche, sotto)
 		// cerco la colonna tramite il suo id nella prop 'specs.data.columns'
 		for (const values of Object.values(Resource.specs.data.columns)) {
-			if (values.id === column.id && values.label !== input__column_label) values.label = input__column_label;
+			if (values.id === column.id && values.label !== input__column_label.value) values.label = input__column_label.value;
 		}
-		if (column) column.label = input__column_label;
+		if (column) column.label = input__column_label.value;
 		// console.log(Resource.dataGroup.getColumnId(dataGroupIndex));
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)]);
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)].getOptions());
-		Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', input__column_label);
-		Resource.dashboardControls[dataGroupIndex].setOption('ui.caption', input__column_label);
-		// Resource.dashboardControls[dataGroupIndex].setOption('ui.label', input__column_label);
-		console.log(Resource.dataGroup);
-		debugger;
+		Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', input__column_label.value);
+		Resource.dashboardControls[dataGroupIndex].setOption('ui.caption', input__column_label.value);
 	} else {
 		const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.token === Resource.columnId);
 		for (const values of Object.values(Resource.specs.data.columns)) {
-			if (values.id === metric.token && values.label !== input__column_label) values.label = input__column_label;
+			if (values.id === metric.token && values.label !== input__column_label.value) values.label = input__column_label.value;
 		}
-		// Resource.specs.data.columns[metric.label].label = input__column_label;
-		if (metric) metric.label = input__column_label;
+		// Resource.specs.data.columns[metric.label].label = input__column_label.value;
+		if (metric) metric.label = input__column_label.value;
+		debugger;
 		metric.properties.formatter = { type, format, prop: formatterProperties };
 		let formatter = app[type](formatterProperties);
 		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
+		formatter.format(Resource.dataTable, Resource.dataTable.getColumnIndex(metric.token));
 	}
 	console.log('DataGroup:', Resource.dataGroup);
-	// console.log('DataGroup:', Resource.dataGroup);
+	console.log('DataGroup:', Resource.dataTable);
 
 	// filtri definiti per il report
 	const index = Resource.specs.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(dataGroupIndex));
-	if (filterColumn.checked === true) {
+	if (checkbox__column_filter.checked === true) {
 		// Proprietà Resource.specs.filters
 		// Inserisco il filtro solo se non è ancora presente in Resource.specs.filters
 		if (index === -1) {
 			// non è presente, lo aggiungo
 			Resource.specs.filters.push({
 				id: Resource.dataGroup.getColumnId(dataGroupIndex),
-				containerId: `flt-${Resource.specs.token}-${Resource.dataGroup.getColumnId(dataGroupIndex)}`,
+				containerId: `${Resource.specs.token}-${Resource.dataGroup.getColumnId(dataGroupIndex)}`,
 				sheet: Resource.specs.token,
-				filterColumnLabel: input__column_label,
-				caption: input__column_label
+				filterColumnLabel: input__column_label.value,
+				caption: input__column_label.value
 			});
 		}
 	} else {
@@ -559,13 +547,7 @@ saveColumnConfig.onclick = () => {
 	Resource.chartWrapperView.setDataTable(dt);
 	Resource.chartWrapperView.draw(); */
 
-	debugger;
 	Resource.gdashboard.draw(Resource.dataTable);
-	// Resource.gdashboard.draw(Resource.dataGroup);
-	// Resource.gdashboard.draw(Resource.dataViewFinal);
-	// Resource.chartWrapperView.draw();
-	/* (Resource.dataTableIndex === -1) ?
-		chartWrapperReady() : Resource.chartWrapperView.draw(); */
 	if (Resource.dashboardControls[dataGroupIndex]) Resource.dashboardControls[dataGroupIndex].draw();
 
 	dlgConfig.close();
