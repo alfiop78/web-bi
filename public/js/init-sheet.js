@@ -5,6 +5,7 @@ let select__column_format;
 let input__fraction_digits;
 let checkbox__column_filter;
 
+const ulColumnsHandler = document.getElementById('ul-columns-handler');
 const dlgConfig = document.getElementById('dlg-sheet-config');
 const btnSheetPreview = document.getElementById("btn-sheet-preview");
 const btnSQLPreview = document.getElementById("btn-sql-preview");
@@ -64,7 +65,6 @@ let app = {
 function createSheetColumns(data) {
 	// ciclo il prpareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
 	// Da questo elenco si potranno nascondere/visualizzare le colonne e le metreehe
-	const ulColumnsHandler = document.getElementById('ul-columns-handler');
 	ulColumnsHandler.querySelectorAll('li').forEach(el => el.remove());
 	data.cols.forEach((col, index) => {
 		const template = template_li.content.cloneNode(true);
@@ -86,10 +86,9 @@ function createSheetColumns(data) {
 }
 
 function draw() {
-	debugger;
 	console.clear();
-	// debugger;
 	console.log('TIMER START', new Date());
+	const start_time_execution = new Date();
 	const prepareData = Resource.prepareData();
 	// Creo l'elenco di colonne/metriche elaborate dallo Sheet. Da qui
 	// potranno essere visualizzate/nascoste le colonne o le metriche per poter
@@ -108,11 +107,10 @@ function draw() {
 	Resource.chartWrapper.setContainerId(Resource.ref.id);
 	// Legame tra Controlli e Dashboard
 	Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
-	// FIX: 13.12.2024 Valutare se questo "redraw" può essere evitato
-	// google.visualization.events.addListener(Resource.chartWrapper, 'ready', chartWrapperReady);
 	google.visualization.events.addListener(Resource.gdashboard, 'ready', chartWrapperReady);
 	Resource.gdashboard.draw(Resource.dataTable);
 	console.log('TIMER END', new Date());
+	console.info(`ExecutionTime : ${new Date() - start_time_execution}ms`);
 }
 
 // NOTE: qui è commentata tutta la logica utilizzata anche nelle Dashboard.
@@ -168,8 +166,8 @@ function drawDatamart() {
 }
 
 function chartWrapperReady() {
-	debugger;
 	console.log('TIMER START (ready)', new Date());
+	const start_time_execution = new Date();
 	// Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
 	// Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
 	// Resource.tableRefGroup = new google.visualization.Table(Resource.ref);
@@ -223,10 +221,10 @@ function chartWrapperReady() {
 	//   let formatter = app[value.type](value.prop);
 	//   formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
 	// }
-	// Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
-	// 	let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-	// 	formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
-	// });
+	Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
+		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
+	});
 	// console.log('dataGroup():', Resource.dataGroup);
 	// console.log(Resource.dataGroup.getColumnIndex())
 	// Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
@@ -282,6 +280,7 @@ function chartWrapperReady() {
 	Resource.chartWrapperView.setDataTable(Resource.dataViewFinal);
 	Resource.chartWrapperView.draw();
 	console.log('TIMER END', new Date());
+	console.info(`ExecutionTime (ChartWrapperReady) : ${new Date() - start_time_execution}ms`);
 	// google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
 	// Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.specs.wrapper[Resource.wrapper].options);
 	// var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataViewGrouped);
@@ -377,34 +376,31 @@ function handleColumn(e) {
 	checkbox__column_filter = document.getElementById('checkbox__column_filter');
 	// default del valore decimale
 	input__fraction_digits.value = 0;
+	// valore di default per la select__column_format
+	select__column_format.selectedIndex = 0;
 
-	// l'indice della colonna nella DataView
+	// l'indice della colonna nella DataViewFinal
 	Resource.colIndex = e.column;
 	// recupero il nome della colonna in base al suo indice
 	Resource.columnId = Resource.dataGroup.getColumnId(Resource.colIndex);
-	// Resource.columnId = Resource.dataViewGrouped.getColumnId(Resource.colIndex);
-	console.log('index della dataView', Resource.colIndex);
-	console.log('column id : ', Resource.columnId);
-	// Resource.dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
-	// Resource.dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
-	// Indice della colonna nella DataTable sottostante in base alla selezione
-	// di una colonna nella DataView
-	// BUG: non vengono trovati gli indici delle metriche composte (questo è
+	console.log(`index della dataViewFinal ${Resource.colIndex}`);
+	console.log(`column_id : ${Resource.columnId}`);
+	console.log(`index DataGroup : ${Resource.dataGroup.getColumnIndex(Resource.columnId)}`);
+	console.log(`index DataTable : ${Resource.dataTable.getColumnIndex(Resource.columnId)}`);
+	console.log(`index DataTable (colIndex) : ${Resource.dataTable.getColumnIndex(Resource.colIndex)}`);
+	console.log(`index DataGroup (colIndex) : ${Resource.dataGroup.getColumnIndex(Resource.colIndex)}`);
+	// WARN: non vengono trovati gli indici delle metriche composte (questo è
 	// segnalato anche su GoogleChart in getTableColumnIndex che parla di colonne generate)
-	// Resource.dataTableIndex = Resource.dataViewGrouped.getTableColumnIndex(Resource.colIndex);
-	Resource.dataTableIndex = Resource.dataGroup.getColumnIndex(Resource.colIndex);
+	console.log(`index DataViewFinal : ${Resource.dataViewFinal.getTableColumnIndex(Resource.colIndex)}`);
+	Resource.dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
+	Resource.dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
 
 	// NOTE: getViewColumnIndex() resituisce l'indice della DataView impostata
 	// con setColumns(), il valore passato è l'indice della dataTable
 	// se setColumns([1,3,5,7]) getViewColumnIndex(7) restituisce 4
 	// Resource.dataViewIndex = Resource.dataViewGrouped.getViewColumnIndex(7);
-	console.log('index della dataTable', Resource.dataTableIndex);
-	// console.log('index della dataGroup', Resource.dataGroupIndex);
 
 	// etichetta colonna, questa viene impostata nella dlg-sheet-config
-	// console.log(Resource.dataViewGrouped.getColumnLabel(Resource.colIndex));
-	console.log(Resource.dataGroup.getColumnLabel(Resource.colIndex));
-	// label della colonna
 	Resource.columnLabel = Resource.dataGroup.getColumnLabel(Resource.colIndex);
 	// datatype della colonna
 	Resource.columnDataType = Resource.dataGroup.getColumnType(Resource.colIndex);
@@ -419,7 +415,6 @@ function handleColumn(e) {
 	// TODO: 04.04.2025 al momento la formattazionie è impostata solo sulle metriche
 	const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.token === Resource.columnId);
 	if (metric) {
-		select__column_format.selectedIndex = 0; // default
 		[...select__column_format.options].forEach((option, index) => {
 			if (option.value === metric.properties.formatter.format) {
 				select__column_format.selectedIndex = index;
@@ -447,18 +442,9 @@ saveColumnConfig.onclick = () => {
 	const fractionDigits = +input__fraction_digits.value;
 	let formatterProperties = {};
 
-	// Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, label);
-	console.log(Resource.dataGroup.getColumnIndex(Resource.columnId));
-	const dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
-	const dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
-	debugger;
-	Resource.dataGroup.setColumnLabel(dataGroupIndex, input__column_label.value);
-	Resource.dataTable.setColumnLabel(dataTableIndex, input__column_label.value);
+	Resource.dataGroup.setColumnLabel(Resource.dataGroupIndex, input__column_label.value);
+	Resource.dataTable.setColumnLabel(Resource.dataTableIndex, input__column_label.value);
 	switch (format) {
-		case 'default':
-			// numero senza decimali e con separatore migliaia
-			formatterProperties = { negativeParens: false, fractionDigits, groupingSymbol: '.' };
-			break;
 		case 'currency':
 			formatterProperties = { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits };
 			break;
@@ -470,50 +456,57 @@ saveColumnConfig.onclick = () => {
 			// Resource.specs.data.formatter[Resource.columnId] = { format: 'date' };
 			break;
 		default:
+			// numero senza decimali e con separatore migliaia
+			formatterProperties = { negativeParens: false, fractionDigits, groupingSymbol: '.' };
 			break;
 	}
 	// console.log(Resource.dataTable.getColumnProperties(Resource.dataTableIndex));
-	const columnType = Resource.dataTable.getColumnProperty(dataTableIndex, 'data');
+	// recupero la proprietà 'p' impostata in prepareData(), qui ho aggiunto :
+	// 'column' : colonne di livelli dimensionali
+	// 'measure' : per le metriche
+	const columnType = Resource.dataTable.getColumnProperty(Resource.dataTableIndex, 'data');
+	// il columnType lo utilizzo per sapere se interrogare l'array ...group.key (colonne dimensionali)
+	// ...oppure l'array group.columns (metriche)
 	if (columnType === 'column') {
+		// cerco, nell'array ...group.key la colonna da modificare, la variabile column è un riferimento
 		const column = Resource.specs.wrapper[Resource.wrapper].group.key.find(col => col.id === Resource.columnId);
-		// WARN: La modifica di Resource.specs.data.columns deve avvenire PRIMA della modifica della proprietà
-		// Resource.specs.wrapper[].group.key, altrimenti non viene trovata. (Stesso discorso per le metriche, sotto)
-		// cerco la colonna tramite il suo id nella prop 'specs.data.columns'
-		for (const values of Object.values(Resource.specs.data.columns)) {
-			if (values.id === column.id && values.label !== input__column_label.value) values.label = input__column_label.value;
+		// ... quindi posso modificarla direttamente
+		column.label = input__column_label.value;
+		for (const value of Object.values(Resource.specs.data.columns)) {
+			if (value.id === column.id && value.label !== input__column_label.value) value.label = input__column_label.value;
 		}
-		if (column) column.label = input__column_label.value;
 		// console.log(Resource.dataGroup.getColumnId(dataGroupIndex));
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)]);
 		// console.log(Resource.dashboardControls[Resource.dataGroup.getColumnIndex(Resource.columnId)].getOptions());
-		Resource.dashboardControls[dataGroupIndex].setOption('filterColumnLabel', input__column_label.value);
-		Resource.dashboardControls[dataGroupIndex].setOption('ui.caption', input__column_label.value);
+		// Modifico le label anche per i controllo associati allo Sheet
+		Resource.dashboardControls[Resource.dataGroupIndex].setOption('filterColumnLabel', input__column_label.value);
+		Resource.dashboardControls[Resource.dataGroupIndex].setOption('ui.caption', input__column_label.value);
+		// Modifico anche l'elemento <li> nella #ul-columns-handler
+		ulColumnsHandler.querySelector(`li[data-column-id='${Resource.columnId}']`).innerText = input__column_label.value;
 	} else {
 		const metric = Resource.specs.wrapper[Resource.wrapper].group.columns.find(metric => metric.token === Resource.columnId);
-		for (const values of Object.values(Resource.specs.data.columns)) {
-			if (values.id === metric.token && values.label !== input__column_label.value) values.label = input__column_label.value;
+		metric.label = input__column_label.value;
+		for (const value of Object.values(Resource.specs.data.columns)) {
+			if (value.id === metric.token && value.label !== input__column_label.value) value.label = input__column_label.value;
 		}
-		// Resource.specs.data.columns[metric.label].label = input__column_label.value;
-		if (metric) metric.label = input__column_label.value;
-		debugger;
 		metric.properties.formatter = { type, format, prop: formatterProperties };
-		let formatter = app[type](formatterProperties);
+		const formatter = app[type](formatterProperties);
 		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
-		formatter.format(Resource.dataTable, Resource.dataTable.getColumnIndex(metric.token));
+		// formatter.format(Resource.dataTable, Resource.dataTable.getColumnIndex(metric.token));
 	}
 	console.log('DataGroup:', Resource.dataGroup);
-	console.log('DataGroup:', Resource.dataTable);
+	console.log('DataTable:', Resource.dataTable);
 
 	// filtri definiti per il report
-	const index = Resource.specs.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(dataGroupIndex));
+	const index = Resource.specs.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(Resource.dataGroupIndex));
 	if (checkbox__column_filter.checked === true) {
 		// Proprietà Resource.specs.filters
 		// Inserisco il filtro solo se non è ancora presente in Resource.specs.filters
 		if (index === -1) {
 			// non è presente, lo aggiungo
 			Resource.specs.filters.push({
-				id: Resource.dataGroup.getColumnId(dataGroupIndex),
-				containerId: `${Resource.specs.token}-${Resource.dataGroup.getColumnId(dataGroupIndex)}`,
+				id: Resource.dataGroup.getColumnId(Resource.dataGroupIndex),
+				containerId: `${Resource.specs.token}-${Resource.dataGroup.getColumnId(Resource.dataGroupIndex)}`,
 				sheet: Resource.specs.token,
 				filterColumnLabel: input__column_label.value,
 				caption: input__column_label.value
@@ -526,29 +519,13 @@ saveColumnConfig.onclick = () => {
 	// definisco il bind in base ai filtri impostati
 	Resource.bind();
 
-	// TODO: Il containerId deve essere deciso in init-dashboard-create.js
-	// Resource.specs.wrapper.containerId = 'chart_div';
 	console.log('specifications : ', Resource.specs);
 	debugger;
 	const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
 	sheet.specs = Resource.specs;
 	window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
-	// window.localStorage.setItem(Resource.specs.token, JSON.stringify(Resource.specs));
-	// le metriche calcolate restituisce -1 per getTableColumnIndex, quindi devo ridisegnare il report
-	// richiamando chartWrapperReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
-	// FIX: 02.04.2025 Quando viene selezionata una colonna calcolata è necessario invocare chartWrapperReady()
-	// per poter rifare i calcoli, questo perchè, nella DataView (legata al chartWrapper) l'index della colonna calcolata è -1
-	// Un altro metodo che si può  utilizzare è questo commentato, converto la DataView in una DataTable, modifico la label e reimposto
-	// il chartWrapper. In questo modo potrò utilizzare sempre il metodo draw() per aggiornare il grafico
-	/* console.log(Resource.chartWrapperView);
-	const dt = Resource.dataViewGrouped.toDataTable();
-	debugger;
-	dt.setColumnLabel(dataGroupIndex, label);
-	Resource.chartWrapperView.setDataTable(dt);
-	Resource.chartWrapperView.draw(); */
-
 	Resource.gdashboard.draw(Resource.dataTable);
-	if (Resource.dashboardControls[dataGroupIndex]) Resource.dashboardControls[dataGroupIndex].draw();
+	if (Resource.dashboardControls[Resource.dataGroupIndex]) Resource.dashboardControls[Resource.dataGroupIndex].draw();
 
 	dlgConfig.close();
 	// la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
@@ -607,10 +584,6 @@ function columnHander(e) {
 	const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
 	sheet.specs = Resource.specs;
 	window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
-	// window.localStorage.setItem(`specs_${Resource.specs.token}`, JSON.stringify(Resource.specs));
-	// Qui dovrò sempre richiamare il chartWrapperReady() perchè devono essere ricalcolate le "colonne generate", in base al nuovo
-	// raggruppamento definito qui
-	// chartWrapperReady();
 	Resource.gdashboard.draw(Resource.dataTable);
 	updatedSheet();
 }

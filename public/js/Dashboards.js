@@ -123,7 +123,7 @@ class Dashboards {
 					}
 				}
 			});
-			console.log(this.filter);
+			// console.log(this.filter);
 			this.chartControls.push(this.filter);
 		});
 
@@ -180,7 +180,6 @@ class Resources extends Dashboards {
 	#data;
 	#resources = new Map();
 	#prepareData = { cols: [], rows: [] };
-	#specs_columns = {};
 	#specs_group = { key: [], columns: [] };
 	#specs = {
 		token: null,
@@ -262,10 +261,10 @@ class Resources extends Dashboards {
 		this.specs.data.columns = {};
 		for (const [token, field] of Sheet.fields) {
 			const groupKey = this.specs.wrapper[this.wrapper].group.key.find(value => value.id === token);
-			// imposto i dati di specs.data.columns
+			// imposto i dati di specs.data.columns, il field.name verrà letto in prepareData() quando
+			// vengono ricevuti i dati dalla query
 			this.specs.data.columns[field.name] = {
 				id: token,
-				// label: groupKey.label || field.name,
 				label: (groupKey) ? groupKey.label : field.name,
 				type: this.getDataType(field.datatype),
 				p: { data: 'column' }
