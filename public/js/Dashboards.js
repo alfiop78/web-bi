@@ -318,7 +318,7 @@ class Resources extends Dashboards {
 			} else {
 				// già presente
 				// imposto solo le proprietà che potrebbero essere state modificate nello Sheet
-				debugger;
+				// debugger;
 				groupColumns.alias = metric.alias;
 				groupColumns.aggregateFn = metric.aggregateFn;
 				groupColumns.dependencies = metric.dependencies;
@@ -329,7 +329,6 @@ class Resources extends Dashboards {
 		console.log(this.specs.data.columns);
 		this.specs.wrapper[this.wrapper].group.key = this.#specs_group.key;
 		this.specs.wrapper[this.wrapper].group.columns = this.#specs_group.columns;
-		debugger;
 		this.bind();
 		const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
 		sheet.specs = this.specs;

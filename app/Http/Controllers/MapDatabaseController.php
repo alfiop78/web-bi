@@ -689,7 +689,7 @@ class MapDatabaseController extends Controller
 	public function datamart(Request $request, $id)
 	{
 		/* $data = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
-    return $data; */
+		return $data; */
 		// ---------- copiato dal metodo preview ----------------
 
 		// dd($id);
@@ -811,6 +811,7 @@ class MapDatabaseController extends Controller
 		}
 	}
 
+
 	private function calcCompositeMetrics()
 	{
 		// dump(!empty((array) $this->query->process->compositeMeasures));
@@ -819,25 +820,55 @@ class MapDatabaseController extends Controller
 				// dd($metric);
 				$sql = [];
 				// converto l'object $metric->metrics in un array per poter controllare con in_array()
-				$metrics = (array) $metric->metrics;
+				// $metrics = (array) $metric->metrics;
 				// ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
+				// TODO: 08.04.2025 provare con array_walk_recursive o qualche altra funzione ricorsiva per gli array
+				function recursive($el, $metrics, $ifNullOperator)
+				{
+					if (is_array($el)) {
+						foreach ($el as $nestedElement) {
+							// dump($nestedElement);
+							if (is_array($nestedElement)) {
+								$sql[] = recursive($nestedElement, $metrics, $ifNullOperator);
+							} else {
+								$sql[] = (in_array($nestedElement, $metrics)) ? "{$ifNullOperator}({$nestedElement}, 0)" : trim($nestedElement);
+							}
+						}
+					} else {
+						$sql[] = (in_array($el, $metrics)) ? "{$ifNullOperator}({$el}, 0)" : trim($el);
+						// return (in_array($el, $metrics)) ? "{$ifNullOperator}({$el}, 0)" : trim($el);
+					}
+					// dump('recursive');
+					// dump($sql);
+					// return $sql;
+					return implode(' ', $sql);
+				}
 				foreach ($metric->SQL as $element) {
-					// dd($element);
+					// dump($element);
 					// se l'elemento in ciclo è un array si tratta di una metrica composta NIDIFICATA, effettuo la stessa operazione
 					// dump($element);
 					if (is_array($element)) {
 						// metrica composta nidificata
 						// BUG: 02.04.2025 errore in metriche composte nidificate con più di un livello
-						foreach ($element as $el) {
-							$sql[] = (in_array($el, $metrics)) ? "{$this->query->ifNullOperator}({$el}, 0)" : trim($el);
+						// dump($element);
+						foreach ($element as $nestedElement) {
+							if (is_array($nestedElement)) {
+								// dump($nestedElement);
+								$sql[] = recursive($nestedElement, $metric->metrics, $this->query->ifNullOperator);
+								// dump($sql);
+							} else {
+								$sql[] = (in_array($nestedElement, $metric->metrics)) ? "{$this->query->ifNullOperator}({$nestedElement}, 0)" : trim($nestedElement);
+								// dump($sql);
+							}
 						}
+						// dd($sql);
 					} else {
 						// metrica composta "semplice"
 						// se nella formula è presente il simbolo della divisione, tutte le metriche susseguenti avranno il CASE...WHEN
 						if (in_array("/", $sql)) {
-							$sql[] = (in_array($element, $metrics)) ? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$element} END" : trim($element);
+							$sql[] = (in_array($element, $metric->metrics)) ? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$element} END" : trim($element);
 						} else {
-							$sql[] = (in_array($element, $metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);
+							$sql[] = (in_array($element, $metric->metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);
 						}
 					}
 				}
@@ -854,6 +885,7 @@ class MapDatabaseController extends Controller
 				// dd($this->query->compositeMeasures);
 				// dump($this->query->compositeMeasures);
 			}
+			// dd($this->query->compositeMeasures);
 		}
 	}
 
@@ -885,6 +917,7 @@ class MapDatabaseController extends Controller
 			}
 			// calcolo metriche composte
 			$this->calcCompositeMetrics();
+			// dd($this->query->compositeMeasures);
 			return $this->query->datamart_new();
 		} catch (\Throwable $th) {
 			// abort(500);
