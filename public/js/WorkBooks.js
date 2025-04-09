@@ -37,6 +37,7 @@ class Sheets {
 		this.#fields.set(object.token, {
 			id: object.token,
 			name: object.name,
+			factId: object.factId,
 			SQL: object.SQL,
 			time: object.time,
 			datatype: object.datatype
@@ -525,12 +526,13 @@ class WorkBooks {
 					default:
 						fields[token] = {
 							token,
+							type: 'column',
 							name: col.column_name,
+							tableId: table.id,
 							table: table.dataset.table,
 							tableAlias: table.dataset.alias,
 							schema: table.dataset.schema,
-							tableId: table.id,
-							type: 'column',
+							factId: table.dataset.factId,
 							origin_field: col.column_name,
 							datatype: col.type_name,
 							constraint: col.constraint_name,

@@ -179,6 +179,7 @@ function columnSave(e) {
 		table: WorkBook.activeTable.dataset.table,
 		tableAlias: WorkBook.activeTable.dataset.alias,
 		schema: WorkBook.activeTable.dataset.schema,
+		factId: WorkBook.activeTable.dataset.factId,
 		cssClass: 'custom',
 		datatype: 'varchar',
 		tables: [],
@@ -415,6 +416,7 @@ function createColumnDefined(token) {
 	const btnRemove = field.querySelector('button[data-remove]');
 	const btnUndo = field.querySelector('button[data-undo]');
 	field.dataset.label = Sheet.fields.get(token).name;
+	field.dataset.factId = Sheet.fields.get(token).factId;
 	field.addEventListener('dragstart', handleDragStart, false);
 	field.addEventListener('dragenter', handleDragEnter, false);
 	field.addEventListener('dragleave', handleDragLeave, false);
@@ -433,6 +435,8 @@ function createColumnDefined(token) {
 	// TODO: da aggiungere in fase di creazione del process
 	// Sheet.tables = WorkBook.fields.get(token).tableAlias;
 	Sheet.tables = WorkBook.elements.get(token).tableAlias;
+	debugger;
+	Sheet.fact.add(field.dataset.factId);
 	return field;
 }
 
@@ -487,6 +491,7 @@ function handleRowDrop(e) {
 	Sheet.fields = {
 		token,
 		SQL: element.SQL,
+		factId: element.factId,
 		name: element.name,
 		datatype: element.datatype,
 		time: (element.time) ? { table: element.table } : false
@@ -1867,7 +1872,7 @@ function checkRemoveMetrics(token) {
 			// se la metrica in ciclo è una composite,
 			// ed è inclusa nella metrica composite in ciclo
 			// non la elimino
-				// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
+			// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
 			if (sheetMetric.metrics.hasOwnProperty(token)) {
 				// la metrica che si sta eliminando è contenuta in una metrica composta.
 				return true;

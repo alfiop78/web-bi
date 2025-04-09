@@ -289,62 +289,64 @@ class Cube
 	{
 		// $this->select_new();
 		// dd(!empty($this->process->baseMeasures));
+		// if (!empty($this->process->baseMeasures)) {
+		// dd("metriche di base presenti");
+		$sql = NULL;
+		// dump("calcolo metriche di base");
+		// dump($this->process->baseMeasures);
 		if (!empty($this->process->baseMeasures)) {
-			// dd("metriche di base presenti");
-			$sql = NULL;
-			// dump("calcolo metriche di base");
-			// dump($this->process->baseMeasures);
 			if (property_exists($this->process->baseMeasures, $this->fact)) {
 				// metriche per la fact in ciclo presenti
 				$this->baseMeasures = $this->process->baseMeasures->{$this->fact};
 				$this->metrics_new();
 			}
-			// $this->from_new();
-			// $this->where_new();
-			// $this->createFilters();
-			// $this->groupBy_new();
-			$sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
-			// aggiungo, alla clausola SELECT di $this->baseQuerySQL, le metriche di base da calcolare
-			if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
-			$sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
-			// dd(empty($this->where_clause));
-			if (array_key_exists($this->factId, $this->where_time_clause)) {
-				$sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
-			} elseif (!empty($this->where_clause)) {
-				$sql .= self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
-			} else {
-				$sql .= self::WHERE . "TRUE";
-			}
-			// dd($sql);
-			if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
-			$sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
-			$this->queries[$this->baseTableName] = $this->datamart_fields;
-			// dd($this->queries);
-			$comment = "/*\nCreazione tabella per calcolo ... :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-			// dump($sql);
-			// dd($sql);
-			// ob_flush()
-			switch (session('db_driver')) {
-				case 'odbc':
-					$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
-					break;
-				case 'mysql':
-					$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} AS ($sql);";
-					break;
-				default:
-					break;
-			}
-			// dd($createStmt);
-			// var_dump($query);
-			// dump($createStmt);
-			if (property_exists($this, 'sql_info')) {
-				return ["raw_sql" => nl2br($createStmt), "format_sql" => $this->sql_info];
-				// dd($createStmt);
-				// dd($this->sql_info);
-			} else {
-				return DB::connection(session('db_client_name'))->statement($createStmt);
-			}
 		}
+		// $this->from_new();
+		// $this->where_new();
+		// $this->createFilters();
+		// $this->groupBy_new();
+		$sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
+		// aggiungo, alla clausola SELECT di $this->baseQuerySQL, le metriche di base da calcolare
+		if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
+		$sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
+		// dd(empty($this->where_clause));
+		if (array_key_exists($this->factId, $this->where_time_clause)) {
+			$sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+		} elseif (!empty($this->where_clause)) {
+			$sql .= self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
+		} else {
+			$sql .= self::WHERE . "TRUE";
+		}
+		// dd($sql);
+		if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
+		$sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
+		$this->queries[$this->baseTableName] = $this->datamart_fields;
+		// dd($this->queries);
+		$comment = "/*\nCreazione tabella per calcolo ... :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
+		// dump($sql);
+		// dd($sql);
+		// ob_flush()
+		switch (session('db_driver')) {
+			case 'odbc':
+				$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
+				break;
+			case 'mysql':
+				$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} AS ($sql);";
+				break;
+			default:
+				break;
+		}
+		dd($createStmt);
+		// var_dump($query);
+		// dump($createStmt);
+		if (property_exists($this, 'sql_info')) {
+			return ["raw_sql" => nl2br($createStmt), "format_sql" => $this->sql_info];
+			// dd($createStmt);
+			// dd($this->sql_info);
+		} else {
+			return DB::connection(session('db_client_name'))->statement($createStmt);
+		}
+		// }
 	}
 
 	// Aggiunta di tabelle "provenienti" dalle metriche avanzate

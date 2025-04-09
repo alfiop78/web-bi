@@ -893,6 +893,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 		let process = {}, fields = {}, filters = {};
 		process.hierarchiesTimeLevel = null;
+		debugger;
 		process.facts = [...Sheet.fact];
 		for (const [token, field] of Sheet.fields) {
 			// verifico le tabelle da includere in tables Sheet.tables
@@ -921,11 +922,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		try {
 			Sheet.fact.forEach(factId => {
 				let advancedMeasures = new Map(), baseMeasures = new Map();
-				// es. :
-				// baseMeasures : {
-				//  fact-1 : {object di metriche di base}
-				//  fact-2 : {object di metriche di base}
-				// }
 				for (const [token, metric] of Sheet.metrics) {
 					const wbMetrics = WorkBook.elements.get(token);
 					switch (metric.type) {
@@ -1010,6 +1006,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 		process.filters = filters;
 		app.setSheet();
+		debugger;
 		process.from = Sheet.from;
 		process.joins = Sheet.joins;
 
