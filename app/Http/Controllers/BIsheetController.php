@@ -111,6 +111,7 @@ class BIsheetController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('name');
+    $userId = $request->collect()->get('userId');
     // codifico tutta la $request in json per poterla inserire nel DB
     $specs = json_encode($request->collect()->get('specs'));
     // WARN: in questo caso salvo specs anche qui, da rivedere, probabilmente
@@ -118,10 +119,11 @@ class BIsheetController extends Controller
     $json = json_encode($request->all());
     // cerco nel DB il token del PROCESS da aggiornare
     $sheet = $bIsheet::findOrFail($token);
-    $sheet->token = $token;
+    // $sheet->token = $token;
     $sheet->name = $name;
     $sheet->json_value = $json;
     $sheet->json_specs = $specs;
+    $sheet->userId = $userId;
     return $sheet->save();
   }
 

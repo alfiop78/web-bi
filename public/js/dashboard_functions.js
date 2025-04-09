@@ -45,7 +45,7 @@ function dashboardDraw() {
 				chartWrapper.setOption('height', 'auto');
 				chartWrapper.setOption('pageSize', 15);
 			}
-			// effettuo il raggruppamento deciso in fase di creazione report e creo la DataViewGroup
+			/* // effettuo il raggruppamento deciso in fase di creazione report e creo la DataViewGroup
 			Resource.group = wrapper.group;
 			const dataGroup = Resource.createDataTableGrouped();
 			Resource.createDataViewGrouped(dataGroup);
@@ -55,7 +55,8 @@ function dashboardDraw() {
 			// utilizzando i nomi di colonna anzichè gli indici (che sono diversi tra DataTable/DataGroup)
 			const dataView = new google.visualization.DataView(Resource.dataTable);
 			dataView.setColumns(Resource.viewDefined);
-			chartWrapper.setView(dataView);
+			chartWrapper.setView(dataView); */
+
 			// console.log(chartWrapper.getView());
 			// google.visualization.events.addListener(chartWrapper, 'ready', ready);
 			wrappers.push(chartWrapper);
@@ -95,15 +96,17 @@ function ready() {
 		// quando si utilizzano i filtri, passo a createDataTableGrouped() una DataTable già filtrata.
 		// Valutare se utilizzare l'index del wrapper in ciclo perchè se, in una dashboard si decide che il primo
 		// grafico NON è influenzato dai filtri, qui non funzionerà con wrappers[0]
-		const dataGroup = Resource.createDataTableGrouped(wrappers[0].getDataTable());
-		Resource.createDataViewGrouped(dataGroup);
+		Resource.chartWrapper = wrappers[0];
+		// const dataGroup = Resource.createDataTableGrouped(wrappers[0].getDataTable());
+		Resource.dataGroup = Resource.createDataTableGrouped();
+		Resource.createDataViewGrouped();
 		// console.log(dataGroup);
 		// ridisegno utilizzando il chartWrapper
 		let redraw = new google.visualization.ChartWrapper({
 			chartType: wrapper.chartType,
 			containerId: wrapper.containerId,
 			options: wrapper.options,
-			dataTable: Resource.dataViewGrouped
+			dataTable: Resource.dataViewFinal
 			// dataTable: dataGroup
 		});
 		document.querySelector('#title__main').innerText = Resource.json.title;

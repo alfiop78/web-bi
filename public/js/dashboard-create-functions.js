@@ -1,4 +1,18 @@
 let wrappers = [];
+let app = {
+	number: function(properties) {
+		return new google.visualization.NumberFormat(properties);
+		// TEST: per provare il colore sui numeri negativi (non funziona, da rivedere 20.09.2024)
+		/* const prop = {
+		  fractionDigits: 0,
+		  negativeColor: 'red',
+		  negativeParens: true,
+		  groupingSymbol: '.',
+		  // suffix: ' €'
+		};
+		return new google.visualization.NumberFormat(prop); */
+	}
+}
 function getDataView() {
 	// esempio utilizzato senza impostare le metriche contenute nelle composite
 	console.log('onReady');
@@ -39,16 +53,16 @@ function drawDashboard() {
 				chartWrapper.setOption('pageSize', 15);
 			}
 			// effettuo il raggruppamento deciso in fase di creazione report e creo la DataViewGroup
-			Resource.group = wrapper.group;
-			const dataGroup = Resource.createDataTableGrouped();
-			Resource.createDataViewGrouped(dataGroup);
+			/* Resource.group = wrapper.group;
+			Resource.dataGroup = Resource.createDataTableGrouped();
+			Resource.createDataViewGrouped();
 			// ... a questo punto gli indici di colonna della Resource.dataViewGrouped non
 			// corrispondono più alla DataTable che viene disegnata dalla Dashboard (sotto, Resource.dataTable)
 			// per cui creo un ulteriore DataView che, con il setColumns(), imposta le colonne corrette riferendosi alla Resource.dataTable
 			// utilizzando i nomi di colonna anzichè gli indici (che sono diversi tra DataTable/DataGroup)
 			const dataView = new google.visualization.DataView(Resource.dataTable);
 			dataView.setColumns(Resource.viewDefined);
-			chartWrapper.setView(dataView);
+			chartWrapper.setView(dataView); */
 			wrappers.push(chartWrapper);
 		}
 		gdashboard.bind(controls, wrappers);
@@ -69,23 +83,27 @@ function dashboardReady() {
 		// quando si utilizzano i filtri, passo a createDataTableGrouped() una DataTable già filtrata.
 		// Valutare se utilizzare l'index del wrapper in ciclo perchè se, in una dashboard si decide che il primo
 		// grafico NON è influenzato dai filtri, qui non funzionerà con wrappers[0]
-		const dataGroup = Resource.createDataTableGrouped(wrappers[0].getDataTable());
-		Resource.createDataViewGrouped(dataGroup);
+		Resource.chartWrapper = wrappers[0];
+		Resource.dataGroup = Resource.createDataTableGrouped();
+		// const dataGroup = Resource.createDataTableGrouped(wrappers[0].getDataTable());
+		Resource.createDataViewGrouped();
 		// console.log(dataGroup);
 		// ridisegno utilizzando il chartWrapper
 		let redraw = new google.visualization.ChartWrapper({
 			chartType: wrapper.chartType,
 			containerId: wrapper.containerId,
 			options: wrapper.options,
-			dataTable: Resource.dataViewGrouped
+			dataTable: Resource.dataViewFinal
 			// dataTable: dataGroup
 		});
 		redraw.draw();
 	}
 }
 
-// invocata da sheetSelected, apertura di un singolo report
+// invocata da sheetSelected, apertura di un singolo report in fase di creazione dashboard
 function draw() {
+	console.log('TIMER START', new Date());
+	const start_time_execution = new Date();
 	// Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
 	// è consentità con la DataView perchè questa è read-only
 	Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
@@ -129,16 +147,21 @@ function draw() {
 	gdashboard.bind(controls, Resource.chartWrapper);
 	google.visualization.events.addListener(gdashboard, 'ready', onReady);
 	gdashboard.draw(Resource.dataTable);
+	console.log('TIMER END', new Date());
+	console.info(`ExecutionTime : ${new Date() - start_time_execution}ms`);
 }
 
 function onReady() {
-	// esempio utilizzato senza impostare le metriche contenute nelle composite
 	console.log('onReady');
+	console.log('TIMER START (ready)', new Date());
+	const start_time_execution = new Date();
+	// esempio utilizzato senza impostare le metriche contenute nelle composite
 	// let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
 	// console.log(groupColumnsIndex);
 	// Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
 	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
-	const dataGroup = Resource.createDataTableGrouped(Resource.chartWrapper.getDataTable());
+	Resource.dataGroup = Resource.createDataTableGrouped();
+	Resource.createDataViewGrouped();
 	Resource.chartWrapperView = new google.visualization.ChartWrapper();
 	Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
 	Resource.chartWrapperView.setContainerId(Resource.ref.id);
@@ -163,14 +186,14 @@ function onReady() {
 	}
 	// formatter
 	/* Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
-	  let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-	  formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
 	}); */
 
-	Resource.createDataViewGrouped(dataGroup);
-
-	Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
+	Resource.chartWrapperView.setDataTable(Resource.dataViewFinal);
 	Resource.chartWrapperView.draw();
+	console.log('TIMER END', new Date());
+	console.info(`ExecutionTime (ChartWrapperReady) : ${new Date() - start_time_execution}ms`);
 }
 
 function openGenerateUrl(e) {

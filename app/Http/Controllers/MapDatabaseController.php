@@ -830,9 +830,6 @@ class MapDatabaseController extends Controller
 						}
 					}
 				}
-				// dump('recursive');
-				// dump($sql);
-				// return $sql;
 				// return implode(' ', $sql);
 				return implode($sql);
 			}

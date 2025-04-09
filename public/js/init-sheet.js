@@ -511,6 +511,10 @@ saveColumnConfig.onclick = () => {
 				filterColumnLabel: input__column_label.value,
 				caption: input__column_label.value
 			});
+		} else {
+			// il Filtro è gia presente sulla dashboard, ne aggiorno la filterColumnLabel
+			const dashboard_filter = Resource.specs.filters.find(filter => filter.id === Resource.dataGroup.getColumnId(Resource.dataGroupIndex));
+			dashboard_filter.filterColumnLabel = input__column_label.value;
 		}
 	} else {
 		// rimozione del filtro, se presente
