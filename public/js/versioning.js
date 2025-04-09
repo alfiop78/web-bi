@@ -44,7 +44,10 @@ var Storage = new SheetStorages();
 		for (const [type, elements] of Object.entries(data)) {
 			// console.log(elements);
 			elements.forEach(element => {
-				const dbElement = JSON.parse(element.json_value);
+				// TODO: 09.04.2025 invece di recuperare tutto il json_value, implementare, come fatto in BisheetController->index()
+				// un result che restituisce solo i dati che servono qui (updated_at, type, workbook_ref, ecc...)
+				const dbElement = (type === "sheet") ? element : JSON.parse(element.json_value);
+				// const dbElement = JSON.parse(element.json_value);
 				const localElement = JSON.parse(localStorage.getItem(dbElement.token));
 				// console.log(element, element.token);
 				// verifico lo stato dell'elemento in ciclo rispetto al localStorage
@@ -94,6 +97,7 @@ var Storage = new SheetStorages();
 				}))
 			})
 			.then((data) => {
+			debugger;
 				data.forEach((elementData) => app.checkObjects(elementData));
 			})
 			.catch(err => console.error(err));
@@ -207,6 +211,7 @@ var Storage = new SheetStorages();
 						if (type === 'sheet') {
 							// aggiungo le specs alla proprietà 'specs' all'interno del json
 							const specs = JSON.parse(json.json_specs);
+						debugger;
 							const sheet = JSON.parse(json.json_value);
 							sheet.specs = specs;
 							Storage.save(sheet);

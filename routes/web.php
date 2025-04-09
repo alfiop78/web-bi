@@ -132,14 +132,6 @@ Route::prefix('/fetch_api/versioning/')->group(function () {
 	Route::get('filters', [BIfilterController::class, 'index']);
 	Route::get('dashboards', [BIdashboardController::class, 'index']);
 });
-// index
-Route::prefix('/fetch_api/versioning/')->group(function () {
-  Route::get('workbooks', [BIworkbookController::class, 'index']);
-  Route::get('sheets', [BIsheetController::class, 'index']);
-  Route::get('metrics', [BImetricController::class, 'index']);
-  Route::get('filters', [BIfilterController::class, 'index']);
-  Route::get('dashboards', [BIdashboardController::class, 'index']);
-});
 
 // store
 Route::post('/fetch_api/connections/store', [BIConnectionsController::class, 'store'])->name('connection.store');
