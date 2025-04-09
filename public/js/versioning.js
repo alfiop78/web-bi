@@ -97,7 +97,6 @@ var Storage = new SheetStorages();
 				}))
 			})
 			.then((data) => {
-			debugger;
 				data.forEach((elementData) => app.checkObjects(elementData));
 			})
 			.catch(err => console.error(err));
@@ -210,10 +209,21 @@ var Storage = new SheetStorages();
 					data.forEach(json => {
 						if (type === 'sheet') {
 							// aggiungo le specs alla proprietà 'specs' all'interno del json
-							const specs = JSON.parse(json.json_specs);
+							console.log(json);
+							const sheet_properties = JSON.parse(json.json_value);
 						debugger;
-							const sheet = JSON.parse(json.json_value);
-							sheet.specs = specs;
+						return;
+							let sheet = {
+								created_at: sheet_properties.created_at,
+								facts: sheet_properties.facts,
+								id: json.datamartId,
+								name: json.name,
+							};
+							console.log(sheet_properties);
+							sheet.token = json.token;
+							sheet.factId = sheet.factId;
+							sheet.specs = JSON.parse(json.json_specs);
+							debugger;
 							Storage.save(sheet);
 						} else {
 							Storage.save(JSON.parse(json.json_value))
@@ -242,6 +252,8 @@ var Storage = new SheetStorages();
 		document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
 			const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
 			tokens.push(el.dataset.id);
+			console.log(json);
+			debugger;
 			const params = JSON.stringify(json);
 			const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
 			requests.push(new Request(`/fetch_api/json/${type}_store`, init));
@@ -283,6 +295,10 @@ var Storage = new SheetStorages();
 		document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
 			const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
 			tokens.push(el.dataset.id);
+			console.log(json);
+			console.log(new Date(json.updated_at));
+			console.log(Date.parse(json.updated_at));
+			debugger;
 			const params = JSON.stringify(json);
 			const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
 			requests.push(new Request(`/fetch_api/json/${type}_update`, init));

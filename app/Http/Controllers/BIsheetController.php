@@ -28,7 +28,7 @@ class BIsheetController extends Controller
 			->where('bi_workbooks.connectionId', session('db_id'))
 			->join('bi_workbooks', 'bi_sheets.workbookId', '=', 'bi_workbooks.token')->get();
 		// restituisco solo i dati necessari anzichè tutto il json_value
-		foreach($sheets->collect() as $sheet) {
+		foreach ($sheets->collect() as $sheet) {
 			$result[] = [
 				"name" => $sheet->name,
 				"token" => $sheet->token,
@@ -68,27 +68,34 @@ class BIsheetController extends Controller
 	 */
 	public function store(Request $request)
 	{
-		$token = $request->collect()->get('token');
-		$name = $request->collect()->get('name');
-		$workbookId = $request->collect()->get('workbook_ref');
-		$userId = $request->collect()->get('userId');
-		$datamartId = $request->collect()->get('id'); // datamartId
+		// $token = $request->collect()->get('token');
+		// $name = $request->collect()->get('name');
+		// $workbookId = $request->collect()->get('workbook_ref');
+		// $userId = $request->collect()->get('userId');
+		// $datamartId = $request->collect()->get('id'); // datamartId
 		// codifico tutta la $request in json per poterla inserire nel DB
 		// dd($request->all());
+		// separo le specifiche (proprietà 'specs') dalla proprietà 'sheet'
+		// Alla proprietà 'sheet' però, vanno aggiunti alcune proprietà
 		$specs = json_encode($request->collect()->get('specs'));
-		// WARN: in questo caso salvo specs anche qui, da rivedere, probabilmente
-		// dovrò creare due proprietà separate nel localStorage (sheet e specs)
-		$json = json_encode($request->all());
-		dd($json);
+		// $json = json_encode($request->all());
+		$sheet_properties = $request->collect()->get('sheet');
+		$sheet_properties['updated_at'] = $request->collect()->get('updated_at');
+		$sheet_properties['created_at'] = $request->collect()->get('created_at');
+		$sheet_properties['type'] = $request->collect()->get('type');
+		$sheet_properties['facts'] = $request->collect()->get('facts');
+		// le codifico in json per poterle inserire nella colonna json_value
+		$sheet_property = json_encode($sheet_properties);
+		// dd($json);
 		$sheet = new BIsheet();
 		// salvo su DB
-		$sheet->token = $token;
-		$sheet->name = $name;
-		$sheet->json_value = $json;
+		$sheet->token = $request->collect()->get('token');
+		$sheet->name = $request->collect()->get('name');
+		$sheet->json_value = $sheet_property;
 		$sheet->json_specs = $specs;
-		$sheet->workbookId = $workbookId;
-		$sheet->userId = $userId;
-		$sheet->datamartId = $datamartId;
+		$sheet->workbookId = $request->collect()->get('workbook_ref');
+		$sheet->userId = $request->collect()->get('userId');
+		$sheet->datamartId = $request->collect()->get('id');
 		return $sheet->save();
 	}
 
@@ -124,23 +131,26 @@ class BIsheetController extends Controller
 	 */
 	public function update(Request $request, BIsheet $bIsheet)
 	{
+		// $json = json_encode($request->all());
 		$token = $request->collect()->get('token');
-		$name = $request->collect()->get('name');
-		$userId = $request->collect()->get('userId');
-		// codifico tutta la $request in json per poterla inserire nel DB
-		$specs = json_encode($request->collect()->get('specs'));
-		$sheet_property = json_encode($request->collect()->get('sheet'));
-		// WARN: in questo caso salvo specs anche qui, da rivedere, probabilmente
-		// dovrò creare due proprietà separate nel localStorage (sheet e specs)
-		$json = json_encode($request->all());
+		// $sheet_properties = $request->collect()->get('sheet');
+		// $sheet_properties['updated_at'] = $request->collect()->get('updated_at');
+		// $sheet_properties['created_at'] = $request->collect()->get('created_at');
+		// $sheet_properties['type'] = $request->collect()->get('type');
+		// $sheet_properties['facts'] = $request->collect()->get('facts');
+		// $sheet_property = json_encode($request->collect()->get('sheet'));
+		// $sheet_property = json_encode($sheet_properties);
+		// dd($sheet_property);
 		// dd($json);
 		// cerco nel DB il token del PROCESS da aggiornare
 		$sheet = $bIsheet::findOrFail($token);
-		// $sheet->token = $token;
-		$sheet->name = $name;
-		$sheet->json_value = $sheet_property;
-		$sheet->json_specs = $specs;
-		$sheet->userId = $userId;
+		$sheet->name = $request->collect()->get('name');
+		$sheet->json_value = json_encode($request->collect()->get('sheet'));
+		$sheet->json_specs = json_encode($request->collect()->get('specs'));
+		$sheet->json_facts = json_encode($request->collect()->get('facts'));
+		$sheet->userId = $request->collect()->get('userId');
+		$sheet->sheet_created_at = $request->collect()->get('created_at');
+		$sheet->sheet_updated_at = $request->collect()->get('updated_at');
 		return $sheet->save();
 	}
 
