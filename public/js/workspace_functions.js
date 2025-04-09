@@ -1100,7 +1100,8 @@ function compositeMetricSave(e) {
 	const alias = document.getElementById('composite-metric-name').value;
 	const date = new Date().toLocaleDateString('it-IT', options);
 	let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: new Set(), metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
-	object.formula = textarea__composite_metric.firstChild.textContent.split(/\b/);
+	// regex : ottengo i bounduary delle word (\b) e anche quelli dei caratteri non-word (\W)
+	object.formula = textarea__composite_metric.firstChild.textContent.split(/\b|(?=[\W])/g);
 	console.log(object.formula);
 	// ottengo i token delle metriche che compongono la metrica composta
 	object.formula.forEach(el => {
@@ -1111,14 +1112,11 @@ function compositeMetricSave(e) {
 			switch (metricFormula.metric_type) {
 				case 'composite':
 					// metrica composte nidificata
+					// La proprietà SQL della metrica annidata è già formattata con i token delle metriche
 					object.SQL.push(metricFormula.SQL);
-					const nested_metric = WorkBook.elements.get(metricFormula.token).metrics;
-					nested_metric.forEach(metric => {
+					WorkBook.elements.get(metricFormula.token).metrics.forEach(metric => {
 						object.metrics.add(metric);
 					});
-					/* for (const [token, metric] of Object.entries(WorkBook.elements.get(metricFormula.token).metrics)) {
-						object.metrics[token] = metric;
-					} */
 					break;
 				default:
 					// base / advanced

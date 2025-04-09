@@ -816,57 +816,44 @@ class MapDatabaseController extends Controller
 	{
 		// dump(!empty((array) $this->query->process->compositeMeasures));
 		if (!empty((array) $this->query->process->compositeMeasures)) {
+			function recursive($el, $metrics, $ifNullOperator)
+			{
+				foreach ($el as $nestedElement) {
+					if (is_array($nestedElement)) {
+						// metrica composta annidata
+						$sql[] = recursive($nestedElement, $metrics, $ifNullOperator);
+					} else {
+						if (in_array("/", $el)) {
+							$sql[] = (in_array($nestedElement, $metrics)) ? "CASE WHEN {$ifNullOperator}({$nestedElement}, 0) = 0 THEN NULL ELSE {$ifNullOperator}({$nestedElement}, 0) END" : trim($nestedElement);
+						} else {
+							$sql[] = (in_array($nestedElement, $metrics)) ? "{$ifNullOperator}({$nestedElement}, 0)" : trim($nestedElement);
+						}
+					}
+				}
+				// dump('recursive');
+				// dump($sql);
+				// return $sql;
+				// return implode(' ', $sql);
+				return implode($sql);
+			}
 			foreach ($this->query->process->compositeMeasures as $metric) {
 				// dd($metric);
 				$sql = [];
-				// converto l'object $metric->metrics in un array per poter controllare con in_array()
-				// $metrics = (array) $metric->metrics;
-				// ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
-				// TODO: 08.04.2025 provare con array_walk_recursive o qualche altra funzione ricorsiva per gli array
-				function recursive($el, $metrics, $ifNullOperator)
-				{
-					if (is_array($el)) {
-						foreach ($el as $nestedElement) {
-							// dump($nestedElement);
-							if (is_array($nestedElement)) {
-								$sql[] = recursive($nestedElement, $metrics, $ifNullOperator);
-							} else {
-								$sql[] = (in_array($nestedElement, $metrics)) ? "{$ifNullOperator}({$nestedElement}, 0)" : trim($nestedElement);
-							}
-						}
-					} else {
-						$sql[] = (in_array($el, $metrics)) ? "{$ifNullOperator}({$el}, 0)" : trim($el);
-						// return (in_array($el, $metrics)) ? "{$ifNullOperator}({$el}, 0)" : trim($el);
-					}
-					// dump('recursive');
-					// dump($sql);
-					// return $sql;
-					return implode(' ', $sql);
-				}
+				// TODO: 09.04.2025 potrei utilizzare un metodo, per ifNullOperator, che restituisce la stringa racchiusa da NVL (o IFNULL) anziché la proprietà
+				// nella Classe Cube
 				foreach ($metric->SQL as $element) {
 					// dump($element);
 					// se l'elemento in ciclo è un array si tratta di una metrica composta NIDIFICATA, effettuo la stessa operazione
 					// dump($element);
 					if (is_array($element)) {
-						// metrica composta nidificata
-						// BUG: 02.04.2025 errore in metriche composte nidificate con più di un livello
-						// dump($element);
-						foreach ($element as $nestedElement) {
-							if (is_array($nestedElement)) {
-								// dump($nestedElement);
-								$sql[] = recursive($nestedElement, $metric->metrics, $this->query->ifNullOperator);
-								// dump($sql);
-							} else {
-								$sql[] = (in_array($nestedElement, $metric->metrics)) ? "{$this->query->ifNullOperator}({$nestedElement}, 0)" : trim($nestedElement);
-								// dump($sql);
-							}
-						}
-						// dd($sql);
+						// metrica composta annidata
+						$sql[] = recursive($element, $metric->metrics, $this->query->ifNullOperator);
 					} else {
 						// metrica composta "semplice"
 						// se nella formula è presente il simbolo della divisione, tutte le metriche susseguenti avranno il CASE...WHEN
+						// BUG: quando l'elemento dell'array è ") /" l'operatore della divisione non viene trovato
 						if (in_array("/", $sql)) {
-							$sql[] = (in_array($element, $metric->metrics)) ? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$element} END" : trim($element);
+							$sql[] = (in_array($element, $metric->metrics)) ? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->query->ifNullOperator}({$element}, 0) END" : trim($element);
 						} else {
 							$sql[] = (in_array($element, $metric->metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);
 						}
@@ -874,9 +861,9 @@ class MapDatabaseController extends Controller
 				}
 				// dd($sql);
 				// WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
-				$sql_string = implode(' ', $sql);
-				// $sql_string = implode($sql);
-				// dd($sql_string);
+				// $sql_string = implode(' ', $sql);
+				$sql_string = implode($sql);
+				// dump($sql_string);
 				// if ($metric->alias === 'test_issue245_1') dd($sql_string);
 				// racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
 				// Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
