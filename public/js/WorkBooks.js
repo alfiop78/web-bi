@@ -121,7 +121,7 @@ class Sheets {
 		// Se, in Map() ho ordinato id, descrizione, in Storage potrei vedere descrizione, id perchè l'object {} visualizza
 		// l'ordine alfabetico
 		for (const [token, object] of Object.entries(SheetStorage.sheet.sheet.fields)) {
-			this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, time: (object.time) ? { table: object.time.table } : false };
+			this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, factId: object.factId, time: (object.time) ? { table: object.time.table } : false };
 		}
 
 		// from

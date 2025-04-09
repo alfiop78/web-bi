@@ -432,10 +432,7 @@ function createColumnDefined(token) {
 	code.dataset.token = token;
 	code.innerText = Sheet.fields.get(token).name;
 	// aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
-	// TODO: da aggiungere in fase di creazione del process
-	// Sheet.tables = WorkBook.fields.get(token).tableAlias;
 	Sheet.tables = WorkBook.elements.get(token).tableAlias;
-	debugger;
 	Sheet.fact.add(field.dataset.factId);
 	return field;
 }
@@ -476,6 +473,8 @@ function createMetricDefined(token) {
 
 // drop nella #dropzone-rows
 function handleRowDrop(e) {
+	// WARN: impostare un debugger in questa Fn non "accende" l'evento handleDragEnd. Quando si vuole analizzare
+	// in debug, meglio aggiungerlo in handleDragEnd
 	if (e.stopPropagation) e.stopPropagation();
 	e.preventDefault();
 	// console.log('DROP : ',elementAt);
@@ -487,12 +486,11 @@ function handleRowDrop(e) {
 	// droppato (colonna già droppata)
 	const element = WorkBook.elements.get(token);
 	console.log(element);
-	debugger;
 	Sheet.fields = {
 		token,
 		SQL: element.SQL,
 		factId: element.factId,
-		name: element.name,
+		name: (Sheet.fields.has(token)) ? Sheet.fields.get(token).name : element.name,
 		datatype: element.datatype,
 		time: (element.time) ? { table: element.table } : false
 	};
@@ -616,6 +614,7 @@ function handleDragEnd(e) {
 		if (!fieldsClone.has(field.dataset.id)) return;
 		Sheet.fields = {
 			token: field.dataset.id,
+			factId: fieldsClone.get(field.dataset.id).factId,
 			name: fieldsClone.get(field.dataset.id).name,
 			SQL: fieldsClone.get(field.dataset.id).SQL,
 			time: fieldsClone.get(field.dataset.id).time,

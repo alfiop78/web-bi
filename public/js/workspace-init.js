@@ -893,13 +893,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 		let process = {}, fields = {}, filters = {};
 		process.hierarchiesTimeLevel = null;
-		debugger;
 		process.facts = [...Sheet.fact];
 		for (const [token, field] of Sheet.fields) {
 			// verifico le tabelle da includere in tables Sheet.tables
 			if (Sheet.checkMultiFactFields(token)) {
 				const obj = WorkBook.elements.get(token);
 				Sheet.tables = obj.tableAlias;
+				debugger;
 				fields[token] = {
 					token,
 					field: obj.origin_field,

@@ -144,9 +144,14 @@ function draw() {
 	// table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
 
-	gdashboard.bind(controls, Resource.chartWrapper);
-	google.visualization.events.addListener(gdashboard, 'ready', onReady);
-	gdashboard.draw(Resource.dataTable);
+	if (controls.length !== 0) {
+		gdashboard.bind(controls, Resource.chartWrapper);
+		google.visualization.events.addListener(gdashboard, 'ready', onReady);
+		gdashboard.draw(Resource.dataTable);
+	} else {
+		google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
+		Resource.chartWrapper.draw();
+	}
 	console.log('TIMER END', new Date());
 	console.info(`ExecutionTime : ${new Date() - start_time_execution}ms`);
 }

@@ -305,6 +305,7 @@ class Cube
 		// $this->where_new();
 		// $this->createFilters();
 		// $this->groupBy_new();
+		// dd($this->select_clause[$this->factId]);
 		$sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
 		// aggiungo, alla clausola SELECT di $this->baseQuerySQL, le metriche di base da calcolare
 		if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
@@ -336,7 +337,7 @@ class Cube
 			default:
 				break;
 		}
-		dd($createStmt);
+		// dd($createStmt);
 		// var_dump($query);
 		// dump($createStmt);
 		if (property_exists($this, 'sql_info')) {

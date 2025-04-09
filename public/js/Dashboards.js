@@ -99,6 +99,8 @@ class Dashboards {
 	// creazione dei filtri del report, in fase di creazione della preview del report in workspace
 	drawSheetControls(ref) {
 		this.chartControls = [];
+		// ripulisco il div #preview__filters
+		ref.querySelectorAll('.filters').forEach(filter => filter.remove());
 		this.specs.wrapper[this.wrapper].group.key.forEach(filter => {
 			// console.log('filters : ', filter);
 			// creo qui il div class="filters" che conterrà il filtro
