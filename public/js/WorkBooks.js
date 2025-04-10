@@ -84,9 +84,16 @@ class Sheets {
 	// OPTIMIZE: il codice si ripete in update() e in save()
 	update() {
 		this.sheet.name = this.name;
+		debugger;
 		this.sheet.facts = [...this.fact];
 		this.sheet.userId = this.userId;
-		this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+		const date = new Date();
+		// imposto setUTCHours() perchè il metodo toISOString() restituisce l'ora UTC e non l'ora locale
+		// quindi, imposto l'ora locale con getHours()
+		date.setUTCHours(date.getHours());
+		this.sheet.updated_at = date.toISOString();
+		// this.sheet.updated_at = new Date().toISOString();
+		// this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
 		this.save();
 		console.info('sheet:', this.sheet);
 		SheetStorage.save(this.sheet);
@@ -96,9 +103,17 @@ class Sheets {
 		this.sheet.id = Date.now();
 		this.sheet.userId = this.userId;
 		this.sheet.name = this.name;
+		debugger;
 		this.sheet.facts = [...this.fact];
-		this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
-		this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+		// this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
+		// this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+		const date = new Date();
+		// imposto setUTCHours() perchè il metodo toISOString() restituisce l'ora UTC e non l'ora locale
+		// quindi, imposto l'ora locale con getHours()
+		date.setUTCHours(date.getHours());
+		this.sheet.created_at = date.toISOString();
+		// this.sheet.updated_at = new Date().toISOString();
+		this.sheet.updated_at = date.toISOString();
 		this.save();
 		console.info('sheet:', this.sheet);
 		debugger;
@@ -122,6 +137,7 @@ class Sheets {
 		// l'ordine alfabetico
 		for (const [token, object] of Object.entries(SheetStorage.sheet.sheet.fields)) {
 			this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, factId: object.factId, time: (object.time) ? { table: object.time.table } : false };
+			// this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, time: (object.time) ? { table: object.time.table } : false };
 		}
 
 		// from

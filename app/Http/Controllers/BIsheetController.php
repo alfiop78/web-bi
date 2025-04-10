@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BIsheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use DateTimeImmutable;
 
 class BIsheetController extends Controller
 {
@@ -149,8 +150,12 @@ class BIsheetController extends Controller
 		$sheet->json_specs = json_encode($request->collect()->get('specs'));
 		$sheet->json_facts = json_encode($request->collect()->get('facts'));
 		$sheet->userId = $request->collect()->get('userId');
-		$sheet->sheet_created_at = $request->collect()->get('created_at');
-		$sheet->sheet_updated_at = $request->collect()->get('updated_at');
+		$sheet_created_at = new DateTimeImmutable($request->collect()->get('created_at'));
+		$sheet_updated_at = new DateTimeImmutable($request->collect()->get('updated_at'));
+		$sheet->sheet_created_at = $sheet_created_at->format('Y-m-d H:i:s.v');
+		$sheet->sheet_updated_at = $sheet_updated_at->format('Y-m-d H:i:s.v');
+		// $date = new DateTimeImmutable($sheet->sheet_updated_at);
+		// dd($date->format('Y-m-d H:i:s.v'));
 		return $sheet->save();
 	}
 

@@ -15,8 +15,9 @@ class AddColumnsToBiSheets extends Migration
 	{
 		Schema::table('bi_sheets', function (Blueprint $table) {
 			$table->longText('json_facts')->after('json_specs')->default(null);
-			$table->dateTime('sheet_created_at')->after('workbookId')->default(now());
-			$table->dateTime('sheet_updated_at')->after('sheet_created_at')->default(now());
+			$date = new DateTimeImmutable();
+			$table->dateTime('sheet_created_at', $precision = 3)->after('workbookId')->default($date->format('Y-m-d H:i:s.v'));
+			$table->dateTime('sheet_updated_at', $precision = 3)->after('sheet_created_at')->default($date->format('Y-m-d H:i:s.v'));
 		});
 	}
 
