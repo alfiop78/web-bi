@@ -211,7 +211,8 @@ class Sheets {
 			// result = [...this.fact].every(fact => (WorkBook.dataModel.get(fact).hasOwnProperty(WorkBook.field.get(token).tableAlias)));
 			result = [...this.fact].every(fact => (WorkBook.dataModel.get(fact).hasOwnProperty(WorkBook.elements.get(token).tableAlias)));
 			// FIX: 04.12.2024 issue#264
-			// console.log(result);
+			console.log(result);
+			debugger;
 		}
 		return result;
 	}
@@ -511,6 +512,7 @@ class WorkBooks {
 		WorkBookStorage.save(this.workBook);
 	}
 
+	// viene impostato in createDataModel() e in workbookSelected()
 	set workbookMap(tables) {
 		tables.forEach(table => {
 			let fields = {}, metrics = {};
@@ -518,7 +520,8 @@ class WorkBooks {
 				key: table.id,
 				schema: table.dataset.schema,
 				table: table.dataset.table,
-				name: table.dataset.name
+				name: table.dataset.name,
+				factId: table.dataset.factId
 			}
 			// recupero (da sessionStorage) tutte le colonne della tabella in ciclo
 			const columns = JSON.parse(window.sessionStorage.getItem(table.dataset.table));

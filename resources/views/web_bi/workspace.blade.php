@@ -363,7 +363,7 @@
 						<div id="workbook-name" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
 					</section>
 					<section data-sheet-menu>
-						<button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
+						<button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog" disabled>Nuovo</button>
 						<button class="btn-link default" type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
 						<button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
 					</section>

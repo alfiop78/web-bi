@@ -430,7 +430,7 @@ function createColumnDefined(token) {
 	code.dataset.token = token;
 	code.innerText = Sheet.fields.get(token).name;
 	// aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
-	Sheet.tables = WorkBook.elements.get(token).tableAlias;
+	// Sheet.tables = WorkBook.elements.get(token).tableAlias;
 	return field;
 }
 

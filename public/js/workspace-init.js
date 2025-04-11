@@ -893,29 +893,33 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 		let process = {}, fields = {}, filters = {};
 		try {
-			process.facts = [...Sheet.fact];
 			process.hierarchiesTimeLevel = null;
+			// console.log(Sheet.tables);
+			Sheet.tables.clear();
 			for (const [token, field] of Sheet.fields) {
-				debugger;
 				// verifico le tabelle da includere in tables Sheet.tables
+				// TEST: 11.04.2025 Funzionalità da testare su Sheet multiFact
 				if (Sheet.checkMultiFactFields(token)) {
-					const obj = WorkBook.elements.get(token);
-					Sheet.tables = obj.tableAlias;
+					const origin_element = WorkBook.elements.get(token);
+					// recupero il factId di tutte le tabelle aggiunte allo Sheet. Sheet.fact è un'oggetto Set() quindi non ci sono duplicati
+					Sheet.fact.add(WorkBook.workbookMap.get(origin_element.tableAlias).props.factId);
+					Sheet.tables = origin_element.tableAlias;
 					fields[token] = {
 						token,
-						field: obj.origin_field,
-						SQL: obj.SQL,
-						tableAlias: obj.tableAlias,
+						field: origin_element.origin_field,
+						SQL: origin_element.SQL,
+						tableAlias: origin_element.tableAlias,
 						name: field.name
 					};
 					// se è un livello della dimensione TIME, ne importo 'hierarchiesTimeLevel' per stabilire l'ultimo livello "TIME" presente nel report
-					if (obj.time) process.hierarchiesTimeLevel = obj.table;
+					if (origin_element.time) process.hierarchiesTimeLevel = origin_element.table;
 				} else {
 					App.showConsole(`Il campo ${field} non è in comune con tutte le tabelle dei Fatti`, 'error', 4000);
 					return false;
 				}
 			}
 			process.fields = fields;
+			process.facts = [...Sheet.fact];
 
 			process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
 			// flag per verifica presenza metriche con funzioni temporali
