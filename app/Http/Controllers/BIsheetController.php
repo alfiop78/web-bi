@@ -25,7 +25,7 @@ class BIsheetController extends Controller
 		/* $sheets = BIsheet::select('bi_sheets.name', 'bi_sheets.token', 'bi_sheets.json_value')
 			->where('bi_workbooks.connectionId', session('db_id'))
 			->join('bi_workbooks', 'bi_sheets.workbookId', '=', 'bi_workbooks.token')->get(); */
-		$sheets = BIsheet::select('bi_sheets.name', 'bi_sheets.token', 'bi_sheets.json_value', 'bi_sheets.workbookId')
+		$sheets = BIsheet::select('bi_sheets.name', 'bi_sheets.token', 'bi_sheets.json_value', 'bi_sheets.sheet_updated_at', 'bi_sheets.workbookId')
 			->where('bi_workbooks.connectionId', session('db_id'))
 			->join('bi_workbooks', 'bi_sheets.workbookId', '=', 'bi_workbooks.token')->get();
 		// restituisco solo i dati necessari anzichè tutto il json_value
@@ -33,12 +33,12 @@ class BIsheetController extends Controller
 			$result[] = [
 				"name" => $sheet->name,
 				"token" => $sheet->token,
-				"updated_at" => json_decode($sheet->json_value)->updated_at,
-				"type" => json_decode($sheet->json_value)->type,
+				"updated_at" => $sheet->sheet_updated_at,
+				"type" => 'sheet',
 				"workbook_ref" => $sheet->workbookId,
 			];
 		}
-		// return $result;
+		// dd($result);
 		return response()->json(['sheet' => $result]);
 		// return response()->json(['sheet' => $sheets]);
 	}
@@ -69,39 +69,26 @@ class BIsheetController extends Controller
 	 */
 	public function store(Request $request)
 	{
-		// $token = $request->collect()->get('token');
-		// $name = $request->collect()->get('name');
-		// $workbookId = $request->collect()->get('workbook_ref');
-		// $userId = $request->collect()->get('userId');
-		// $datamartId = $request->collect()->get('id'); // datamartId
-		// codifico tutta la $request in json per poterla inserire nel DB
-		// dd($request->all());
-		// separo le specifiche (proprietà 'specs') dalla proprietà 'sheet'
-		// Alla proprietà 'sheet' però, vanno aggiunti alcune proprietà
-		$specs = json_encode($request->collect()->get('specs'));
-		// $json = json_encode($request->all());
-		$sheet_properties = $request->collect()->get('sheet');
-		$sheet_properties['updated_at'] = $request->collect()->get('updated_at');
-		$sheet_properties['created_at'] = $request->collect()->get('created_at');
-		$sheet_properties['type'] = $request->collect()->get('type');
-		$sheet_properties['facts'] = $request->collect()->get('facts');
-		// le codifico in json per poterle inserire nella colonna json_value
-		$sheet_property = json_encode($sheet_properties);
-		// dd($json);
 		$sheet = new BIsheet();
 		// salvo su DB
 		$sheet->token = $request->collect()->get('token');
 		$sheet->name = $request->collect()->get('name');
-		$sheet->json_value = $sheet_property;
-		$sheet->json_specs = $specs;
-		$sheet->workbookId = $request->collect()->get('workbook_ref');
+		$sheet->json_value = json_encode($request->collect()->get('sheet'));
+		$sheet->json_specs = json_encode($request->collect()->get('specs'));
+		$sheet->json_facts = json_encode($request->collect()->get('facts'));
 		$sheet->userId = $request->collect()->get('userId');
+		$sheet->workbookId = $request->collect()->get('workbook_ref');
+		$sheet_created_at = new DateTimeImmutable($request->collect()->get('created_at'));
+		$sheet_updated_at = new DateTimeImmutable($request->collect()->get('updated_at'));
+		$sheet->sheet_created_at = $sheet_created_at->format('Y-m-d H:i:s.v');
+		$sheet->sheet_updated_at = $sheet_updated_at->format('Y-m-d H:i:s.v');
 		$sheet->datamartId = $request->collect()->get('id');
 		return $sheet->save();
 	}
 
 	/**
 	 * Display the specified resource.
+	 * Recupero tutta la risorsa (tutte le colonne)
 	 *
 	 * @param  \App\Models\BIsheet  $bIsheet
 	 * @return \Illuminate\Http\Response
@@ -133,16 +120,8 @@ class BIsheetController extends Controller
 	public function update(Request $request, BIsheet $bIsheet)
 	{
 		// $json = json_encode($request->all());
-		$token = $request->collect()->get('token');
-		// $sheet_properties = $request->collect()->get('sheet');
-		// $sheet_properties['updated_at'] = $request->collect()->get('updated_at');
-		// $sheet_properties['created_at'] = $request->collect()->get('created_at');
-		// $sheet_properties['type'] = $request->collect()->get('type');
-		// $sheet_properties['facts'] = $request->collect()->get('facts');
-		// $sheet_property = json_encode($request->collect()->get('sheet'));
-		// $sheet_property = json_encode($sheet_properties);
-		// dd($sheet_property);
 		// dd($json);
+		$token = $request->collect()->get('token');
 		// cerco nel DB il token del PROCESS da aggiornare
 		$sheet = $bIsheet::findOrFail($token);
 		$sheet->name = $request->collect()->get('name');

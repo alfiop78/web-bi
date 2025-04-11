@@ -59,6 +59,12 @@ class Sheets {
 
 	get metrics() { return this.#metrics; }
 
+	static getISOStringDate(value) {
+		const date = new Date(value);
+		date.setUTCHours(date.getHours());
+		return date.toISOString();
+	}
+
 	save() {
 		this.sheet.sheet.fields = Object.fromEntries(this.fields);
 		this.sheet.sheet.from = this.from;
@@ -83,16 +89,9 @@ class Sheets {
 	// OPTIMIZE: il codice si ripete in update() e in save()
 	update() {
 		this.sheet.name = this.name;
-		debugger;
 		this.sheet.facts = [...this.fact];
 		this.sheet.userId = this.userId;
-		const date = new Date();
-		// imposto setUTCHours() perchè il metodo toISOString() restituisce l'ora UTC e non l'ora locale
-		// quindi, imposto l'ora locale con getHours()
-		date.setUTCHours(date.getHours());
-		this.sheet.updated_at = date.toISOString();
-		// this.sheet.updated_at = new Date().toISOString();
-		// this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+		this.sheet.updated_at = Sheets.getISOStringDate(new Date());
 		this.save();
 		console.info('sheet:', this.sheet);
 		SheetStorage.save(this.sheet);
@@ -102,20 +101,12 @@ class Sheets {
 		this.sheet.id = Date.now();
 		this.sheet.userId = this.userId;
 		this.sheet.name = this.name;
-		debugger;
 		this.sheet.facts = [...this.fact];
-		// this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
-		// this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
-		const date = new Date();
-		// imposto setUTCHours() perchè il metodo toISOString() restituisce l'ora UTC e non l'ora locale
-		// quindi, imposto l'ora locale con getHours()
-		date.setUTCHours(date.getHours());
-		this.sheet.created_at = date.toISOString();
-		// this.sheet.updated_at = new Date().toISOString();
-		this.sheet.updated_at = date.toISOString();
+		this.sheet.created_at = Sheets.getISOStringDate(new Date());
+		this.sheet.updated_at = Sheets.getISOStringDate(new Date());
+		debugger;
 		this.save();
 		console.info('sheet:', this.sheet);
-		debugger;
 		SheetStorage.save(this.sheet);
 	}
 

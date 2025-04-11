@@ -53,14 +53,28 @@ var Storage = new SheetStorages();
 				// verifico lo stato dell'elemento in ciclo rispetto al localStorage
 				// (sincronizzato, non sincronizzato, ecc...)
 				const div = document.querySelector(`div[data-type='${type}']`);
-				let li;
+				// let li;
 				if (div.querySelector(`li[id='${dbElement.token}']`)) {
 					// l'elemento in ciclo (dal db) è presente anche in locale
-					li = div.querySelector(`li[id='${dbElement.token}']`);
+					const li = div.querySelector(`li[id='${dbElement.token}']`);
 					const statusIcon = li.querySelector('i[data-sync-status]');
 					li.dataset.sync = 'true';
 					// verifico se l'elemento in ciclo è "identico" all'elemento in storage
-					if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
+					// FIX: Codice utilizzato temporaneamente. Modificherò questo codice quando
+					// tutti i Controller relativi al metadato avranno la colonna updated_at come fatto in bi_sheets
+					// Inoltre tutti gli oggetti memorizzati dovranno avere, sia in locale che su db, le date formattate con ISO 8601, come
+					// fatto con bi_sheets
+					let db_updated_at;
+					// if (dbElement.token === 'xxiwl72') {
+					if (type === 'sheet') {
+						db_updated_at = new Date(dbElement.updated_at);
+						db_updated_at.setUTCHours(db_updated_at.getHours());
+						db_updated_at = db_updated_at.toISOString();
+					} else {
+						db_updated_at = dbElement.updated_at;
+					}
+					// if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
+					if (dbElement.updated_at && (localElement.updated_at === db_updated_at)) {
 						// oggetti identici
 						li.dataset.identical = 'true';
 						statusIcon.classList.add('done');
@@ -210,20 +224,23 @@ var Storage = new SheetStorages();
 						if (type === 'sheet') {
 							// aggiungo le specs alla proprietà 'specs' all'interno del json
 							console.log(json);
-							const sheet_properties = JSON.parse(json.json_value);
-						debugger;
-						return;
-							let sheet = {
-								created_at: sheet_properties.created_at,
-								facts: sheet_properties.facts,
+							// NOTE: utilizzo di un metodo static
+							const created_at = Sheets.getISOStringDate(json.sheet_created_at);
+							const updated_at = Sheets.getISOStringDate(json.sheet_updated_at);
+							const sheet = {
+								// da convertire con toISOString, considerando le modifiche da fare per il UTC time altrimenti non corrispondono le date
 								id: json.datamartId,
+								facts: JSON.parse(json.json_facts),
 								name: json.name,
+								token: json.token,
+								sheet: JSON.parse(json.json_value),
+								specs: JSON.parse(json.json_specs),
+								type: 'sheet',
+								userId: json.userId,
+								workbook_ref: json.workbookId,
+								created_at,
+								updated_at
 							};
-							console.log(sheet_properties);
-							sheet.token = json.token;
-							sheet.factId = sheet.factId;
-							sheet.specs = JSON.parse(json.json_specs);
-							debugger;
 							Storage.save(sheet);
 						} else {
 							Storage.save(JSON.parse(json.json_value))
@@ -253,7 +270,6 @@ var Storage = new SheetStorages();
 			const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
 			tokens.push(el.dataset.id);
 			console.log(json);
-			debugger;
 			const params = JSON.stringify(json);
 			const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
 			requests.push(new Request(`/fetch_api/json/${type}_store`, init));
@@ -295,10 +311,6 @@ var Storage = new SheetStorages();
 		document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
 			const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
 			tokens.push(el.dataset.id);
-			console.log(json);
-			console.log(new Date(json.updated_at));
-			console.log(Date.parse(json.updated_at));
-			debugger;
 			const params = JSON.stringify(json);
 			const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
 			requests.push(new Request(`/fetch_api/json/${type}_update`, init));
