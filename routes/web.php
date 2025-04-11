@@ -157,6 +157,8 @@ Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'sch
 
 // recupero degli sheets appartenenti a un determinato workbooks
 Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetController::class, 'indexByWorkbook']);
+// recupero le specifiche dello sheet
+Route::get('fetch_api/sheet_get_specs/{token}/get_sheet_specs', [BIsheetController::class, 'indexSpecs']);
 // recupero le dashboards della connessione corrente
 Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
 

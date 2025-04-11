@@ -43,7 +43,8 @@ google.charts.load('current', { 'packages': ['corechart', 'controls', 'chartedit
 function updatedSheet() {
 	// la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
 	const sheet = SheetStorage.sheet;
-	sheet.updated_at = new Date().toLocaleDateString('it-IT', Sheet.options);
+	sheet.updated_at = Sheets.getISOStringDate(new Date());
+	// sheet.updated_at = new Date().toLocaleDateString('it-IT', Sheet.options);
 	SheetStorage.save(sheet);
 }
 

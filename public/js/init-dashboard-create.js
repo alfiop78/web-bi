@@ -475,7 +475,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 	}
 
 	// Fn invocata dal tasto + che viene creato dinamicamente dal layout-template
-	// apertura dialog per l'aggiunta del chart o DataTable
+	// apertura dialog per l'aggiunta dell'oggeteto google chart
 	app.addResource = (e) => {
 		if (e.currentTarget.classList.contains('defined')) return false;
 		// il ref corrente, appena aggiunto
@@ -548,7 +548,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 	}
 
 	// Selezione del report che alimenta il chart_div
-	app.sheetSelected = (e) => {
+	app.sheetSelected = async (e) => {
 		// recupero le specifiche per questo report (resource)
 		// successivamente recupero i dati del datamart
 		Resource.token = e.currentTarget.dataset.token;
@@ -562,19 +562,30 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		Resource.ref.dataset.wrapper = 'Table';
 		// WARN: 11-04-2025 le specifiche le devo recuperare dal DB e non dal localStorage perchè la versione su DB potrebbe essere
 		// diversa tra quella su DB (fatta da un altro utente) e quella in locale
-		debugger;
-		Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
-		// imposto, sul tasto btn__chartWrapper il token di questo Sheet
-		const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
-		btn__chartWrapper.dataset.id = Resource.ref.id;
-		btn__chartWrapper.dataset.token = e.currentTarget.dataset.token;
-		if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
-		// eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
-		debugger;
-		app.getData(`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`);
-		app.dlgChartSection.close();
-		// aggiungo la class 'defined' nel div che contiene il grafico/tabella
-		Resource.ref.classList.add('defined');
+		await fetch(`/fetch_api/sheet_get_specs/${Resource.token}/get_sheet_specs`)
+			.then((response) => {
+				if (!response.ok) { throw Error(response.statusText); }
+				return response;
+			})
+			.then((response) => response.json())
+			.then(data => {
+				Resource.specs = JSON.parse(data.json_specs);
+				// imposto, sul tasto btn__chartWrapper il token di questo Sheet
+				const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
+				btn__chartWrapper.dataset.id = Resource.ref.id;
+				btn__chartWrapper.dataset.token = Resource.token;
+				if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
+				// eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
+				debugger;
+				app.getData(`/fetch_api/${Resource.ref.dataset.datamartId}_${Resource.ref.dataset.userId}/preview?page=1`);
+				app.dlgChartSection.close();
+				// aggiungo la class 'defined' nel div che contiene il grafico/tabella
+				Resource.ref.classList.add('defined');
+			})
+			.catch(err => {
+				App.showConsole(err, 'error');
+				console.error(err);
+			});
 	}
 
 	// recupero il datamrt

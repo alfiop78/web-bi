@@ -83,6 +83,7 @@ function drawDashboard() {
 }
 
 function dashboardReady() {
+	debugger;
 	for (const wrapper of Object.values(Resource.specs.wrappers)) {
 		Resource.group = wrapper.group;
 		// WARN: 18.12.2024 al momento recupero il primo wrapper della dashboard, in questo modo
@@ -109,6 +110,7 @@ function dashboardReady() {
 // invocata da sheetSelected, apertura di un singolo report in fase di creazione dashboard
 function draw() {
 	console.log('TIMER START', new Date());
+	debugger;
 	const start_time_execution = new Date();
 	// Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
 	// è consentità con la DataView perchè questa è read-only
@@ -148,7 +150,6 @@ function draw() {
 	// NOTE: esempio array di View
 	// table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
 	// table.setView({ columns: [1, 3, 5, 7, 9, 16] });
-
 
 	if (controls.length !== 0) {
 		gdashboard.bind(controls, Resource.chartWrapper);
@@ -196,10 +197,11 @@ function onReady() {
 		Resource.chartWrapperView.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
 	}
 	// formatter
-	/* Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
+	debugger;
+	Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
 		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
 		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
-	}); */
+	});
 
 	Resource.chartWrapperView.setDataTable(Resource.dataViewFinal);
 	Resource.chartWrapperView.draw();
