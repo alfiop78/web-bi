@@ -65,14 +65,20 @@ function drawDashboard() {
 			chartWrapper.setView(dataView); */
 			wrappers.push(chartWrapper);
 		}
-		gdashboard.bind(controls, wrappers);
-
 		// NOTE: esempio array di View
 		// table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
 		// table.setView({ columns: [1, 3, 5, 7, 9, 16] });
-
-		google.visualization.events.addListener(gdashboard, 'ready', dashboardReady);
-		gdashboard.draw(Resource.dataTable);
+		if (controls.length !== 0) {
+			gdashboard.bind(controls, wrappers);
+			google.visualization.events.addListener(gdashboard, 'ready', dashboardReady);
+			gdashboard.draw(Resource.dataTable);
+		} else {
+			wrappers.forEach(wrapper => {
+				wrapper.setDataTable(Resource.dataTable);
+				google.visualization.events.addListener(wrapper, 'ready', dashboardReady);
+				wrapper.draw();
+			});
+		}
 	})
 }
 

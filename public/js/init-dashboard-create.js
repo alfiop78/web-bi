@@ -560,7 +560,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		// direttamente nelle specs.wrapper dello sheet, ad esempio se salvo lo sheet come barChart
 		// potrei impostare una proprietà 'default : true' nel wrapper barChart
 		Resource.ref.dataset.wrapper = 'Table';
-		// TODO: le specifiche le devo recuperare dal DB e non dal localStorage perchè la versione su DB potrebbe essere
+		// WARN: le specifiche le devo recuperare dal DB e non dal localStorage perchè la versione su DB potrebbe essere
 		// diversa tra quella su DB (fatta da un altro utente) e quella in locale
 		debugger;
 		Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
