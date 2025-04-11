@@ -179,7 +179,6 @@ function columnSave(e) {
 		table: WorkBook.activeTable.dataset.table,
 		tableAlias: WorkBook.activeTable.dataset.alias,
 		schema: WorkBook.activeTable.dataset.schema,
-		factId: WorkBook.activeTable.dataset.factId,
 		cssClass: 'custom',
 		datatype: 'varchar',
 		tables: [],
@@ -416,7 +415,6 @@ function createColumnDefined(token) {
 	const btnRemove = field.querySelector('button[data-remove]');
 	const btnUndo = field.querySelector('button[data-undo]');
 	field.dataset.label = Sheet.fields.get(token).name;
-	field.dataset.factId = Sheet.fields.get(token).factId;
 	field.addEventListener('dragstart', handleDragStart, false);
 	field.addEventListener('dragenter', handleDragEnter, false);
 	field.addEventListener('dragleave', handleDragLeave, false);
@@ -433,7 +431,6 @@ function createColumnDefined(token) {
 	code.innerText = Sheet.fields.get(token).name;
 	// aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
 	Sheet.tables = WorkBook.elements.get(token).tableAlias;
-	Sheet.fact.add(field.dataset.factId);
 	return field;
 }
 
@@ -489,7 +486,6 @@ function handleRowDrop(e) {
 	Sheet.fields = {
 		token,
 		SQL: element.SQL,
-		factId: element.factId,
 		name: (Sheet.fields.has(token)) ? Sheet.fields.get(token).name : element.name,
 		datatype: element.datatype,
 		time: (element.time) ? { table: element.table } : false
@@ -614,7 +610,6 @@ function handleDragEnd(e) {
 		if (!fieldsClone.has(field.dataset.id)) return;
 		Sheet.fields = {
 			token: field.dataset.id,
-			factId: fieldsClone.get(field.dataset.id).factId,
 			name: fieldsClone.get(field.dataset.id).name,
 			SQL: fieldsClone.get(field.dataset.id).SQL,
 			time: fieldsClone.get(field.dataset.id).time,
@@ -637,12 +632,6 @@ function handleDragEnd(e) {
 				// degli elementi nel DOM non corrisponde
 				if (metricsClone.get(token).dependencies) Sheet.metrics = metricsClone.get(token);
 			});
-			/* Object.keys(metricsClone.get(metric.dataset.id).metrics).forEach(token => {
-				// se la metrica ha dependencies = false significa che è inclusa in questo ciclo, quindi verrà
-				// aggiunta comunque, adesso la aggiungo solo se ha dependencies = true altrimenti l'ordine
-				// degli elementi nel DOM non corrisponde
-				if (metricsClone.get(token).dependencies) Sheet.metrics = metricsClone.get(token);
-			}); */
 		}
 		Sheet.metrics = metricsClone.get(metric.dataset.id);
 	});

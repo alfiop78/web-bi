@@ -892,34 +892,34 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		}
 
 		let process = {}, fields = {}, filters = {};
-		process.hierarchiesTimeLevel = null;
-		process.facts = [...Sheet.fact];
-		for (const [token, field] of Sheet.fields) {
-			// verifico le tabelle da includere in tables Sheet.tables
-			if (Sheet.checkMultiFactFields(token)) {
-				const obj = WorkBook.elements.get(token);
-				Sheet.tables = obj.tableAlias;
-				debugger;
-				fields[token] = {
-					token,
-					field: obj.origin_field,
-					SQL: obj.SQL,
-					tableAlias: obj.tableAlias,
-					name: field.name
-				};
-				// se è un livello della dimensione TIME, ne importo 'hierarchiesTimeLevel' per stabilire l'ultimo livello "TIME" presente nel report
-				if (obj.time) process.hierarchiesTimeLevel = obj.table;
-			} else {
-				App.showConsole(`Il campo ${field} non è in comune con tutte le tabelle dei Fatti`, 'error', 4000);
-				return false;
-			}
-		}
-		process.fields = fields;
-
-		process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
-		// flag per verifica presenza metriche con funzioni temporali
-		let timingFunctionsFlag = false;
 		try {
+			process.facts = [...Sheet.fact];
+			process.hierarchiesTimeLevel = null;
+			for (const [token, field] of Sheet.fields) {
+				debugger;
+				// verifico le tabelle da includere in tables Sheet.tables
+				if (Sheet.checkMultiFactFields(token)) {
+					const obj = WorkBook.elements.get(token);
+					Sheet.tables = obj.tableAlias;
+					fields[token] = {
+						token,
+						field: obj.origin_field,
+						SQL: obj.SQL,
+						tableAlias: obj.tableAlias,
+						name: field.name
+					};
+					// se è un livello della dimensione TIME, ne importo 'hierarchiesTimeLevel' per stabilire l'ultimo livello "TIME" presente nel report
+					if (obj.time) process.hierarchiesTimeLevel = obj.table;
+				} else {
+					App.showConsole(`Il campo ${field} non è in comune con tutte le tabelle dei Fatti`, 'error', 4000);
+					return false;
+				}
+			}
+			process.fields = fields;
+
+			process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
+			// flag per verifica presenza metriche con funzioni temporali
+			let timingFunctionsFlag = false;
 			Sheet.fact.forEach(factId => {
 				let advancedMeasures = new Map(), baseMeasures = new Map();
 				for (const [token, metric] of Sheet.metrics) {
@@ -977,38 +977,39 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				if (advancedMeasures.size !== 0) process.advancedMeasures[factId] = Object.fromEntries(advancedMeasures);
 				if (baseMeasures.size !== 0) process.baseMeasures[factId] = Object.fromEntries(baseMeasures);
 			});
+
+			// BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
+			// della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
+			console.log(process.hierarchiesTimeLevel);
+			// se NON sono presenti livelli TIME && sono presenti metriche con timing function interrompo l'operazione
+			if (!process.hierarchiesTimeLevel && timingFunctionsFlag) {
+				App.showConsole('Nessun livello della dimensione <b>TIME</b> presente nel report', 'error', 3000);
+				return false;
+			}
+
+			// se non ci sono filtri nel Report bisogna far comparire un avviso
+			// perchè l'elaborazione potrebbe essere troppo onerosa
+			if (Sheet.filters.size === 0) {
+				App.showConsole('Non sono presenti filtri nel report', 'error', 2000);
+				return false;
+			} else {
+				Sheet.filters.forEach(token => {
+					const filter = WorkBook.filters.get(token);
+					filter.tables.forEach(table => Sheet.tables = table);
+					filters[token] = filter;
+				});
+			}
+
+			process.filters = filters;
+			app.setSheet();
+			debugger;
+			process.from = Sheet.from;
+			process.joins = Sheet.joins;
 		} catch (error) {
 			App.showConsole('Errori nella creazione del processo', 'error');
 			console.log(error);
 			throw error;
 		}
-		// BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
-		// della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
-		console.log(process.hierarchiesTimeLevel);
-		// se NON sono presenti livelli TIME && sono presenti metriche con timing function interrompo l'operazione
-		if (!process.hierarchiesTimeLevel && timingFunctionsFlag) {
-			App.showConsole('Nessun livello della dimensione <b>TIME</b> presente nel report', 'error', 3000);
-			return false;
-		}
-
-		// se non ci sono filtri nel Report bisogna far comparire un avviso
-		// perchè l'elaborazione potrebbe essere troppo onerosa
-		if (Sheet.filters.size === 0) {
-			App.showConsole('Non sono presenti filtri nel report', 'error', 2000);
-			return false;
-		} else {
-			Sheet.filters.forEach(token => {
-				const filter = WorkBook.filters.get(token);
-				filter.tables.forEach(table => Sheet.tables = table);
-				filters[token] = filter;
-			});
-		}
-
-		process.filters = filters;
-		app.setSheet();
-		debugger;
-		process.from = Sheet.from;
-		process.joins = Sheet.joins;
 
 		(e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
 	}

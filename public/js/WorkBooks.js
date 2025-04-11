@@ -37,7 +37,6 @@ class Sheets {
 		this.#fields.set(object.token, {
 			id: object.token,
 			name: object.name,
-			factId: object.factId,
 			SQL: object.SQL,
 			time: object.time,
 			datatype: object.datatype
@@ -136,8 +135,13 @@ class Sheets {
 		// Se, in Map() ho ordinato id, descrizione, in Storage potrei vedere descrizione, id perchè l'object {} visualizza
 		// l'ordine alfabetico
 		for (const [token, object] of Object.entries(SheetStorage.sheet.sheet.fields)) {
-			this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, factId: object.factId, time: (object.time) ? { table: object.time.table } : false };
-			// this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, time: (object.time) ? { table: object.time.table } : false };
+			this.fields = {
+				token,
+				SQL: object.SQL,
+				name: object.name,
+				datatype: object.datatype,
+				time: (object.time) ? { table: object.time.table } : false
+			};
 		}
 
 		// from
@@ -548,7 +552,6 @@ class WorkBooks {
 							table: table.dataset.table,
 							tableAlias: table.dataset.alias,
 							schema: table.dataset.schema,
-							factId: table.dataset.factId,
 							origin_field: col.column_name,
 							datatype: col.type_name,
 							constraint: col.constraint_name,
