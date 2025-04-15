@@ -34,14 +34,14 @@ function getDataView() {
 function drawDashboard() {
 	Resource.multiData.forEach(datamart => {
 		Resource.data = datamart.data;
-		Resource.specs = datamart.specs;
-		// console.log(Resource.specs);
+		Resource.dashboardWrappers = datamart.specs.wrappers;
+		Resource.specs = JSON.parse(window.localStorage.getItem(datamart.specs.token)).specs;
 		Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
 		Resource.ref = document.getElementById(datamart.ref);
 		let gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
 		const controls = Resource.drawDraggableControls(document.getElementById('filter__dashboard'));
 		wrappers = [];
-		for (const [ref, wrapper] of Object.entries(Resource.specs.wrappers)) {
+		for (const [ref, wrapper] of Object.entries(Resource.dashboardWrappers)) {
 			Resource.ref = document.getElementById(ref);
 			const chartWrapper = new google.visualization.ChartWrapper();
 			// imposto sempre Table di default
@@ -52,17 +52,6 @@ function drawDashboard() {
 				chartWrapper.setOption('height', 'auto');
 				chartWrapper.setOption('pageSize', 15);
 			}
-			// effettuo il raggruppamento deciso in fase di creazione report e creo la DataViewGroup
-			/* Resource.group = wrapper.group;
-			Resource.dataGroup = Resource.createDataTableGrouped();
-			Resource.createDataViewGrouped();
-			// ... a questo punto gli indici di colonna della Resource.dataViewGrouped non
-			// corrispondono più alla DataTable che viene disegnata dalla Dashboard (sotto, Resource.dataTable)
-			// per cui creo un ulteriore DataView che, con il setColumns(), imposta le colonne corrette riferendosi alla Resource.dataTable
-			// utilizzando i nomi di colonna anzichè gli indici (che sono diversi tra DataTable/DataGroup)
-			const dataView = new google.visualization.DataView(Resource.dataTable);
-			dataView.setColumns(Resource.viewDefined);
-			chartWrapper.setView(dataView); */
 			wrappers.push(chartWrapper);
 		}
 		// NOTE: esempio array di View
@@ -83,9 +72,10 @@ function drawDashboard() {
 }
 
 function dashboardReady() {
-	debugger;
-	for (const wrapper of Object.values(Resource.specs.wrappers)) {
-		Resource.group = wrapper.group;
+	for (const wrapper of Object.values(Resource.dashboardWrappers)) {
+		// le specifiche del group le recupero dal localStorage
+		Resource.group = Resource.specs.wrapper[wrapper.chartType].group;
+		// Resource.group = wrapper.group;
 		// WARN: 18.12.2024 al momento recupero il primo wrapper della dashboard, in questo modo
 		// quando si utilizzano i filtri, passo a createDataTableGrouped() una DataTable già filtrata.
 		// Valutare se utilizzare l'index del wrapper in ciclo perchè se, in una dashboard si decide che il primo
@@ -96,14 +86,13 @@ function dashboardReady() {
 		Resource.createDataViewGrouped();
 		// console.log(dataGroup);
 		// ridisegno utilizzando il chartWrapper
-		let redraw = new google.visualization.ChartWrapper({
+		const chartWrapper = new google.visualization.ChartWrapper({
 			chartType: wrapper.chartType,
 			containerId: wrapper.containerId,
 			options: wrapper.options,
 			dataTable: Resource.dataViewFinal
-			// dataTable: dataGroup
 		});
-		redraw.draw();
+		chartWrapper.draw();
 	}
 }
 

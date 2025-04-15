@@ -14,9 +14,10 @@ class Dashboards {
 		return this.#json;
 	}
 
-	drawDraggableControls(parent) {
+	drawDraggableControls(ref) {
 		this.controls = [];
 		// console.log(this.sheetSpecs);
+		ref.querySelectorAll('.filters').forEach(filter => filter.remove());
 		if (this.specs.filters) {
 			this.specs.filters.forEach(filter => {
 				// creo qui il div class="filters" che conterrà il filtro
@@ -30,12 +31,12 @@ class Dashboards {
 				// i.addEventListener('click', addDashboardFilters);
 				let div = content.querySelector('div');
 				div.id = filter.containerId;
-				parent.appendChild(content);
+				ref.appendChild(content);
 				this.filter = new google.visualization.ControlWrapper({
 					'controlType': 'CategoryFilter',
 					'containerId': filter.containerId,
 					'options': {
-						'filterColumnIndex': filter.filterColumnIndex,
+						// 'filterColumnIndex': filter.filterColumnIndex,
 						'filterColumnLabel': filter.filterColumnLabel,
 						'ui': {
 							'caption': filter.caption,
@@ -165,12 +166,7 @@ class Dashboards {
 	}
 
 	set dashboard(value) {
-		this.#dashboard.type = 'dashboard';
-		this.#dashboard.title = value.title;
-		this.#dashboard.token = value.token;
-		this.#dashboard.layout = value.layout;
-		this.#dashboard.dashboardFilters = Object.fromEntries(this.dashboardFilters);
-		this.#dashboard.resources = Object.fromEntries(this.resources);
+		this.#dashboard = value;
 		console.log(this.#dashboard);
 	}
 

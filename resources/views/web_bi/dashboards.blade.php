@@ -60,12 +60,11 @@
 			<section class="navOverflow">
 				<section class="navContent">
 					@foreach($dashboards as $dashboard)
-					<!-- <a href="#" data-token="{{ json_decode($dashboard)->token }}">
-            <i class="material-symbols-rounded white">dashboard</i><span>{{ json_decode($dashboard)->name }}</span>
-          </a> -->
+					@if ($dashboard->published)
 					<a href="#" data-token="{{ $dashboard['token'] }}">
 						<i class="material-symbols-rounded white">dashboard</i><span>{{ $dashboard['name'] }}</span>
 					</a>
+					@endif
 					@endforeach
 				</section>
 			</section>

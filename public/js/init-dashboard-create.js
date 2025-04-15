@@ -230,9 +230,11 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		// ciclo le resources
 		for (const [token, resource] of Object.entries(Resource.json.resources)) {
 			Resource.resources = resource;
+			debugger;
 			Resource.arrResources.push(token);
 			// specifiche del chartWrapper
 			Resource.wrapperSpecs.push(resource);
+			debugger;
 			// ciclo sui wrappers per popolare tutti gli elementi della dashboard
 			for (const [ref, wrapper] of Object.entries(resource.wrappers)) {
 				Resource.ref = document.getElementById(ref);
@@ -249,6 +251,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 				btn__chartWrapper.dataset.token = token;
 				if (Object.keys(resource.wrappers).length >= 2) btn__chartWrapper.removeAttribute('disabled');
 			}
+			// urls.push(`/fetch_api/${resource.datamartId}/preview?page=1`)
 			urls.push(`/fetch_api/${resource.datamartId}_${resource.userId}/preview?page=1`)
 		}
 		app.getAllData(urls);
@@ -295,11 +298,11 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		// - recuperare tutti gli oggetti della pagina (report)
 		// - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
 		// - salvare le specifiche in bi_sheet_specifications
-		console.log(Resource.resources);
-		// debugger;
+		Resource.dashboard.published = true;
+		console.log(Resource.dashboard);
+
 		let urls = [];
 		for (const wrapper of Resource.resources.values()) {
-			debugger;
 			urls.push(`/fetch_api/copy_from/${wrapper.datamartId}_${wrapper.userId}/copy_to/${wrapper.datamartId}/copy_table`);
 		}
 		console.log(urls);
@@ -310,9 +313,28 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 					return response.text();
 				}))
 			})
-			.then(data => {
-				console.log(data);
-				if (data) App.showConsole("Dashboard pubblicata", 'done', 2000);
+			.then(async data => {
+				// if (data) App.showConsole("Dashboard pubblicata", 'done', 2000);
+				if (data) {
+					console.log(data);
+					const params = JSON.stringify(Resource.dashboard);
+					const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+					const req = new Request('/fetch_api/json/dashboard_update', init);
+					await fetch(req)
+						.then((response) => {
+							if (!response.ok) { throw Error(response.statusText); }
+							return response;
+						})
+						.then((response) => response.json())
+						.then((data) => {
+							console.log(data);
+							if (data) App.showConsole("Dashboard pubblicata", 'done', 2000);
+						})
+						.catch((err) => {
+							App.showConsole(err, 'error');
+							console.error(err);
+						});
+				}
 			})
 			.catch(err => {
 				App.showConsole(err, 'error');
@@ -345,28 +367,21 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 
 		// TODO: 10.12.2024 Recupero le risorse aggiunte alla dashboard
 		document.querySelectorAll('.chartContent[data-resource]>.chart-elements').forEach(sheet => {
-			debugger;
 			const token = sheet.dataset.token;
 			const specs = JSON.parse(window.localStorage.getItem(token)).specs;
 			// console.log(specs);
 			// verifico se questa risorsa è già stata inserita in un altro container
 			specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
-			// specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
-			if (Resource.resources.has(token)) {
-				// aggiorno solo il wrapper, le altre proprietà sono uguali
-				// TEST: 10.12.2024 da testare (questo sarebbe il secondo oggetto grafico appartenente allo stesso datamart)
-				Resource.resources.get(token).wrappers[sheet.id] = specs.wrapper[sheet.dataset.wrapper];
-			} else {
-				Resource.resources = {
-					token,
-					userId: +sheet.dataset.userId,
-					datamartId: +sheet.dataset.datamartId,
-					data: specs.data,
-					bind: specs.bind,
-					filters: specs.filters,
-					wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
-				};
-			}
+			Resource.resources = {
+				token,
+				userId: +sheet.dataset.userId,
+				datamartId: +sheet.dataset.datamartId,
+				data: specs.data,
+				bind: specs.bind,
+				filters: specs.filters,
+				wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
+			};
+			debugger;
 		});
 		// verifica di validità
 		if (Resource.resources.size === 0) {
@@ -382,8 +397,12 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		// Qui salvo anche le resources di questa dashboard
 		Resource.dashboard = {
 			title: app.dashboardName.dataset.value,
+			type: 'dashboard',
 			note,
 			token,
+			published: false,
+			dashboardFilters: Object.fromEntries(Resource.dashboardFilters),
+			resources: Object.fromEntries(Resource.resources),
 			layout: Template.id
 		}
 		console.log(Resource.dashboard);
@@ -562,7 +581,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		Resource.ref.dataset.wrapper = 'Table';
 		// WARN: 11-04-2025 le specifiche le devo recuperare dal DB e non dal localStorage perchè la versione su DB potrebbe essere
 		// diversa tra quella su DB (fatta da un altro utente) e quella in locale
-		await fetch(`/fetch_api/sheet_get_specs/${Resource.token}/get_sheet_specs`)
+		/* await fetch(`/fetch_api/sheet_get_specs/${Resource.token}/get_sheet_specs`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;
@@ -585,7 +604,18 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 			.catch(err => {
 				App.showConsole(err, 'error');
 				console.error(err);
-			});
+			}); */
+		Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
+		// imposto, sul tasto btn__chartWrapper il token di questo Sheet
+		const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
+		btn__chartWrapper.dataset.id = Resource.ref.id;
+		btn__chartWrapper.dataset.token = e.currentTarget.dataset.token;
+		if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
+		// eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
+		app.getData(`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`);
+		app.dlgChartSection.close();
+		// aggiungo la class 'defined' nel div che contiene il grafico/tabella
+		Resource.ref.classList.add('defined');
 	}
 
 	// recupero il datamrt
