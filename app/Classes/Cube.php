@@ -289,7 +289,6 @@ class Cube
 	{
 		// $this->select_new();
 		// dd(!empty($this->process->baseMeasures));
-		// if (!empty($this->process->baseMeasures)) {
 		// dd("metriche di base presenti");
 		$sql = NULL;
 		// dump("calcolo metriche di base");
@@ -347,7 +346,6 @@ class Cube
 		} else {
 			return DB::connection(session('db_client_name'))->statement($createStmt);
 		}
-		// }
 	}
 
 	// Aggiunta di tabelle "provenienti" dalle metriche avanzate

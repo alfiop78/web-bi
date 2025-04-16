@@ -271,32 +271,6 @@ async function getAllData(urls) {
 		});
 }
 
-/*
-  * Utilizzata per recuperare le formule delle metriche composte
-  * Viene chiamata quando si utilizza una url raggiungibile dall'esterno.
-  * In questi casi, le metriche composte venivano recuperate dal localStorage.
-  */
-async function getCompositeMetrics(urls) {
-	await Promise.all(urls.map(url => fetch(url)))
-		.then(responses => {
-			return Promise.all(responses.map(response => {
-				if (!response.ok) { throw Error(response.statusText); }
-				return response.json();
-			}))
-		})
-		.then((data) => {
-			console.log('getCompositeMetrics', data);
-			// memorizzo in localstorage
-			data.forEach(metric => {
-				const json = JSON.parse(metric.json_value);
-				console.log(JSON.stringify(json));
-				window.localStorage.setItem(metric.token, JSON.stringify(json));
-			});
-		})
-		.catch(err => console.error(err));
-}
-
-
 function export_datatable_XLS() {
 	// e.preventDefault();
 	// console.log(JSON.parse(Resource.dataTable.toJSON()));

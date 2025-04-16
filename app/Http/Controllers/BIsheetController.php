@@ -94,7 +94,7 @@ class BIsheetController extends Controller
 		$sheet_updated_at = new DateTimeImmutable($request->collect()->get('updated_at'));
 		$sheet->sheet_created_at = $sheet_created_at->format('Y-m-d H:i:s.v');
 		$sheet->sheet_updated_at = $sheet_updated_at->format('Y-m-d H:i:s.v');
-		$sheet->datamartId = $request->collect()->get('id');
+		$sheet->datamartId = $request->collect()->get('datamartId');
 		return $sheet->save();
 	}
 
