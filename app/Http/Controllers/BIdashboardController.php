@@ -30,7 +30,7 @@ class BIdashboardController extends Controller
 	public function indexByConnectionId()
 	{
 		$dashboards = BIdashboard::where('connectionId', session('db_id'))->get(['name', 'token', 'json_value']);
-		dd($dashboards);
+		// dd($dashboards);
 		return response()->json($dashboards);
 	}
 	/**

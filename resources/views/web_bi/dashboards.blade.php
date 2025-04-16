@@ -60,11 +60,11 @@
 			<section class="navOverflow">
 				<section class="navContent">
 					@foreach($dashboards as $dashboard)
-					@if ($dashboard->published)
+						{{-- @if ($dashboard->published) --}}
 					<a href="#" data-token="{{ $dashboard['token'] }}">
 						<i class="material-symbols-rounded white">dashboard</i><span>{{ $dashboard['name'] }}</span>
 					</a>
-					@endif
+						{{-- @endif --}}
 					@endforeach
 				</section>
 			</section>

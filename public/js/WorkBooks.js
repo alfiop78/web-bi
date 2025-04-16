@@ -98,7 +98,7 @@ class Sheets {
 	}
 
 	create() {
-		this.sheet.id = Date.now();
+		this.sheet.datamartId = Date.now();
 		this.sheet.userId = this.userId;
 		this.sheet.name = this.name;
 		this.sheet.facts = [...this.fact];
@@ -117,7 +117,7 @@ class Sheets {
 		// reimposto la Classe
 		SheetStorage.sheet = this.sheet.token;
 		this.name = SheetStorage.sheet.name;
-		this.sheet.id = SheetStorage.sheet.id;
+		this.sheet.datamartId = SheetStorage.sheet.datamartId;
 		this.userId = SheetStorage.sheet.userId;
 		this.sheet.created_at = SheetStorage.sheet.created_at;
 		this.sheet.updated_at = SheetStorage.sheet.updated_at;
@@ -161,7 +161,7 @@ class Sheets {
 
 	async exist() {
 		App.showConsole('Verifica in corso...', null, null);
-		return await fetch(`/fetch_api/${this.sheet.id}_${this.userId}/check_datamart`)
+		return await fetch(`/fetch_api/${this.sheet.datamartId}_${this.userId}/check_datamart`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;
@@ -178,7 +178,7 @@ class Sheets {
 	}
 
 	delete() {
-		return fetch(`/fetch_api/${this.sheet.id}_${this.userId}/delete_datamart`)
+		return fetch(`/fetch_api/${this.sheet.datamartId}_${this.userId}/delete_datamart`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;
@@ -229,7 +229,7 @@ class Sheets {
 			info__created_at: this.sheet.created_at,
 			info__updated_at: this.sheet.updated_at
 		}
-		if (this.sheet.id) info.info__datamart_id = `decisyon_cache.WEB_BI_${this.sheet.id}_${this.userId}`;
+		if (this.sheet.datamartId) info.info__datamart_id = `decisyon_cache.WEB_BI_${this.sheet.datamartId}_${this.userId}`;
 		return info;
 	}
 

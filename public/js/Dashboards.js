@@ -296,11 +296,13 @@ class Resources extends Dashboards {
 			// debugger;
 			if (!groupColumns) {
 				// non presente, la creo
+				// TODO: aggiungere qui la proprietà SQL (probabilmente anche la proprietà metrics)
 				this.#specs_group.columns.push({
 					token,
 					alias: metric.alias,
 					aggregateFn: metric.aggregateFn,
 					dependencies: metric.dependencies,
+					SQL: metric.SQL,
 					properties: {
 						visible: true,
 						formatter: {
@@ -321,6 +323,7 @@ class Resources extends Dashboards {
 				groupColumns.aggregateFn = metric.aggregateFn;
 				groupColumns.dependencies = metric.dependencies;
 				groupColumns.label = groupColumns.label;
+				groupColumns.SQL = metric.SQL;
 				this.#specs_group.columns.push(groupColumns);
 			}
 		}
@@ -607,7 +610,8 @@ class Resources extends Dashboards {
 					// delle colonne ricavo e costo per creare la metrica margine :
 					// recupero la formula della metrica composta
 					// const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
-					const SQL = JSON.parse(localStorage.getItem(metric.token)).SQL;
+					// const SQL = metric.SQL;
+					// const SQL = JSON.parse(localStorage.getItem(metric.token)).SQL;
 					// console.log(SQL);
 					// Creo una Func "dinamica"
 					let calcFunction = function(dt, row) {
@@ -619,7 +623,7 @@ class Resources extends Dashboards {
 						let formula = [];
 						// in formula ciclo tutti gli elementi della Formula, imposto i
 						// valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
-						SQL.forEach(item => {
+						metric.SQL.forEach(item => {
 							const recursive = (nested) => {
 								let nested_formula = [];
 								nested.forEach(item => {
@@ -651,7 +655,7 @@ class Resources extends Dashboards {
 						// console.log(eval(formula.join(' ')));
 						const result = (isNaN(eval(formula.join(' ')))) ? 0 : eval(formula.join(' '));
 						let total = (result) ? { v: result } : { v: result, f: '-' };
-						console.log(total);
+						// console.log(total);
 						// formattazione della cella con formatValue()
 						const formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
 						const resultFormatted = (result) ? formatter.formatValue(result) : '-';

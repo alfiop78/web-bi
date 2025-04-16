@@ -882,7 +882,7 @@ class MapDatabaseController extends Controller
 			foreach ($this->query->facts as $fact) {
 				$this->query->fact = $fact;
 				$this->query->factId = substr($fact, -5);
-				$this->query->baseTableName = "WB_BASE_{$this->query->report_id}_{$this->query->datamart_id}_{$this->query->factId}";
+				$this->query->baseTableName = "WB_BASE_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}";
 				$this->query->createBaseQuery();
 				// TODO: rinominare in "calcolo metriche di base"
 				$this->query->base_table_new();
@@ -928,23 +928,28 @@ class MapDatabaseController extends Controller
 		// recupero l'oggetto Sheet dal metadato
 		// dd(BIsheet::find($token));
 		if (BIsheet::find($token)) {
-			$json_sheet = json_decode(BIsheet::where("token", $token)->first('json_value')->json_value);
+			// $sheet = BIsheet::where("token", $token)->get(['json_value', 'workbookId']);
+			$sheet = BIsheet::where("token", $token)->first(['json_value', 'json_facts', 'datamartId', 'userId', 'workbookId']);
+			$facts = json_decode($sheet->json_facts);
+			// dd($sheet->workbookId);
+			$json_sheet = json_decode($sheet->json_value);
 			// dd($json_sheet);
+			// $json_sheet = json_decode(BIsheet::where("token", $token)->first('json_value')->json_value);
 			// WorkBook
-			if (BIworkbook::find($json_sheet->workbook_ref)) {
+			if (BIworkbook::find($sheet->workbookId)) {
 				// recupero il json del workbook, qui è memorizzato il databaseId al quale si collega questo
 				// sheet (il token dello sheet passato da curl o da jobScheduler)
-				$json_workbook = json_decode(BIworkbook::where("token", $json_sheet->workbook_ref)->first('json_value')->json_value);
+				$json_workbook = json_decode(BIworkbook::where("token", $sheet->workbookId)->first('json_value')->json_value);
 				// dd($json_workbook->databaseId);
 				// Call un metodo statico che imposterà le variabili di sessione che riguardano la connessione al db
 				BIConnectionsController::curlDBConnection($json_workbook->databaseId);
 				// creo l'object 'process' che verrà processato da this->sheetCurlProcess()
 				$process = (object)[
-					'id' => $json_sheet->id,
-					'datamartId' => $json_sheet->userId,
-					'facts' => $json_sheet->facts,
-					'from' => $json_sheet->sheet->from,
-					'joins' => $json_sheet->sheet->joins,
+					'datamartId' => $sheet->datamartId,
+					'userId' => $sheet->userId,
+					'facts' => $facts,
+					'from' => $json_sheet->from,
+					'joins' => $json_sheet->joins,
 					'filters' => (object)[],
 					'fields' => (object)[],
 					'baseMeasures' => (object)[],
@@ -955,12 +960,13 @@ class MapDatabaseController extends Controller
 				$metrics = (object)[];
 				$advancedMeasures = (object)[];
 				// fields vengono recuperati dal WorkBook
-				foreach ($json_sheet->sheet->fields as $token => $field) {
-					// dump($field);
+				foreach ($json_sheet->fields as $token => $field) {
+					// dd($field);
 					// recupero le proprietà 'field', 'tableAlias' mentre la proprietà 'name' la utilizzo dallo Sheet
 					$process->fields->$token = (object)[
 						'SQL' => $field->SQL,
-						'name' => $field->name
+						'name' => $field->name,
+						'token' => $token
 					];
 					// se è un livello della dimensione TIME, ne importo 'hierarchiesTimeLevel' per stabilire l'ultimo livello "TIME" presente nel report
 					// dump(($field->time));
@@ -968,7 +974,7 @@ class MapDatabaseController extends Controller
 				}
 				// dd($process);
 				// recupero i filtri impostati nello Sheet
-				foreach ($json_sheet->sheet->filters as $token) {
+				foreach ($json_sheet->filters as $token) {
 					if (BIfilter::find($token)) {
 						$process->filters->$token = json_decode(BIfilter::where("token", $token)->first('json_value')->json_value);
 					} else {
@@ -977,11 +983,11 @@ class MapDatabaseController extends Controller
 				}
 
 				$timingFunctions = ['last-year', 'last-month', 'ecc..'];
-				foreach ($json_sheet->facts as $fact) {
+				foreach ($facts as $fact) {
 					// metriche di base
 					// dd($json_sheet->sheet);
-					if (property_exists($json_sheet->sheet, 'metrics')) {
-						foreach ($json_sheet->sheet->metrics as $token => $object) {
+					if (property_exists($json_sheet, 'metrics')) {
+						foreach ($json_sheet->metrics as $token => $object) {
 							// anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
 							// utilizzo la stessa logica presente in createProcess()
 							// dump($object);
@@ -1034,8 +1040,8 @@ class MapDatabaseController extends Controller
 										'token' => $object->token, // TODO: probabilmente il token non serve
 										"alias" => $object->alias,
 										"aggregateFn" => $object->aggregateFn,
-										"SQL" => $json_sheet->sheet->metrics->{$token}->SQL,
-										"distinct" => $json_sheet->sheet->metrics->{$token}->distinct
+										"SQL" => $json_sheet->metrics->{$token}->SQL,
+										"distinct" => $json_sheet->metrics->{$token}->distinct
 									];
 									$process->baseMeasures->$fact = $metrics;
 									break;
@@ -1046,7 +1052,7 @@ class MapDatabaseController extends Controller
 				// metriche composte
 				return $this->curlProcess($process);
 			} else {
-				return "WorkBook (objectId: {$json_sheet->workbook_ref}) non presente nel Database";
+				return "WorkBook (objectId: {$sheet->workbookId}) non presente nel Database";
 			}
 		} else {
 			return "Report (objectId: {$token}) non presente nel Database\n";
@@ -1055,17 +1061,17 @@ class MapDatabaseController extends Controller
 
 	private function curlProcess($process)
 	{
-		// utilizzo per test anche alla url : http://web-bi.test/curl/process/bd0aqzq/schedule aprendola su browser
+		// utilizzo per test anche alla url : http://web-bi.local/curl/process/bd0aqzq/schedule aprendola su browser
 		// curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
 		// con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
 		// ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
-		// dump($process);
+		// dd($process);
 		$this->query = new Cube($process);
 		$this->query->datamartFields();
 		foreach ($this->query->facts as $fact) {
 			$this->query->fact = $fact;
 			$this->query->factId = substr($fact, -5);
-			$this->query->baseTableName = "WB_BASE_{$this->query->report_id}_{$this->query->datamart_id}_{$this->query->factId}";
+			$this->query->baseTableName = "WB_BASE_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}";
 			$this->query->createBaseQuery();
 			// dump(($this->query->process->baseMeasures));
 			// dump(!empty((array) $this->query->process->baseMeasures));
@@ -1116,7 +1122,7 @@ class MapDatabaseController extends Controller
 			];
 			$this->query->fact = $fact;
 			$this->query->factId = substr($fact, -5);
-			$this->query->baseTableName = "WB_BASE_{$this->query->report_id}_{$this->query->datamart_id}_{$this->query->factId}";
+			$this->query->baseTableName = "WB_BASE_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}";
 			$this->query->createBaseQuery();
 			$resultSQL['base'][] = $this->query->base_table_new();
 			// return $resultSQL;

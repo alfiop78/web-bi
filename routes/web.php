@@ -153,7 +153,8 @@ Route::prefix('/fetch_api/json/')->group(function () {
 	Route::post('/dashboard_update', [BIdashboardController::class, 'update']);
 });
 
-Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'scheduleProcess'])->middleware(['guest'])->name('web_bi.schedule');
+// Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'scheduleProcess'])->middleware(['guest'])->name('web_bi.schedule');
+Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'scheduleProcess'])->name('web_bi.schedule');
 
 // recupero degli sheets appartenenti a un determinato workbooks
 Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetController::class, 'indexByWorkbook']);

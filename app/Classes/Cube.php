@@ -43,11 +43,11 @@ class Cube
 	function __construct($process)
 	{
 		$this->process = $process;
-		$this->report_id = $this->process->{"id"};
+		$this->user_id = $this->process->{"userId"};
 		$this->facts = $this->process->{"facts"};
 		// TODO: da modificare in userId
 		$this->datamart_id = $this->process->{"datamartId"};
-		$this->datamart_name = "WEB_BI_{$this->report_id}_{$this->datamart_id}";
+		$this->datamart_name = "WEB_BI_{$this->datamart_id}_{$this->user_id}";
 		// il report deve necessariamente contenere almeno un livello dimensionale
 		// ...quindi $this->process->{fields} sarà sempre presente
 		$this->fields = $this->process->{"fields"};
@@ -553,7 +553,7 @@ class Cube
 	{
 		foreach ($this->groupMetricsByFilters as $groupToken => $advancedMetric) {
 			$groupAdvancedMeasures = [];
-			$tableName = "WB_METRIC_{$this->report_id}_{$this->datamart_id}_{$this->factId}_{$groupToken}";
+			$tableName = "WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
 			if (property_exists($this, 'sql_info')) {
 				$this->json_info_advanced[$tableName] = (object) [
 					"SELECT" => $this->sql_info->{'SELECT'},
@@ -729,10 +729,10 @@ class Cube
 		$union_sql = implode("UNION\n", $union);
 		switch (session('db_driver')) {
 			case 'odbc':
-				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n$union_sql;";
+				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->datamart_id}_{$this->user_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n$union_sql;";
 				break;
 			case 'mysql':
-				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} AS\n$union_sql;";
+				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->datamart_id}_{$this->user_id} AS\n$union_sql;";
 				break;
 			default:
 				break;
@@ -778,7 +778,7 @@ class Cube
 		$fields = [];
 		foreach ($this->datamart_fields as $token => $alias) {
 			// dd($token, $field);
-			$fields[] = "union_{$this->report_id}_{$this->datamart_id}.{$token} AS \"{$alias}\"";
+			$fields[] = "union_{$this->datamart_id}_{$this->user_id}.{$token} AS \"{$alias}\"";
 		}
 		// dd($fields);
 		// unisco i seguenti campi :
@@ -787,13 +787,13 @@ class Cube
 		$mergeElements = array_merge($fields, $this->datamart_baseMeasures, $this->datamart_advancedMeasures, $this->compositeMeasures);
 		$createStmt .= implode(",\n", $mergeElements);
 		// dd($createStmt);
-		$createStmt .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
+		$createStmt .= self::FROM . "decisyon_cache.union_{$this->datamart_id}_{$this->user_id}";
 		$joinLEFT = "";
 		$ONClause = [];
 		foreach ($this->queries as $table => $fields) {
 			$joinLEFT .= "\nLEFT JOIN decisyon_cache.{$table}\n\tON ";
 			foreach ($fields as $token => $field) {
-				$ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.$token = $table.$token";
+				$ONClause[] = "decisyon_cache.union_{$this->datamart_id}_{$this->user_id}.$token = $table.$token";
 			}
 			$joinLEFT .= implode("\nAND ", $ONClause);
 			unset($ONClause);
@@ -809,29 +809,29 @@ class Cube
 		} else {
 			try {
 				// elimino prima il datamart già esistente
-				if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}")) {
+				if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->datamart_id}_{$this->user_id}")) {
 					// TEST: 27.09.2024 verifica, in laravel viene restituito un NOTICE quando si utilizza dropIfExists() e una tabella non è presente
-					Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}");
+					Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->datamart_id}_{$this->user_id}");
 				}
 				// creazione del datamart
 				// dd($createStmt);
 				DB::connection(session('db_client_name'))->statement($createStmt);
 				// elimino la tabella union....
-				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
+				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->datamart_id}_{$this->user_id}");
 				// elimino tutte le tabelle temporanee utilizzate per creare il datamart
 				foreach (array_keys($this->queries) as $table) {
 					Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
 				}
 			} catch (\Throwable $th) {
 				// elimino la tabella union....
-				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
+				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->datamart_id}_{$this->user_id}");
 				// elimino tutte le tabelle temporanee utilizzate per creare il datamart
 				foreach (array_keys($this->queries) as $table) {
 					Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
 				}
 				throw $th;
 			}
-			return $this->report_id;
+			return $this->datamart_id;
 		}
 	}
 } // End Class

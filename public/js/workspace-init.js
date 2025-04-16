@@ -1020,7 +1020,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	app.generateSQL = async (process) => {
 		Sheet.userId = userId;
-		// lo Sheet.id può essere già presente quando è stato aperto
+		// lo Sheet.datamartId può essere già presente quando è stato aperto
 		if (Sheet.edit === true) {
 			/* Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
 			if (Sheet.changes.length !== 0) {
@@ -1036,8 +1036,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		} else {
 			Sheet.create();
 		}
-		process.id = Sheet.sheet.id;
-		process.datamartId = Sheet.userId;
+		process.datamartId = Sheet.sheet.datamartId;
+		process.userId = Sheet.userId;
 		process.sql_info = true;
 		console.log(process);
 		// app.saveSheet();
@@ -1073,7 +1073,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	/* app.loadPreview = async () => {
 	  let partialData = [];
-	  await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview?page=1`)
+	  await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.userId}/preview?page=1`)
 		.then((response) => {
 		  // console.log(response);
 		  if (!response.ok) { throw Error(response.statusText); }
@@ -1137,9 +1137,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		debugger;
 		Resource.setSpecifications();
 
-		process.id = Sheet.sheet.id;
-		process.datamartId = Sheet.userId;
+		process.datamartId = Sheet.sheet.datamartId;
+		process.userId = Sheet.userId;
+		// FIX: userId e datamartId sono da correggere
 		console.log(process);
+		debugger;
 		// invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
 		const params = JSON.stringify(process);
 		// App.showConsole('Elaborazione in corso...', 'info');
@@ -1323,7 +1325,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		const inputName = document.getElementById('composite-metric-name');
 		inputName.value = metric.alias;
 		btnCompositeMetricSave.dataset.token = e.target.dataset.token;
-		const text = document.createTextNode(metric.formula.join(''));
+		console.log(metric.formula);
+		// NOTE: la memorizzazione su DB converte, (json_encode) gli spazi " " in elementi NULL nella formula e nell'SQL.
+		// Qui li riconverto per visualizzare la formula nel modo in cui è stata inserita, se è stata inserita con gli spazi.
+		const formula = metric.formula.map(item => (item) ? item : ' ');
+		const text = document.createTextNode(formula.join(''));
 		textarea__composite_metric.insertBefore(text, textarea__composite_metric.lastChild);
 		dlgCompositeMetricCheck();
 		dlg__composite_metric.showModal();

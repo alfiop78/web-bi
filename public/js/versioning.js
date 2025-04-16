@@ -243,7 +243,7 @@ var Storage = new SheetStorages();
 							};
 							Storage.save(sheet);
 						} else {
-							Storage.save(JSON.parse(json.json_value))
+							Storage.save(JSON.parse(json.json_value));
 						}
 						// aggiorno lo status dell'elemento dopo il download
 						const li = document.getElementById(`${json.token}`);
