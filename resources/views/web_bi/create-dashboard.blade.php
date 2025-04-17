@@ -129,7 +129,12 @@
 									<div class="list-search">
 										<input type="search" id="dashboards-search-id" data-element-search="dashboards" autocomplete="off" placeholder="Ricerca Dashboard" />
 										<div class="relative-ul">
-											<ul id="ul-dashboards" data-search-id="dashboards-search-id" class="custom-scrollbar"></ul>
+												<ul id="ul-dashboards" data-search-id="dashboards-search-id" class="custom-scrollbar">
+													@foreach($dashboards as $dashboard)
+													<li data-token="{{ $dashboard->token }}">{{ $dashboard->name }}</li>
+													@endforeach
+
+												</ul>
 										</div>
 									</div>
 								</section>
@@ -198,11 +203,11 @@
 											<input type="search" id="workbooks-search-id" data-element-search="workbooks" placeholder="Ricerca" autocomplete="off" />
 											<div class="relative-ul">
 												<ul id="ul-workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar">
-													@foreach($workbooks as $workbook)
-													<li data-li data-element-search="workbooks" class="select-list" data-label="{{ $workbook->name }}" data-searchable="true" data-token="{{ $workbook->token }}" data-fn="workbookSelected">
-														<span>{{ $workbook->name }}</span>
+													{{-- @foreach($workbooks as $workbook) --}}
+													<li data-li data-element-search="workbooks" class="select-list" data-label="{{-- $workbook->name --}}" data-searchable="true" data-token="{{-- $workbook->token --}}" data-fn="workbookSelected">
+														<span>{{-- $workbook->name --}}</span>
 													</li>
-													@endforeach
+													{{-- @endforeach --}}
 												</ul>
 											</div>
 										</section>

@@ -127,8 +127,8 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 
 	// recupero l'elenco delle Dashboard appartenenti al DB corrente
 	app.openDashboard = async () => {
-		app.clearDashboard();
-		App.showConsole('Recupero elenco Dashboard', 'info');
+		// app.clearDashboard();
+		/* App.showConsole('Recupero elenco Dashboard', 'info');
 		await fetch(`/fetch_api/dashboardsByConnectionId`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
@@ -154,7 +154,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 			.catch(err => {
 				App.showConsole(err, 'error');
 				console.error(err);
-			});
+			}); */
 		app.dlgDashboard.showModal();
 	}
 
@@ -526,7 +526,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 						}).then(response => response.json())
 							.then((paginate) => {
 								partialData[index] = partialData[index].concat(paginate.data);
-								if (paginate.next_page_url) {
+								if (paginate.next_page_url && paginate.current_page !== 5) {
 									recursivePaginate(paginate.next_page_url, index);
 									console.log(partialData[index]);
 								} else {
@@ -642,7 +642,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 						// console.log(paginate);
 						// console.log(progressBar.value);
 						partialData = partialData.concat(paginate.data);
-						if (paginate.next_page_url) {
+						if (paginate.next_page_url && paginate.current_page !== 2) {
 							recursivePaginate(paginate.next_page_url);
 						} else {
 							// Non sono presenti altre pagine, visualizzo il dashboard

@@ -176,6 +176,7 @@ function columnSave(e) {
 		type: 'column',
 		name,
 		tableId: WorkBook.activeTable.id,
+		factId: WorkBook.activeTable.dataset.factId,
 		table: WorkBook.activeTable.dataset.table,
 		tableAlias: WorkBook.activeTable.dataset.alias,
 		schema: WorkBook.activeTable.dataset.schema,

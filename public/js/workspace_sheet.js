@@ -134,7 +134,7 @@ async function preview() {
 						progressTotal.innerText = paginate.total;
 						// console.log(progressBar.value);
 						partialData = partialData.concat(paginate.data);
-						if (paginate.next_page_url) {
+						if (paginate.next_page_url && paginate.current_page !== 2) {
 							recursivePaginate(paginate.next_page_url);
 						} else {
 							// Non sono presenti altre pagine, visualizzo il dashboard
@@ -142,8 +142,6 @@ async function preview() {
 							Resource.data = partialData;
 							// google.charts.setOnLoadCallback(drawDatamart());
 							google.charts.setOnLoadCallback(draw());
-							App.closeConsole();
-							App.loaderStop();
 							sheetInformations();
 						}
 					}).catch((err) => {
@@ -159,8 +157,8 @@ async function preview() {
 					Resource.data = partialData;
 					// google.charts.setOnLoadCallback(drawDatamart());
 					google.charts.setOnLoadCallback(draw());
-					App.loaderStop();
-					App.closeConsole();
+					// App.loaderStop();
+					// App.closeConsole();
 					sheetInformations();
 				}
 			} else {
@@ -174,6 +172,38 @@ async function preview() {
 			console.error(err);
 		});
 }
+
+/* async function preview() {
+	Resource.specs = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
+	// se esistono più di un chartWrapper li visualizzo in questa popover
+	if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
+	App.showConsole('Recupero dati in corso...', null, null);
+	await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.sheet.userId}/preview`)
+		.then((response) => {
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		})
+		.then((response) => response.json())
+		.then(data => {
+			if (data) {
+				// Non sono presenti altre pagine, visualizzo la dashboard
+				Resource.data = data;
+				// google.charts.setOnLoadCallback(drawDatamart());
+				google.charts.setOnLoadCallback(draw());
+				App.loaderStop();
+				App.closeConsole();
+				sheetInformations();
+			} else {
+				App.loaderStop();
+				App.closeConsole();
+				App.showConsole('Nessun dato presente', 'warning', 2000);
+			}
+		})
+		.catch(err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
+} */
 
 function sheetInformations() {
 	document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);

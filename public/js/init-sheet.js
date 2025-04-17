@@ -282,6 +282,8 @@ function chartWrapperReady() {
 	Resource.chartWrapperView.draw();
 	console.log('TIMER END', new Date());
 	console.info(`ExecutionTime (ChartWrapperReady) : ${new Date() - start_time_execution}ms`);
+	App.closeConsole();
+	App.loaderStop();
 	// google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
 	// Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.specs.wrapper[Resource.wrapper].options);
 	// var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataViewGrouped);

@@ -55,7 +55,10 @@ Route::get('/versioning', function () {
 
 Route::get('/dashboards', [BIdashboardController::class, 'index'])->middleware(['auth'])->name('web_bi.dashboards');
 
-Route::get('/create-dashboard', [BIworkbookController::class, 'indexByDashboardCreate'])->middleware(['auth'])->name('web_bi.dashboard_create');
+// Route::get('/create-dashboard', [BIworkbookController::class, 'indexByDashboardCreate'])->middleware(['auth'])->name('web_bi.dashboard_create');
+// recupero le dashboards della connessione corrente
+// Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
+Route::get('/create-dashboard', [BIdashboardController::class, 'indexByConnectionId'])->middleware(['auth'])->name('web_bi.dashboard_create');
 
 // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
@@ -160,8 +163,6 @@ Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'sch
 Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetController::class, 'indexByWorkbook']);
 // recupero le specifiche dello sheet
 Route::get('fetch_api/sheet_get_specs/{token}/get_sheet_specs', [BIsheetController::class, 'indexSpecs']);
-// recupero le dashboards della connessione corrente
-Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
 
 Route::get('/dashboards/dashboard/{token}', function (Request $request, $token) {
 	// INFO: recupero url compresa di querystring

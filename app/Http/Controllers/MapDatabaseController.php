@@ -645,6 +645,7 @@ class MapDatabaseController extends Controller
 
 		// $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->orderBy('area_id')->paginate(15000);
 
+		// INFO: metodo 1
 		BIConnectionsController::getDB();
 		// dd(session('db_driver'));
 		switch (session('db_driver')) {
@@ -658,31 +659,28 @@ class MapDatabaseController extends Controller
 			default:
 				break;
 		}
+
 		$columnsData = $queryColumns->where('TABLE_SCHEMA', "decisyon_cache")
 			->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
-
 		$query = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}");
 		foreach ($columnsData as $columns) {
 			foreach ($columns as $column) {
 				$query->orderBy($column);
 			}
 		}
-
 		// $data = $query->cursorPaginate(10000);
 		// NOTE: il cursorPaginate dovrebbe essere più performante (da testare) ma non contiene i dati relativi al
 		// numero di pagine, al momento utilizzo paginate() con la clausola OrderBy
 		$data = $query->paginate(10000);
-
-		// $query->orderBy('area_id')->orderBy('area')
-		//   ->orderBy('zona_id')->orderBy('zona')
-		//   ->orderBy('descrizione_id')->orderBy('descrizione')
-		//   ->orderBy('year_id')->orderBy('year')
-		//   ->orderBy('quarter_id')->orderBy('quarter')
-		//   ->orderBy('month_id')->orderBy('month')
-		//   ->orderBy('basketMLI_id')->orderBy('basketMLI');
-		// $data = $query->cursorPaginate(15000);
-		// dd($data);
+		// if ($data->currentPage() === 3) return $data;
 		return $data;
+		// INFO: metodo 1
+
+		// INFO: metodo 2
+		/* $data = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}")->limit(20000)->get();
+		// dd($data);
+		return response()->json($data); */
+		// INFO: metodo 2
 	}
 
 	// viene invocata da init-dashboards.js
