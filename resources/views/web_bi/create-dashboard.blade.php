@@ -129,12 +129,7 @@
 									<div class="list-search">
 										<input type="search" id="dashboards-search-id" data-element-search="dashboards" autocomplete="off" placeholder="Ricerca Dashboard" />
 										<div class="relative-ul">
-												<ul id="ul-dashboards" data-search-id="dashboards-search-id" class="custom-scrollbar">
-													@foreach($dashboards as $dashboard)
-													<li data-token="{{ $dashboard->token }}">{{ $dashboard->name }}</li>
-													@endforeach
-
-												</ul>
+											<ul id="ul__dashboards" data-search-id="dashboards-search-id" class="custom-scrollbar"></ul>
 										</div>
 									</div>
 								</section>
@@ -179,7 +174,7 @@
 					</section>
 					<section class="dbStatus">
 						{{-- session()->forget('db_name') --}}
-						<span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
+						<span id="db-connection-status" data-database-id="{{ session('db_id', 0) }}">
 							<span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
 							@if (session('db_name'))
 							<i id="db-icon-status" class="material-symbols-rounded">database</i>
@@ -202,11 +197,11 @@
 										<section class="list-search">
 											<input type="search" id="workbooks-search-id" data-element-search="workbooks" placeholder="Ricerca" autocomplete="off" />
 											<div class="relative-ul">
-												<ul id="ul-workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar">
+												<ul id="ul__workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar">
 													{{-- @foreach($workbooks as $workbook) --}}
-													<li data-li data-element-search="workbooks" class="select-list" data-label="{{-- $workbook->name --}}" data-searchable="true" data-token="{{-- $workbook->token --}}" data-fn="workbookSelected">
-														<span>{{-- $workbook->name --}}</span>
-													</li>
+													<!-- <li data-li data-element-search="workbooks" class="select-list" data-label="{{-- $workbook->name --}}" data-searchable="true" data-token="{{-- $workbook->token --}}" data-fn="workbookSelected"> -->
+														<!-- <span>{{-- $workbook->name --}}</span> -->
+													<!-- </li> -->
 													{{-- @endforeach --}}
 												</ul>
 											</div>
@@ -218,7 +213,7 @@
 										<section class="list-search">
 											<input type="search" id="sheets-search-id" data-element-search="sheets" placeholder="Ricerca" autocomplete="off" />
 											<div class="relative-ul">
-												<ul id="ul-sheets" data-search-id="sheets-search-id" class="custom-scrollbar"></ul>
+												<ul id="ul__sheets" data-search-id="sheets-search-id" class="custom-scrollbar"></ul>
 											</div>
 										</section>
 

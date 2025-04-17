@@ -58,7 +58,7 @@ const btn__editConnection = document.getElementById("btn__editConnection");
 	document.querySelectorAll('#drawer .navContent>a:not([title="Dashboards"])').forEach(el => {
 		el.onclick = (e) => {
 			// verifico se è stata stabilita una connessione al DB
-			if (+connectionStatus.dataset.connected === 0) {
+			if (+connectionStatus.dataset.databaseId === 0) {
 				e.preventDefault();
 				App.showConsole('Nessun database connesso', 'error', 2000);
 				return false;

@@ -72,7 +72,7 @@
 				<menu class="standard onlyStatus">
 					<section class="dbStatus">
 						{{-- session()->forget('db_name') --}}
-						<span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
+						<span id="db-connection-status" data-database-id="{{ session('db_id', 0) }}">
 							<span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
 							@if (session('db_name'))
 							<i id="db-icon-status" class="material-symbols-rounded">database</i>

@@ -18,13 +18,13 @@ async function selectConnection(e) {
         e.target.dataset.selected = 'true';
         iconStatus.innerText = 'database';
         databaseName.innerHTML = data.name;
-        connectionStatus.dataset.connected = data.id;
+        connectionStatus.dataset.databaseId = data.id;
         App.showConsole('Connessione effettuata', 'done', 2000);
       } else {
         delete e.target.dataset.selected;
         iconStatus.innerText = 'database_off';
         databaseName.innerHTML = 'Database non impostato';
-        connectionStatus.dataset.connected = 0;
+        connectionStatus.dataset.databaseId = 0;
         App.showConsole('Connessione non riuscita', 'error', 2000);
       }
     })

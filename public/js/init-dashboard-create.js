@@ -14,14 +14,16 @@ const dlg__create_url = document.getElementById('dlg__create_url');
 const btn__create_url = document.getElementById('btn__create_url');
 const btn__url_generate = document.getElementById('btn__url_generate');
 const tmpl__url_params = document.getElementById('tmpl__url_params');
+const ref__connectionId = document.getElementById('db-connection-status');
+const ul__sheets = document.getElementById('ul__sheets');
+const ul__workbooks = document.getElementById('ul__workbooks');
+const dlg__chartSection = document.getElementById('dlg-chart');
+const ul__dashboards = document.getElementById('ul__dashboards');
 (() => {
 	var app = {
 		layoutRef: document.getElementById('template-layout'),
-		// templates
-		// tmplList: document.getElementById('tmpl-li'),
 		// dialogs
 		dlgTemplateLayout: document.getElementById('dlg-template-layout'),
-		dlgChartSection: document.getElementById('dlg-chart'),
 		number: function(properties) {
 			return new google.visualization.NumberFormat(properties);
 		},
@@ -128,7 +130,7 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 	// recupero l'elenco delle Dashboard appartenenti al DB corrente
 	app.openDashboard = async () => {
 		// app.clearDashboard();
-		/* App.showConsole('Recupero elenco Dashboard', 'info');
+		App.showConsole('Recupero elenco Dashboard', 'info');
 		await fetch(`/fetch_api/dashboardsByConnectionId`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
@@ -137,7 +139,6 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 			.then((response) => response.json())
 			.then(data => {
 				console.log(data);
-				const ul = document.getElementById('ul-dashboards');
 				data.forEach(dashboard => {
 					const content = template__li.content.cloneNode(true);
 					const li = content.querySelector('li[data-li]');
@@ -147,14 +148,14 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 					li.addEventListener('click', app.dashboardSelected);
 					li.dataset.elementSearch = 'dashboards';
 					span.innerText = dashboard.name;
-					ul.appendChild(li);
+					ul__dashboards.appendChild(li);
 				});
 				App.closeConsole();
 			})
 			.catch(err => {
 				App.showConsole(err, 'error');
 				console.error(err);
-			}); */
+			});
 		app.dlgDashboard.showModal();
 	}
 
@@ -256,40 +257,6 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		}
 		app.getAllData(urls);
 		// console.log(Resource.multiData);
-	}
-
-	app.workbookSelected = async (e) => {
-		console.log(e.currentTarget.dataset.token);
-		// recupero l'elenco degli sheets del workbook selezionato
-		await fetch(`/fetch_api/workbook_token/${e.currentTarget.dataset.token}/sheet_indexByWorkbook`)
-			.then((response) => {
-				if (!response.ok) { throw Error(response.statusText); }
-				return response;
-			})
-			.then((response) => response.json())
-			.then(data => {
-				// console.log(data);
-				const ul = document.getElementById('ul-sheets');
-				ul.querySelectorAll('li').forEach(el => el.remove());
-				data.forEach(sheet => {
-					const content = template__li.content.cloneNode(true);
-					const li = content.querySelector('li[data-li]');
-					const span = li.querySelector('span');
-					li.dataset.token = sheet.token;
-					li.dataset.datamartId = sheet.datamartId;
-					li.dataset.userId = sheet.userId;
-					li.dataset.label = sheet.name;
-					li.dataset.workbookId = sheet.workbookId;
-					li.addEventListener('click', app.sheetSelected);
-					li.dataset.elementSearch = 'sheets';
-					span.innerText = sheet.name;
-					ul.appendChild(li);
-				});
-			})
-			.catch(err => {
-				App.showConsole(err, 'error');
-				console.error(err);
-			});
 	}
 
 	app.publish = async (e) => {
@@ -499,7 +466,22 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 		if (e.currentTarget.classList.contains('defined')) return false;
 		// il ref corrente, appena aggiunto
 		Resource.ref = document.getElementById(e.currentTarget.id);
-		app.dlgChartSection.showModal();
+		// 17-04-2025 Recupero gli WorkBook dal localStorage in base al db connesso
+		ul__workbooks.querySelectorAll('li').forEach(item => item.remove());
+		// utilizzo il Metodo statico per recuperare l'elenco degli workbook appartenenti al
+		// databaseId corrente
+		Storages.getWorkbookByDatabaseId(ref__connectionId.dataset.databaseId).forEach(workbook => {
+			const content = template__li.content.cloneNode(true);
+			const li = content.querySelector('li[data-li]');
+			const span = li.querySelector('span');
+			li.dataset.token = workbook.token;
+			li.dataset.label = workbook.name;
+			li.addEventListener('click', workbookSelected);
+			li.dataset.elementSearch = 'workbooks';
+			span.innerText = workbook.name;
+			ul__workbooks.appendChild(li);
+		});
+		dlg__chartSection.showModal();
 	}
 
 	app.getAllData = async (urls) => {
@@ -564,111 +546,6 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 				App.showConsole(err, 'error');
 				console.error(err);
 			});
-	}
-
-	// Selezione del report che alimenta il chart_div
-	app.sheetSelected = async (e) => {
-		// recupero le specifiche per questo report (resource)
-		// successivamente recupero i dati del datamart
-		Resource.token = e.currentTarget.dataset.token;
-		// aggiungo un token per identificare, in publish(), il report (datamart_id)
-		Resource.ref.dataset.token = e.currentTarget.dataset.token;
-		Resource.ref.dataset.datamartId = e.currentTarget.dataset.datamartId;
-		Resource.ref.dataset.userId = e.currentTarget.dataset.userId;
-		// NOTE: 10.12.2024 imposto di default 'Table' ma potrei impostare il default
-		// direttamente nelle specs.wrapper dello sheet, ad esempio se salvo lo sheet come barChart
-		// potrei impostare una proprietà 'default : true' nel wrapper barChart
-		Resource.ref.dataset.wrapper = 'Table';
-		// WARN: 11-04-2025 le specifiche le devo recuperare dal DB e non dal localStorage perchè la versione su DB potrebbe essere
-		// diversa tra quella su DB (fatta da un altro utente) e quella in locale
-		/* await fetch(`/fetch_api/sheet_get_specs/${Resource.token}/get_sheet_specs`)
-			.then((response) => {
-				if (!response.ok) { throw Error(response.statusText); }
-				return response;
-			})
-			.then((response) => response.json())
-			.then(data => {
-				Resource.specs = JSON.parse(data.json_specs);
-				// imposto, sul tasto btn__chartWrapper il token di questo Sheet
-				const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
-				btn__chartWrapper.dataset.id = Resource.ref.id;
-				btn__chartWrapper.dataset.token = Resource.token;
-				if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
-				// eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
-				debugger;
-				app.getData(`/fetch_api/${Resource.ref.dataset.datamartId}_${Resource.ref.dataset.userId}/preview?page=1`);
-				app.dlgChartSection.close();
-				// aggiungo la class 'defined' nel div che contiene il grafico/tabella
-				Resource.ref.classList.add('defined');
-			})
-			.catch(err => {
-				App.showConsole(err, 'error');
-				console.error(err);
-			}); */
-		Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
-		// imposto, sul tasto btn__chartWrapper il token di questo Sheet
-		const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
-		btn__chartWrapper.dataset.id = Resource.ref.id;
-		btn__chartWrapper.dataset.token = e.currentTarget.dataset.token;
-		if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
-		// eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
-		app.getData(`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`);
-		app.dlgChartSection.close();
-		// aggiungo la class 'defined' nel div che contiene il grafico/tabella
-		Resource.ref.classList.add('defined');
-	}
-
-	// recupero il datamrt
-	app.getData = async (url) => {
-		let partialData = [];
-		await fetch(url)
-			.then((response) => {
-				console.log(response);
-				if (!response.ok) { throw Error(response.statusText); }
-				return response;
-			})
-			.then((response) => response.json())
-			.then(async (paginateData) => {
-				// console.log(paginateData);
-				// console.log(paginateData.data);
-				// funzione ricorsiva fino a quando è presente next_page_url
-				let recursivePaginate = async (url) => {
-					// console.log(url);
-					await fetch(url).then((response) => {
-						// console.log(response);
-						if (!response.ok) { throw Error(response.statusText); }
-						return response;
-					}).then(response => response.json()).then((paginate) => {
-						// console.log(paginate);
-						// console.log(progressBar.value);
-						partialData = partialData.concat(paginate.data);
-						if (paginate.next_page_url && paginate.current_page !== 2) {
-							recursivePaginate(paginate.next_page_url);
-						} else {
-							// Non sono presenti altre pagine, visualizzo il dashboard
-							// console.log('tutte le paginate completate :', partialData);
-							Resource.data = partialData;
-							google.charts.setOnLoadCallback(draw());
-						}
-					}).catch((err) => {
-						App.showConsole(err, 'error');
-						console.error(err);
-					});
-				}
-				partialData = paginateData.data;
-				if (paginateData.next_page_url) {
-					recursivePaginate(paginateData.next_page_url);
-				} else {
-					// Non sono presenti altre pagine, visualizzo la dashboard
-					Resource.data = partialData;
-					google.charts.setOnLoadCallback(draw());
-				}
-			})
-			.catch(err => {
-				App.showConsole(err, 'error');
-				console.error(err);
-			});
-		// end chiamata in GET
 	}
 
 	// Ridisegno il report in base alle specifiche recuperate dal report
@@ -768,12 +645,12 @@ const tmpl__url_params = document.getElementById('tmpl__url_params');
 	// app.dlgTemplateLayout.onclose = () => document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
 
 	// reset sheets
-	app.dlgChartSection.onclose = () => {
+	dlg__chartSection.onclose = () => {
 		// document.querySelectorAll('#ul-sheets > li').forEach(el => el.remove());
 		// document.querySelectorAll('#ul-workbooks > li').forEach(el => el.remove());
 	}
 
-	app.dlgDashboard.onclose = () => document.querySelectorAll('#ul-dashboards li').forEach(el => el.remove());
+	app.dlgDashboard.onclose = () => ul__dashboards.querySelectorAll('li').forEach(item => item.remove());
 
 	// Drag events
 	app.filterDragStart = (e) => {

@@ -31,8 +31,8 @@ class BIdashboardController extends Controller
 	{
 		$dashboards = BIdashboard::where('connectionId', session('db_id'))->get(['name', 'token', 'json_value']);
 		// dd($dashboards);
-		// return response()->json($dashboards);
-		return view('web_bi.create-dashboard')->with('dashboards', $dashboards);
+		return response()->json($dashboards);
+		// return view('web_bi.create-dashboard')->with('dashboards', $dashboards);
 	}
 	/**
 	 * Show the form for creating a new resource.

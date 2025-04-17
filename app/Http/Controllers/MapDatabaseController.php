@@ -723,7 +723,7 @@ class MapDatabaseController extends Controller
 			// se nella querystring è presente la stringa token, non la considero nella query
 			// TODO: 26.03.2025 implementare un try...catch per restituire il messaggio d'errore custom se
 			// la colonna passata nella querystring non è presente nella tabella
-			if ($key !== 'token') $query->where($key, $value);
+			if ($key !== 'token' && $key !== 'page') $query->where($key, $value);
 		}
 
 		foreach ($columnsData as $columns) {

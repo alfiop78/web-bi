@@ -57,8 +57,11 @@ Route::get('/dashboards', [BIdashboardController::class, 'index'])->middleware([
 
 // Route::get('/create-dashboard', [BIworkbookController::class, 'indexByDashboardCreate'])->middleware(['auth'])->name('web_bi.dashboard_create');
 // recupero le dashboards della connessione corrente
-// Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
-Route::get('/create-dashboard', [BIdashboardController::class, 'indexByConnectionId'])->middleware(['auth'])->name('web_bi.dashboard_create');
+Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
+// Route::get('/create-dashboard', [BIdashboardController::class, 'indexByConnectionId'])->middleware(['auth'])->name('web_bi.dashboard_create');
+Route::get('/create-dashboard', function(){
+	return view('web_bi.create-dashboard');
+})->middleware(['auth'])->name('web_bi.dashboard_create');
 
 // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);

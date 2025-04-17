@@ -742,7 +742,7 @@ menu.standard>section {
   column-gap: 4px;
 }
 
-menu.standard>.dbStatus>span[data-connected] {
+menu.standard>.dbStatus>span[data-database-id] {
   display: flex;
   align-items: center;
   padding: 0px 8px;
@@ -753,7 +753,7 @@ menu.standard>.dbStatus>span[data-connected] {
 }
 
 /* database non connesso */
-menu.standard>.dbStatus>span[data-connected="0"] {
+menu.standard>.dbStatus>span[data-database-id="0"] {
   background-color: var(--main-important-color);
   color: white;
 }
