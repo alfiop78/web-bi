@@ -103,7 +103,7 @@ async function preview() {
 	const progressTotal = document.getElementById('progress-total');
 	const progressLabel = document.querySelector("label[for='progress-bar']");
 	App.showConsole('Recupero dati in corso...', null, null);
-	await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.userId}/preview`)
+	await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.sheet.userId}/preview`)
 		.then((response) => {
 			// console.log(response);
 			if (!response.ok) { throw Error(response.statusText); }

@@ -294,15 +294,17 @@ class Resources extends Dashboards {
 				p: { data: 'measure' }
 			};
 			// debugger;
+			// recupero la proprietà 'SQL' direttamente dal WorkBook.elements, questa è la versione originale della
+			// metrica. Se viene modificata una formula, in WorkBook.elements è sempre aggiornata
+			console.log(WorkBook.elements.get(metric.token));
 			if (!groupColumns) {
 				// non presente, la creo
-				// TODO: aggiungere qui la proprietà SQL (probabilmente anche la proprietà metrics)
 				this.#specs_group.columns.push({
 					token,
 					alias: metric.alias,
 					aggregateFn: metric.aggregateFn,
 					dependencies: metric.dependencies,
-					SQL: metric.SQL,
+					SQL: WorkBook.elements.get(metric.token).SQL,
 					properties: {
 						visible: true,
 						formatter: {
@@ -323,7 +325,7 @@ class Resources extends Dashboards {
 				groupColumns.aggregateFn = metric.aggregateFn;
 				groupColumns.dependencies = metric.dependencies;
 				groupColumns.label = groupColumns.label;
-				groupColumns.SQL = metric.SQL;
+				groupColumns.SQL = WorkBook.elements.get(metric.token).SQL;
 				this.#specs_group.columns.push(groupColumns);
 			}
 		}

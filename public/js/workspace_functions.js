@@ -1096,6 +1096,9 @@ function compositeMetricSave(e) {
 	// regex : ottengo i bounduary delle word (\b) e anche quelli dei caratteri non-word (\W)
 	object.formula = textarea__composite_metric.firstChild.textContent.split(/\b|(?=[\W])/g);
 	console.log(object.formula);
+	// BUG: 17.04.2025 quando si modifica la formula, posizionando il cursore su un nome di metrica "riconosciuto" (trovato dal suggestions)
+	// viene inserito un &nbsp che causa il ritorno a capo di tutta la stringa che segue. In questo caso, la stringa che segue, dopo
+	// &nbsp;, non viene memorizzata.
 	// ottengo i token delle metriche che compongono la metrica composta
 	object.formula.forEach(el => {
 		if (document.querySelector(`li.metrics[data-label='${el}']`)) {
@@ -1123,6 +1126,7 @@ function compositeMetricSave(e) {
 			object.SQL.push(el);
 		}
 	});
+	debugger;
 	// aggiornamento/creazione della metrica imposta created_at
 	// object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
 	object.created_at = (e.target.dataset.token) ? WorkBook.elements.get(e.target.dataset.token).created_at : date;

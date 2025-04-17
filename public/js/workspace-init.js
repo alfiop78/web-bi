@@ -1124,22 +1124,26 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 	} */
 
 	app.process = async (process) => {
-		debugger;
 		Sheet.userId = userId;
+		debugger;
 		if (Sheet.edit === true) {
-			debugger;
 			// Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
-			if (document.querySelectorAll('*[data-adding], *[data-removed], *[data-modified]').length !== 0) Sheet.update();
+			if (document.querySelectorAll('*[data-adding], *[data-removed], *[data-modified]').length !== 0) {
+				Sheet.update();
+				process.datamartId = Sheet.sheet.datamartId;
+				process.userId = Sheet.userId;
+			} else {
+				// nessuna modifica fatta al report, quindi elaboro il report con lo stesso userId
+				process.userId = Sheet.sheet.userId;
+			}
 		} else {
 			Sheet.create();
+			process.userId = Sheet.userId;
 		}
+		process.datamartId = Sheet.sheet.datamartId;
 		Resource.specs.token = Sheet.sheet.token;
-		debugger;
 		Resource.setSpecifications();
 
-		process.datamartId = Sheet.sheet.datamartId;
-		process.userId = Sheet.userId;
-		// FIX: userId e datamartId sono da correggere
 		console.log(process);
 		debugger;
 		// invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart

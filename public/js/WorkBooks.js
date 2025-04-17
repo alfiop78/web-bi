@@ -92,6 +92,7 @@ class Sheets {
 		this.sheet.facts = [...this.fact];
 		this.sheet.userId = this.userId;
 		this.sheet.updated_at = Sheets.getISOStringDate(new Date());
+		debugger;
 		this.save();
 		console.info('sheet:', this.sheet);
 		SheetStorage.save(this.sheet);
@@ -119,6 +120,7 @@ class Sheets {
 		this.name = SheetStorage.sheet.name;
 		this.sheet.datamartId = SheetStorage.sheet.datamartId;
 		this.userId = SheetStorage.sheet.userId;
+		this.sheet.userId = SheetStorage.sheet.userId;
 		this.sheet.created_at = SheetStorage.sheet.created_at;
 		this.sheet.updated_at = SheetStorage.sheet.updated_at;
 
