@@ -777,6 +777,7 @@ class MapDatabaseController extends Controller
 	private function calcAdvancedMetrics()
 	{
 		$this->query->filteredMetrics = $this->query->process->advancedMeasures->{$this->query->fact};
+		// dd($this->query->filteredMetrics);
 		// verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
 		// Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
 		// Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
@@ -890,9 +891,11 @@ class MapDatabaseController extends Controller
 				// dd($this->query->process->{"advancedMeasures"});
 				// dd(empty($this->query->process->{"advancedMeasures"}));
 				if (!empty($this->query->process->advancedMeasures)) {
-					// sono presenti metriche avanzate
+					// dump("Metriche advanced");
+					// dd($this->query->process->advancedMeasures);
 					if (property_exists($this->query->process->advancedMeasures, $fact)) {
 						$this->calcAdvancedMetrics();
+						// dd($this->query->groupMetricsByFilters);
 						$this->query->createMetricDatamarts_new();
 					}
 				}

@@ -351,7 +351,6 @@ class Cube
 	// Aggiunta di tabelle "provenienti" dalle metriche avanzate
 	private function setFromClause_advancedMeasure($from, $tableName)
 	{
-		$this->FROM_metricTable = [];
 		foreach ($from as $alias => $prop) {
 			$this->FROM_metricTable[$this->factId][$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
 
@@ -365,7 +364,6 @@ class Cube
 	// Imposto la WHERE in base alle metriche filtrate
 	private function setWhereClause_advancedMeasure($joins, $tableName)
 	{
-		$this->WHERE_metricTable = array();
 		// dd($joins);
 		foreach ($joins as $token => $join) {
 			// dd($token, $join);
@@ -480,8 +478,8 @@ class Cube
 			// dd($timingFunctions, $token);
 			if (in_array($token, $timingFunctions)) {
 				/*
-         * è una funzione temporale. Aggiungo, alla WHERE, la condizione per applicare il filtro temporale.
-        */
+				 * è una funzione temporale. Aggiungo, alla WHERE, la condizione per applicare il filtro temporale.
+				*/
 				if ($token !== "year-to-month") {
 					// creo l'SQL join della dimensione TIME in base al livello più basso presente nel report (year, quarter, month, date)
 					// dd($this->hierarchiesTimeLevel);
@@ -565,6 +563,8 @@ class Cube
 			}
 			// dd($this->json_info_advanced);
 			// dd($m);
+			$this->FROM_metricTable = [];
+			$this->WHERE_metricTable = [];
 			foreach ($advancedMetric as $metric) {
 				unset($this->sqlAdvancedMeasures);
 				// dd($metric);
@@ -636,7 +636,8 @@ class Cube
 		// dd(array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
 		$this->sqlAdvancedMeasures = self::SELECT . implode(",\n", array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
 		// dd($this->sqlAdvancedMeasures);
-		// dd($this->from_clause[$this->factId], $this->FROM_metricTable[$this->factId]);
+		// dd($this->from_clause[$this->factId]);
+		// dd($this->FROM_metricTable[$this->factId]);
 		if (array_key_exists($this->factId, $this->FROM_metricTable)) {
 			// dd($this->from_clause[$this->factId], $this->FROM_metricTable[$this->factId]);
 			$this->sqlAdvancedMeasures .= self::FROM . implode(",\n", array_merge($this->from_clause[$this->factId], $this->FROM_metricTable[$this->factId]));
