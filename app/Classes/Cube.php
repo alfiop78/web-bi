@@ -547,6 +547,7 @@ class Cube
 	/* creo i datamart necessari per le metriche filtrate */
 	public function createMetricDatamarts_new()
 	{
+		// dd($this->groupMetricsByFilters);
 		foreach ($this->groupMetricsByFilters as $groupToken => $advancedMetric) {
 			$groupAdvancedMeasures = [];
 			$tableName = "WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
@@ -565,6 +566,7 @@ class Cube
 			// dd($m);
 			$this->FROM_metricTable = [];
 			$this->WHERE_metricTable = [];
+			// dd($advancedMetric);
 			foreach ($advancedMetric as $metric) {
 				unset($this->sqlAdvancedMeasures);
 				// dd($metric);

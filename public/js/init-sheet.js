@@ -386,13 +386,12 @@ function handleColumn(e) {
 	// l'indice della colonna nella DataViewFinal
 	Resource.colIndex = e.column;
 	console.log(`index DataTable : ${Resource.dataTable.getColumnIndex(Resource.colIndex)}`);
-	const test = Resource.chartWrapperView.getDataTable().toDataTable();
-	console.log(test.getColumnIndex(Resource.colIndex));
+	// const test = Resource.chartWrapperView.getDataTable().toDataTable();
+	// console.log(test.getColumnIndex(Resource.colIndex));
 
 	// console.log(Resource.dataViewFinal.getViewColumnIndex(4));
-		console.log(Resource.dataViewFinal.toDataTable().getColumnIndex(4));
+	// console.log(Resource.dataViewFinal.toDataTable().getColumnIndex(4));
 
-	debugger;
 	// recupero il nome della colonna in base al suo indice
 	Resource.columnId = Resource.dataGroup.getColumnId(Resource.colIndex);
 	console.log(`index della dataViewFinal ${Resource.colIndex}`);
@@ -404,7 +403,6 @@ function handleColumn(e) {
 	// WARN: non vengono trovati gli indici delle metriche composte (questo è
 	// segnalato anche su GoogleChart in getTableColumnIndex che parla di colonne generate)
 	console.log(`index DataViewFinal : ${Resource.dataViewFinal.getTableColumnIndex(Resource.colIndex)}`);
-	debugger;
 
 	Resource.dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
 	Resource.dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
@@ -416,7 +414,6 @@ function handleColumn(e) {
 
 	// etichetta colonna, questa viene impostata nella dlg-sheet-config
 	Resource.columnLabel = Resource.dataGroup.getColumnLabel(Resource.colIndex);
-	debugger;
 	// datatype della colonna
 	Resource.columnDataType = Resource.dataGroup.getColumnType(Resource.colIndex);
 	input__column_label.value = Resource.columnLabel;

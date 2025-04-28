@@ -864,7 +864,7 @@ class MapDatabaseController extends Controller
 				// racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
 				// Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
 				// $this->query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
-				$this->query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
+				$this->query->compositeMeasures[] = "{$sql_string} AS \"{$metric->alias}\"";
 				// dd($this->query->compositeMeasures);
 				// dump($this->query->compositeMeasures);
 			}
@@ -1024,6 +1024,7 @@ class MapDatabaseController extends Controller
 											}
 										}
 										$advancedMeasures->$token = (object)[
+											"token" => $token,
 											"alias" => $object->alias,
 											"aggregateFn" => $object->aggregateFn,
 											"SQL" => $json_advanced_measures->SQL,

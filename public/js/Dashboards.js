@@ -553,8 +553,9 @@ class Resources extends Dashboards {
 		});
 		this.group.columns.forEach(column => {
 			let aggregation;
-			// salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
-			// quali dovranno essere visibili (quelle con dependencies:false)
+			// salvo in 'columns' e in 'depsMetrics' tutte le metriche del report.
+			// In 'columns' sono presenti le metriche da visualizzare (dependencies: false)
+			// mentre in 'depsMetrics' ci saranno quelle incluse nelle composte (dependencies.true)
 			// recupero l'indice della colonna in base al suo nome
 			// const index = this.dataTable.getColumnIndex(metric.alias);
 			// TODO: modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
@@ -568,26 +569,19 @@ class Resources extends Dashboards {
 					aggregation = (column.aggregateFn) ? column.aggregateFn.toLowerCase() : 'sum';
 					break;
 			}
-			if (column.dependencies) {
-				depsMetrics.push({
-					id: column.token,
-					column: this.chartWrapper.getDataTable().getColumnIndex(column.token),
-					aggregation: google.visualization.data[aggregation],
-					type: 'number',
-					label: column.label
-				});
-			} else {
-				columns.push({
-					id: column.token,
-					column: this.chartWrapper.getDataTable().getColumnIndex(column.token),
-					// column: metric.alias,
-					aggregation: google.visualization.data[aggregation],
-					type: 'number',
-					label: column.label
-				});
-			}
+			const object = {
+				id: column.token,
+				column: this.chartWrapper.getDataTable().getColumnIndex(column.token),
+				aggregation: google.visualization.data[aggregation],
+				type: 'number',
+				label: column.label
+
+			};
+			(column.dependencies) ? depsMetrics.push(object) : columns.push(object);
 		});
 		return new google.visualization.data.group(
+			// Utilizzo il concat per posizionare le metriche dependencies:true DOPO le metriche da
+			// visualizzare. In questo modo gli indici di colonna della DataView corrispondono a quelli della DataGroup (issue#290)
 			this.chartWrapper.getDataTable(), keys, columns.concat(depsMetrics)
 		);
 	}
@@ -607,7 +601,6 @@ class Resources extends Dashboards {
 		this.group.columns.forEach(metric => {
 			if (!metric.dependencies && metric.properties.visible) {
 				const index = this.dataGroup.getColumnIndex(metric.token);
-				debugger;
 				// NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
 				// modo come alternativa a eval() (non l'ho testato)
 				// function evil(fn) {
