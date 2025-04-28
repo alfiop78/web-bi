@@ -60,7 +60,7 @@ function filterSave(e) {
 	if (textareaFilter.firstChild.nodeType !== 3) return;
 	const name = input__filter_name.value;
 	// in edit recupero il token presente sul tasto
-	const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
 	let tables = new Set();
 	// const formula = textareaFilter.firstChild.textContent.split(' ');
 	// separo ogni parola/elemento della formula con \b
@@ -158,7 +158,7 @@ function columnSave(e) {
 	const name = input.value;
 	// in edit recupero il token presente sul tasto
 	const token_string = WorkBook.activeTable.id.substring(WorkBook.activeTable.id.length - 5);
-	const generated_token = rand().substring(0, 7);
+	const generated_token = `_${rand().substring(0, 7)}`;
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `__${token_string}_${generated_token}`;
 	let tables = new Set();
 	// separo ogni parola/elemento della formula con \b
@@ -970,7 +970,7 @@ function customBaseMetricSave(e) {
 	// se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
 	// è una nuova metrica
 	const token_string = WorkBook.activeTable.id.substring(WorkBook.activeTable.id.length - 5);
-	const generated_token = rand().substring(0, 7);
+	const generated_token = `_${rand().substring(0, 7)}`;
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `__${token_string}_${generated_token}`;
 	const alias = document.getElementById('input-base-custom-metric-name').value;
 	let fields = [];
@@ -1026,7 +1026,8 @@ function customBaseMetricSave(e) {
 // salvataggio metrica avanzata
 function advancedMetricSave(e) {
 	const alias = document.getElementById("input-advanced-metric-name").value;
-	const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+	debugger;
+	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
 	const date = new Date().toLocaleDateString('it-IT', options);
 	let filters = new Set();
 	// const metric = WorkBook.metrics.get(e.target.dataset.originToken);
@@ -1090,7 +1091,8 @@ function advancedMetricSave(e) {
 
 // salvataggio metrica composta
 function compositeMetricSave(e) {
-	const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+	debugger;
+	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
 	const alias = document.getElementById('composite-metric-name').value;
 	const date = new Date().toLocaleDateString('it-IT', options);
 	let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: new Set(), metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
@@ -1755,7 +1757,7 @@ function convertToMetric(e) {
 			break;
 	}
 	// const token = `_cm_${ e.currentTarget.dataset.token } `;
-	const token = rand().substring(0, 7);
+	const token = `_${rand().substring(0, 7)}`;
 	const metric = {
 		token,
 		factId: element.tableId,
@@ -1828,25 +1830,20 @@ function checkCompositeMetrics(token, key) {
 }
 
 function checkMetricsDeps(token, depsToken) {
-	for (const [sheetToken, sheetMetric] of Sheet.metrics) {
+	for (const [sheetMetricToken, sheetMetric] of Sheet.metrics) {
 		if (sheetMetric.type === 'composite') {
-			if (depsToken && sheetToken !== token) {
+			debugger;
+			if (depsToken && sheetMetricToken !== token) {
 				// controllo metriche basic/advanced contenute nelle composite
 				// se la metrica in ciclo è una composite,
 				// ed è inclusa nella metrica composite in ciclo
 				// non la elimino
-				// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
-				if (sheetMetric.metrics.hasOwnProperty(depsToken)) {
-					// la metrica che si sta eliminando è contenuta in una metrica composta.
-					return true;
-				}
+				// la metrica che si sta eliminando è contenuta in una metrica composta. Quindi NON si può eliminare
+				if (sheetMetric.metrics.includes(depsToken)) return true;
 			} else {
 				// controllo metriche basic/advanced
-				// FIX: 02.04.2025 la prop metrics non è più un'object ma un array issue#282
-				if (sheetMetric.metrics.hasOwnProperty(token)) {
-					// la metrica che si sta eliminando è contenuta in una metrica composta.
-					return true;
-				}
+				// la metrica che si sta eliminando è contenuta in una metrica composta. Quindi NON si può eliminare
+				if (sheetMetric.metrics.includes(token)) return true;
 			}
 		}
 	}

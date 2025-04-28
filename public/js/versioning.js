@@ -228,7 +228,6 @@ var Storage = new SheetStorages();
 							const created_at = Sheets.getISOStringDate(json.sheet_created_at);
 							const updated_at = Sheets.getISOStringDate(json.sheet_updated_at);
 							const sheet = {
-								// da convertire con toISOString, considerando le modifiche da fare per il UTC time altrimenti non corrispondono le date
 								datamartId: +json.datamartId,
 								facts: JSON.parse(json.json_facts),
 								name: json.name,

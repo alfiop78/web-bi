@@ -733,9 +733,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		((Sheet.edit && metricRef.dataset.adding) || (!Sheet.edit && metricRef.dataset.added)) ?
 			metricRef.remove() :
 			Sheet.objectRemoved.set(token, metric);
-		debugger;
 		metricRef.dataset.removed = 'true';
 		let check;
+		debugger;
 		if (metric.type === 'composite') {
 			// è una metrica composta che si sta eliminando.
 			// Se le metriche che la compongono sono utilizzate in altre metriche
@@ -748,7 +748,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 					// Se la metrica in cui è inclusa è diversa da quella che sto eliminando, non
 					// posso eliminare la metrica (fa parte di un'altra composite)
 					// controllo tutte le metriche composite presenti in Sheet.metrics
-					// check = checkCompositeMetrics(token, key);
 					check = checkMetricsDeps(token, metric_token);
 					if (!check) Sheet.metrics.delete(metric_token);
 				}
@@ -757,10 +756,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			Sheet.metrics.delete(token);
 		} else {
 			// Se la metrica da eliminare (basic,advanced) è contenuta in una metrica composta deve comunque
-			// essere pesente nel report ma la contrassegno come dependencies:true (non visibile su report ma presente su datamart)
+			// essere presente nel report ma la contrassegno come dependencies:true (non visibile su report ma presente su datamart)
 			// cerco questa metrica all'interno delle metriche composte
-			// check = checkRemoveMetrics(token);
 			check = checkMetricsDeps(token);
+			debugger;
 			(check) ? Sheet.metrics.get(token).dependencies = true : Sheet.metrics.delete(token);
 		}
 		// if (Sheet.metrics.size === 0) Sheet.metrics.clear();

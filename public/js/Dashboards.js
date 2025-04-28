@@ -537,7 +537,7 @@ class Resources extends Dashboards {
 	// Quando invece deve essere raggruppato, ad esempio, un ChartWRapper, bisogna passare l'argomento a questo Metodo
 	// già convertito in DataTable, cioè ChartWrapper.getDataTable()
 	createDataTableGrouped() {
-		let keys = [], columns = [];
+		let keys = [], columns = [], depsMetrics = [];
 		this.group.key.forEach(key => {
 			// if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
 			// imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
@@ -552,12 +552,12 @@ class Resources extends Dashboards {
 			}
 		});
 		this.group.columns.forEach(column => {
+			let aggregation;
 			// salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
 			// quali dovranno essere visibili (quelle con dependencies:false)
 			// recupero l'indice della colonna in base al suo nome
 			// const index = this.dataTable.getColumnIndex(metric.alias);
 			// TODO: modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
-			let aggregation;
 			switch (column.aggregateFn) {
 				case 'COUNT':
 				case 'MIN':
@@ -568,17 +568,27 @@ class Resources extends Dashboards {
 					aggregation = (column.aggregateFn) ? column.aggregateFn.toLowerCase() : 'sum';
 					break;
 			}
-			columns.push({
-				id: column.token,
-				column: this.chartWrapper.getDataTable().getColumnIndex(column.token),
-				// column: metric.alias,
-				aggregation: google.visualization.data[aggregation],
-				type: 'number',
-				label: column.label
-			});
+			if (column.dependencies) {
+				depsMetrics.push({
+					id: column.token,
+					column: this.chartWrapper.getDataTable().getColumnIndex(column.token),
+					aggregation: google.visualization.data[aggregation],
+					type: 'number',
+					label: column.label
+				});
+			} else {
+				columns.push({
+					id: column.token,
+					column: this.chartWrapper.getDataTable().getColumnIndex(column.token),
+					// column: metric.alias,
+					aggregation: google.visualization.data[aggregation],
+					type: 'number',
+					label: column.label
+				});
+			}
 		});
 		return new google.visualization.data.group(
-			this.chartWrapper.getDataTable(), keys, columns
+			this.chartWrapper.getDataTable(), keys, columns.concat(depsMetrics)
 		);
 	}
 
@@ -597,6 +607,7 @@ class Resources extends Dashboards {
 		this.group.columns.forEach(metric => {
 			if (!metric.dependencies && metric.properties.visible) {
 				const index = this.dataGroup.getColumnIndex(metric.token);
+				debugger;
 				// NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
 				// modo come alternativa a eval() (non l'ho testato)
 				// function evil(fn) {
@@ -679,6 +690,8 @@ class Resources extends Dashboards {
 		// dataGroup.setColumnProperty(5, 'className', 'cssc1')
 		this.dataViewFinal = new google.visualization.DataView(this.dataGroup);
 		this.dataViewFinal.setColumns(columns.concat(metrics));
+		console.log(this.dataViewFinal.toDataTable());
+		debugger;
 	}
 
 }

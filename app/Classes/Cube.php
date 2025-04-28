@@ -571,14 +571,14 @@ class Cube
 				// dd($metric->sql);
 				// dump(($metric->distinct));
 
-				$groupAdvancedMeasures[$this->factId][$metric->alias] = ($metric->distinct) ?
-					"{$this->ifNullOperator}({$metric->aggregateFn}(DISTINCT {$metric->SQL}), 0) AS '{$metric->alias}'" :
-					"{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+				$groupAdvancedMeasures[$this->factId][$metric->token] = ($metric->distinct) ?
+					"{$this->ifNullOperator}({$metric->aggregateFn}(DISTINCT {$metric->SQL}), 0) AS {$metric->token}" :
+					"{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS {$metric->token}";
 				// $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
 				// dd($groupAdvancedMeasures);
 				if (property_exists($this, 'sql_info')) {
 					// TODO: testare con un alias contenente spazi
-					$this->json_info_advanced[$tableName]->METRICS->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+					$this->json_info_advanced[$tableName]->METRICS->{"$metric->token"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS {$metric->token}";
 					// dd($this->json_info_advanced);
 				}
 				// dd($groupAdvancedMeasures);
@@ -588,7 +588,7 @@ class Cube
 				// $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
 				// $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
 
-				$this->datamart_advancedMeasures[] = "{$this->ifNullOperator}({$metric->alias}, 0) AS '{$metric->alias}'";
+				$this->datamart_advancedMeasures[] = "{$this->ifNullOperator}({$metric->token}, 0) AS \"{$metric->alias}\"";
 				// $this->datamart_advancedMeasures[] = "NVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
 				// aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
 				$this->setFiltersMetricTable_new($metric->filters, $tableName);
