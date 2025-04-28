@@ -606,8 +606,8 @@ menu {
 #preview__filters {
   display: flex;
   gap: 1em;
-  /* overflow-x: hidden; */
-  flex-wrap: wrap;
+  overflow-x: overlay;
+  flex-wrap: nowrap;
   padding: 8px;
   align-items: center;
 }
