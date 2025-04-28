@@ -502,6 +502,7 @@ class WorkBooks {
 	update() {
 		this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
 		App.showConsole("WorkBook aggiornato", "done", 1500);
+		debugger;
 		WorkBookStorage.save(this.workBook);
 	}
 
@@ -573,6 +574,9 @@ class WorkBooks {
 					}
 				}
 				// aggiungo le metriche avanzate al workBook
+				// debugger;
+				// WARN: 28.04.2025 Da rivedere perchè WorkBook.elements e this.elements
+				// fanno riferimento alla stessa proprietà
 				for (const [token, metric] of WorkBook.elements) {
 					if (metric.metric_type === 'advanced' && metric.factId === table.id) {
 						metrics[token] = metric;
@@ -600,7 +604,6 @@ class WorkBooks {
 		WorkBookStorage.workBook = token;
 		this.workBook.created_at = WorkBookStorage.workBook.created_at;
 		this.workBook.updated_at = WorkBookStorage.workBook.updated_at;
-		// debugger;
 		this.workSheet = WorkBookStorage.workBook.worksheet;
 		this.databaseId = WorkBookStorage.workBook.databaseId;
 
@@ -663,18 +666,20 @@ class WorkBooks {
 			}
 		}
 
+		// TODO: 28.04.2025 potrei utilizzare i metodi statici per recuperare tutte
+		// le metriche appartenenti a un determinato WorkBook
+		console.log(Storages.getMetricsByWorkbookId(WorkBookStorage.workBook.token));
+		debugger;
 		for (const [token, metric] of Object.entries(WorkBookStorage.storage)) {
 			// qui vengono recuperate metriche advanced/composite
 			this.json = JSON.parse(metric);
-			if (this.json.type === 'metric' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
+			if (this.json.metric_type === 'composite' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
 				this.elements = this.json;
 				// if (this.json.metric_type === 'composite') this.elements = this.json;
 			}
 		}
 
 		// metriche e colonne custom (worksheet)
-
-		// this.createDataModel();
 
 		return this;
 	}

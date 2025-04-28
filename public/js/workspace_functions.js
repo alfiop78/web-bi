@@ -1030,7 +1030,6 @@ function advancedMetricSave(e) {
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
 	const date = new Date().toLocaleDateString('it-IT', options);
 	let filters = new Set();
-	// const metric = WorkBook.metrics.get(e.target.dataset.originToken);
 	const metric = WorkBook.elements.get(e.target.dataset.originToken);
 	// WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
 	const aggregateFn = dlg__advancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
@@ -1055,30 +1054,28 @@ function advancedMetricSave(e) {
 		const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
 		// TODO: aggiungere le altre funzioni temporali
 		if (['last-year', 'last-month', 'year-to-month'].includes(timingFn.dataset.value)) {
-			const timeField = timingFn.dataset.timeField;
 			// Per questa metrica è stata aggiunta una timingFn.
 			// oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
 			// ... questa timingFn, questo perchè la timingFn non è un filtro 'separato' che viene salvato in storage
 			filters.add(timingFn.dataset.value);
-			object.timingFn = { [timingFn.dataset.value]: { field: timeField } };
+			object.timingFn = { [timingFn.dataset.value]: { field: timingFn.dataset.timeField } };
 		}
 	}
 
 	if (filters.size !== 0) object.filters = [...filters];
 	// aggiornamento/creazione della metrica imposta created_at
 	object.created_at = (e.target.dataset.token) ? metric.created_at : date;
-	// WorkBook.metrics = object;
 	WorkBook.elements = object;
-	// salvo la nuova metrica nello storage
-	// window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
-	window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
+	// salvo la nuova metrica nel 'worksheet'
+	WorkBook.workSheet[token] = object;
+	WorkBook.update();
+	// window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
 	if (!e.target.dataset.token) {
 		// aggiungo la nuova metrica nello stesso <details> della metrica originaria (originToken)
 		const parent = document.querySelector(`li[data-id='${e.target.dataset.originToken}']`).parentElement;
 		appendMetric(parent, token);
 	} else {
 		// la metrica già esiste, aggiorno il nome
-		// NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
 		const li = document.querySelector(`li[data-id='${token}']`);
 		const dragIcon = li.querySelector('i');
 		const span = li.querySelector('.span__content>span');

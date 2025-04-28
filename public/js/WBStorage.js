@@ -34,6 +34,16 @@ class Storages {
 		return sheets;
 	}
 
+	static getMetricsByWorkbookId(workbookId) {
+		let metrics = [];
+		for (const object of Object.values(window.localStorage)) {
+			if (JSON.parse(object).type === 'metric' && JSON.parse(object).workbook_ref === workbookId) {
+				metrics.push(JSON.parse(object));
+			}
+		}
+		return metrics;
+	}
+
 	set workBook(value) {
 		// value : il token del workbook
 		this.#workbook = value;

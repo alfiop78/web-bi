@@ -1277,7 +1277,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 	// Invocata dal context menu per le metriche
 	app.editAdvancedMetric = (e) => {
 		contextMenuRef.toggleAttribute('open');
-		// const metric = WorkBook.metrics.get(e.target.dataset.token);
 		const metric = WorkBook.elements.get(e.target.dataset.token);
 		const input = dlg__advancedMetric.querySelector('#input-metric');
 		const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
