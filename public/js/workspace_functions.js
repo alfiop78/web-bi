@@ -123,10 +123,13 @@ function filterSave(e) {
 	}
 	// Salvataggio del Filtro
 	// WorkBook.filters = { token, value: object };
-	debugger;
 	WorkBook.filters = object;
 	// salvo la nuova metrica nel 'worksheet'
-	// WorkBook.workSheet[token] = object;
+	(WorkBook.workSheet.hasOwnProperty('filters')) ?
+		WorkBook.workSheet.filters[token] = object :
+		WorkBook.workSheet.filters = { [token]: object };
+	debugger;
+	// WorkBook.workSheet.filters[token] = object;
 	WorkBook.update();
 	// window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
 	// completato il salvataggio rimuovo l'attributo data-token da e.target
@@ -241,7 +244,10 @@ function columnSave(e) {
 	WorkBook.elements = object;
 	// TODO: 22.11.2024 da valutare se è utilizzato
 	// WorkBook.fields = object;
-	WorkBook.workSheet[token] = object;
+	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
+		WorkBook.workSheet[WorkBook.activeTable.id][token] = object :
+		WorkBook.workSheet[WorkBook.activeTable.id] = { [token]: object };
+	debugger;
 	WorkBook.update();
 	// completato il salvataggio rimuovo l'attributo data-token da e.target
 	if (!e.target.dataset.token) {
@@ -879,6 +885,7 @@ function openContextMenu(e) {
 	content.querySelectorAll('button').forEach(button => {
 		// button.dataset.token = e.currentTarget.id;
 		button.dataset.token = e.currentTarget.dataset.id;
+		if (e.currentTarget.dataset.tableId) button.dataset.tableId = e.currentTarget.dataset.tableId;
 		// if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
 	});
 	contextMenuRef.appendChild(content);
@@ -991,7 +998,7 @@ function customBaseMetricSave(e) {
 		}
 	});
 	// TODO: 21.11.2024 verificare per quale motivo la creazione dell'object qui è diversa da quella in convertToMetric()
-	const metric = {
+	const object = {
 		token,
 		factId,
 		alias,
@@ -1008,11 +1015,14 @@ function customBaseMetricSave(e) {
 		cssClass: 'custom'
 	}
 	WorkBook.checkChanges(token);
-	WorkBook.elements = metric;
-	WorkBook.workSheet[token] = metric;
+	WorkBook.elements = object;
+	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
+		WorkBook.workSheet[WorkBook.activeTable.id][token] = object :
+		WorkBook.workSheet[WorkBook.activeTable.id] = { [token]: object };
+	// WorkBook.workSheet[token] = object;
 	WorkBook.update();
 	if (!e.target.dataset.token) {
-		appendCustomMetric(metric);
+		appendCustomMetric(object);
 	} else {
 		const li = document.querySelector(`li[data-id='${token}']`);
 		const dragIcon = li.querySelector('i');
@@ -1062,11 +1072,12 @@ function advancedMetricSave(e) {
 	}
 
 	if (filters.size !== 0) object.filters = [...filters];
-	// aggiornamento/creazione della metrica imposta created_at
-	// object.created_at = (e.target.dataset.token) ? metric.created_at : date;
 	WorkBook.elements = object;
 	// salvo la nuova metrica nel 'worksheet'
-	WorkBook.workSheet[token] = object;
+	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
+		WorkBook.workSheet[WorkBook.activeTable.id][token] = object :
+		WorkBook.workSheet[WorkBook.activeTable.id] = { [token]: object };
+	// WorkBook.workSheet[token] = object;
 	WorkBook.update();
 	// window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
 	if (!e.target.dataset.token) {

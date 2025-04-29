@@ -239,7 +239,6 @@ class Sheets {
 
 class WorkBooks {
 	#activeTable;
-	#field = new Map();
 	#elements = new Map();
 	#customMetrics = new Map();
 	#fields = new Map();
@@ -319,22 +318,6 @@ class WorkBooks {
 	}
 
 	get activeTable() { return this.#activeTable; }
-
-	// 'field/s' colonne create in fase di Mapping (quindi aggiunte al WorkBook)
-	set field(object) {
-		this.#field.set(object.token, object);
-		// TODO: dati utili al sistema di log
-		// console.log('field aggiunto : ', `${object.value.name} (${object.token})`);
-		// console.log('Elenco #field : ', this.#field);
-	}
-
-	get field() { return this.#field; }
-
-	set fields(object) {
-		this.#fields.set(object.token, object);
-	}
-
-	get fields() { return this.#fields; }
 
 	set join(object) {
 		// this.#join.set(object.token, { table: object.table, alias: object.alias, from: object.from, to: object.to });
@@ -467,9 +450,6 @@ class WorkBooks {
 	save() {
 		this.workBook.name = this.title;
 		this.workBook.databaseId = this.databaseId;
-		// this.workBook.fields = Object.fromEntries(this.fields);
-		// TODO: 20.11.2024 fields_new per ora viene utilizzato, da scheduleProcess() DA VALUTARE
-		// this.workBook.fields_new = Object.fromEntries(this.field);
 		this.workBook.joins = Object.fromEntries(this.joins);
 		// WARN: inutile salvarlo in localStorage, questo viene ricreato quando si apre un WorkBook
 		this.workBook.dataModel = Object.fromEntries(this.dataModel);
@@ -490,6 +470,7 @@ class WorkBooks {
 			// non sono in edit mode, salvo sempre 'updated_at'
 			this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
 		}
+		debugger;
 		this.workBook.worksheet = this.workSheet;
 		WorkBookStorage.save(this.workBook);
 	}
@@ -505,7 +486,7 @@ class WorkBooks {
 	set workbookMap(tables) {
 		tables.forEach(table => {
 			let fields = {}, metrics = {};
-			let props = {
+			const props = {
 				key: table.id,
 				schema: table.dataset.schema,
 				table: table.dataset.table,
@@ -532,7 +513,7 @@ class WorkBooks {
 							metric_type: 'basic',
 							properties: { table: table.dataset.table, fields: [col.column_name] }
 						}
-						this.metrics = metrics[token];
+						// this.metrics = metrics[token];
 						this.elements = metrics[token];
 						break;
 					default:
@@ -550,37 +531,35 @@ class WorkBooks {
 							SQL: `${table.dataset.alias}.${col.column_name}`,
 							time: (table.dataset.type === 'time')
 						}
-						this.fields = fields[token];
+						// this.fields = fields[token];
 						this.elements = fields[token];
 						break;
 				}
 				// aggiungo le metriche e le colonne custom create, si trovano nella proprietà "worksheet".
-				// Qui si trovano anche le metriche avanzate.
-				// TODO: 29.04.2025 Inoltre potrei inserire qui anche i filtri creati nel WorkBook
-				for (const [token, object] of Object.entries(this.workSheet)) {
-					if (object.factId === table.id || object.tableId === table.id) {
-						// this.elements = this.workSheet[token];
-						this.elements = object;
-						// console.log(object);
-						// console.log(this.workSheet[token]);
-						if (object.type === 'metric') {
-							metrics[token] = object;
-							this.metrics = object;
-						} else {
-							// fields
-							fields[token] = object;
-							this.fields = object;
+				// Qui si trovano anche le metriche avanzate e le metriche di base custom
+				if (this.workSheet.hasOwnProperty(table.id)) {
+					for (const [token, object] of Object.entries(this.workSheet[table.id])) {
+						if (object.factId === table.id || object.tableId === table.id) {
+							this.elements = object;
+							(object.type === 'metric') ? metrics[token] = object : fields[token] = object;
 						}
 					}
 				}
 			});
 			this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
 		});
+		// Recupero dei filtri del WorkBook dallaa proprietà worksheet
+		if (this.workSheet.filters) {
+			for (const object of Object.values(this.workSheet.filters)) {
+				this.filters = object;
+			}
+
+		}
 		// aggiungo, al WorkBook, le metriche composte relative al WorkBook
 		// Storages.getCompositeMetricsByWorkbookId(this.workBook.token).forEach(metric => this.elements = metric);
 		Storages.getObjectsByWorkbookId(this.workBook.token, 'metric', 'composite').forEach(metric => this.elements = metric);
 		console.info("workbookMap : ", this.#workbookMap);
-		debugger;
+		// debugger;
 	}
 
 	get workbookMap() { return this.#workbookMap; }
@@ -645,28 +624,16 @@ class WorkBooks {
 		}
 
 		console.log(this.workSheet);
-		debugger;
-		// filters e metriche avanzate
-		// for (const [token, object] of Object.entries(this.workSheet)) {
-		// 	if (object.type === 'filter') this.filters = { token, value: object };
-		// }
-
-		for (const [token, filter] of Object.entries(WorkBookStorage.storage)) {
-			this.json = JSON.parse(filter);
-			if (this.json.type === 'filter' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
-				this.filters = { token, value: this.json };
-			}
-		}
-
-		// recupero le metriche composte appartenenti al WorkBook passato come argomento
-		// Storages.getCompositeMetricsByWorkbookId(WorkBookStorage.workBook.token).forEach(metric => this.elements = metric);
-		// Storages.getObjectsByWorkbookId(WorkBookStorage.workBook.token, 'metric', 'composite').forEach(metric => this.elements = metric);
+		// WARN: 29.04.2025 dopo aver eliminato tutti i filtri dallo storage e salvati
+		// nella proprietà workSheet, questa riga può essere eliminata
+		// Storages.getObjectsByWorkbookId(token, 'filter').forEach(filter => this.filters = filter);
 
 		return this;
 	}
 
 	checkMetricNames(table, alias) {
-		for (const value of this.metrics.values()) {
+		debugger;
+		for (const value of this.elements.values()) {
 			if (table === value.factId) {
 				if (value.alias.toLowerCase() === alias.toLowerCase()) return true;
 			}

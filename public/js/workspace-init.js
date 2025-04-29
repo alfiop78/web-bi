@@ -1276,6 +1276,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	// Invocata dal context menu per le metriche
 	app.editAdvancedMetric = (e) => {
+		WorkBook.activeTable = e.currentTarget.dataset.tableId;
 		contextMenuRef.toggleAttribute('open');
 		const metric = WorkBook.elements.get(e.target.dataset.token);
 		const input = dlg__advancedMetric.querySelector('#input-metric');
@@ -1939,8 +1940,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		}
 	}
 
-	// apertura dialog per la creazione di una nuova metrica
+	// apertura dialog per la creazione di una nuova metrica avanzata
 	app.newAdvMeasure = (e) => {
+		WorkBook.activeTable = e.currentTarget.dataset.tableId;
 		contextMenuRef.toggleAttribute('open');
 		// TODO: aggiungo la formula della metrica (SUM(NettoRiga)) nella textarea ma, in questo caso la textarea è disabilitata.
 		// nella metrica filtrata posso modificare solo la funzione di aggregazione
@@ -1987,7 +1989,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
 		// workbookMap viene creato nel Metodo createDataModel() e contiene la mappatura di tutte le tabelle del canvas
-		// console.log(WorkBook.workbookMap);
+		console.log(WorkBook.workbookMap);
 		for (const [alias, objects] of WorkBook.workbookMap) {
 			// console.log(tableAlias);
 			const tmpl = app.tmplDetails.content.cloneNode(true);
@@ -2028,6 +2030,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				i.id = token;
 				li.dataset.type = metric.metric_type;
 				li.dataset.elementSearch = 'elements';
+				li.dataset.tableId = objects.props.key;
 				if (metric.metric_type !== 'composite') li.dataset.factId = details.dataset.factId;
 				li.dataset.label = metric.alias;
 				// definisco quale context-menu-template apre questo elemento
