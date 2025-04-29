@@ -34,14 +34,43 @@ class Storages {
 		return sheets;
 	}
 
-	static getMetricsByWorkbookId(workbookId) {
+	static getCompositeMetricsByWorkbookId(workbookId) {
 		let metrics = [];
 		for (const object of Object.values(window.localStorage)) {
-			if (JSON.parse(object).type === 'metric' && JSON.parse(object).workbook_ref === workbookId) {
+			if (JSON.parse(object).metric_type === 'composite' && JSON.parse(object).workbook_ref === workbookId) {
 				metrics.push(JSON.parse(object));
 			}
 		}
 		return metrics;
+	}
+
+	static getFilterByWorkbookId(workbookId) {
+		let filters = [];
+		for (const object of Object.values(window.localStorage)) {
+			if (JSON.parse(object).type === 'filter' && JSON.parse(object).workbook_ref === workbookId) {
+				filters.push(JSON.parse(object));
+			}
+		}
+		return filters;
+	}
+
+	// utilizzare questo Metodo statico al posto dei 4 qui sopra
+	static getObjectsByWorkbookId(workbookId, type, metric_type) {
+		// type: sheet, filter, metric, ecc...
+		// metric_type : utilizzato solo in caso di recupero delle metriche
+		let objects = [];
+		for (const json of Object.values(window.localStorage)) {
+			const object = JSON.parse(json);
+			if (object.workbook_ref === workbookId) {
+				if (metric_type) {
+					// è una metrica, quindi è richiesto anche la proprietà metric_type
+					if (object.type === type && object.metric_type === metric_type) objects.push(object);
+				} else {
+					if (object.type === type) objects.push(object);
+				}
+			}
+		}
+		return objects;
 	}
 
 	set workBook(value) {

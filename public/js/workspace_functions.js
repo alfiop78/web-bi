@@ -72,7 +72,14 @@ function filterSave(e) {
 	// es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
 	const tablesFounded = textareaFilter.firstChild.textContent.match(/\w+.(?=\.)/g);
 	const date = new Date().toLocaleDateString('it-IT', options);
-	let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula: formulaJoined, SQL: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+	let object = {
+		type: 'filter',
+		name,
+		token,
+		tables: [], from: {}, joins: {},
+		formula: formulaJoined, SQL: [],
+		// workbook_ref: WorkBook.workBook.token, updated_at: date
+	};
 	// replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
 	object.SQL = formula.map(element => {
 		if (tablesFounded.includes(element)) {
@@ -114,19 +121,14 @@ function filterSave(e) {
 			}
 		});
 	}
-
-	// la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
-	if (e.target.dataset.token) {
-		// aggiornamento del filtro
-		// recupero il filtro dallo storage per leggere 'created_at'
-		const filter = JSON.parse(window.localStorage.getItem(e.target.dataset.token));
-		object.created_at = filter.created_at;
-	} else {
-		object.created_at = date;
-	}
 	// Salvataggio del Filtro
-	WorkBook.filters = { token, value: object };
-	window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
+	// WorkBook.filters = { token, value: object };
+	debugger;
+	WorkBook.filters = object;
+	// salvo la nuova metrica nel 'worksheet'
+	// WorkBook.workSheet[token] = object;
+	WorkBook.update();
+	// window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
 	// completato il salvataggio rimuovo l'attributo data-token da e.target
 	if (!e.target.dataset.token) {
 		appendFilter(token);
@@ -134,7 +136,6 @@ function filterSave(e) {
 		input__filter_name.focus();
 	} else {
 		// filtro modificato, aggiorno solo il nome eventualmente modificato
-		// NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById() in questo caso
 		const li = document.querySelector(`li[data-id='${token}']`);
 		const dragIcon = li.querySelector('i');
 		const span = li.querySelector('span');
@@ -147,7 +148,7 @@ function filterSave(e) {
 	if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
 	delete e.target.dataset.token;
 	document.getElementById('filter-note').value = '';
-	App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
+	// App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
 }
 
 function columnSave(e) {
@@ -1026,9 +1027,7 @@ function customBaseMetricSave(e) {
 // salvataggio metrica avanzata
 function advancedMetricSave(e) {
 	const alias = document.getElementById("input-advanced-metric-name").value;
-	debugger;
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
-	const date = new Date().toLocaleDateString('it-IT', options);
 	let filters = new Set();
 	const metric = WorkBook.elements.get(e.target.dataset.originToken);
 	// WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
@@ -1043,8 +1042,8 @@ function advancedMetricSave(e) {
 		aggregateFn,
 		SQL: metric.SQL,
 		distinct,
-		workbook_ref: WorkBook.workBook.token,
-		updated_at: date
+		// workbook_ref: WorkBook.workBook.token,
+		// updated_at: date
 	};
 	// recupero tutti i filtri droppati in #filter-drop
 	// salvo solo il riferimento al filtro e non tutta la definizione del filtro
@@ -1064,7 +1063,7 @@ function advancedMetricSave(e) {
 
 	if (filters.size !== 0) object.filters = [...filters];
 	// aggiornamento/creazione della metrica imposta created_at
-	object.created_at = (e.target.dataset.token) ? metric.created_at : date;
+	// object.created_at = (e.target.dataset.token) ? metric.created_at : date;
 	WorkBook.elements = object;
 	// salvo la nuova metrica nel 'worksheet'
 	WorkBook.workSheet[token] = object;

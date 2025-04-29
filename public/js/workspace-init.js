@@ -192,7 +192,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			}
 		}
 		// creo/aggiorno la mappatura di tutte le tabelle del Canvas
-		WorkBook.createDataModel();
+		// WorkBook.createDataModel();
 		// creo una mappatura per popolare il WorkBook nello step successivo
 		app.hierTables();
 		app.checkSessionStorage();
@@ -1771,7 +1771,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 	}
 
 	app.setPropertyTimeDimension = (data) => {
-		WorkBook.createDataModel();
+		// WorkBook.createDataModel();
 		// recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
 		WorkBook.activeTable = `${data.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
 		// aggiungo i field delle tabelle time a WorkBook.fields

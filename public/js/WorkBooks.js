@@ -364,7 +364,8 @@ class WorkBooks {
 	get joins() { return this.#joins; }
 
 	set filters(object) {
-		this.#filters.set(object.token, object.value);
+		// this.#filters.set(object.token, object.value);
+		this.#filters.set(object.token, object);
 	}
 
 	get filters() { return this.#filters; }
@@ -477,12 +478,6 @@ class WorkBooks {
 			tables: Object.fromEntries(Draw.tables),
 			lines: Object.fromEntries(Draw.joinLines)
 		}
-		/* for (const [token, metric] of this.metrics) {
-		  if (metric.metric_type === 'basic') {
-			// WARN: perchè non utilizzo Object.fromEntries ?
-			(!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
-		  }
-		} */
 		// console.info('WorkBook : ', this.workBook);
 		if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.#options);
 		if (this.edit) {
@@ -559,43 +554,33 @@ class WorkBooks {
 						this.elements = fields[token];
 						break;
 				}
-				// aggiungo le metriche e le colonne custom create, si trovano nella proprietà "worksheet"
+				// aggiungo le metriche e le colonne custom create, si trovano nella proprietà "worksheet".
+				// Qui si trovano anche le metriche avanzate.
+				// TODO: 29.04.2025 Inoltre potrei inserire qui anche i filtri creati nel WorkBook
 				for (const [token, object] of Object.entries(this.workSheet)) {
-					// debugger;
 					if (object.factId === table.id || object.tableId === table.id) {
-						this.elements = this.workSheet[token];
-						if (this.workSheet[token].type === 'metric') {
+						// this.elements = this.workSheet[token];
+						this.elements = object;
+						// console.log(object);
+						// console.log(this.workSheet[token]);
+						if (object.type === 'metric') {
 							metrics[token] = object;
 							this.metrics = object;
 						} else {
+							// fields
 							fields[token] = object;
 							this.fields = object;
 						}
 					}
 				}
-				// aggiungo le metriche avanzate al workBook
-				// debugger;
-				// WARN: 28.04.2025 Da rivedere perchè WorkBook.elements e this.elements
-				// fanno riferimento alla stessa proprietà
-				for (const [token, metric] of WorkBook.elements) {
-					if (metric.metric_type === 'advanced' && metric.factId === table.id) {
-						metrics[token] = metric;
-						// la aggiungo anche al Map() elements
-						this.elements = metric;
-					}
-				}
 			});
 			this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
 		});
-		// aggiungo le metriche composte al workBook all'esterno del ciclo, queste
-		// metriche non sono associate ad una specifica tabella e vengono posizionate in una <ul> separata
-		/* for (const metric of WorkBook.elements.values()) {
-		  if (metric.metric_type === 'composite') {
-			// la aggiungo anche al Map() elements
-			this.elements = metric;
-		  }
-		} */
+		// aggiungo, al WorkBook, le metriche composte relative al WorkBook
+		// Storages.getCompositeMetricsByWorkbookId(this.workBook.token).forEach(metric => this.elements = metric);
+		Storages.getObjectsByWorkbookId(this.workBook.token, 'metric', 'composite').forEach(metric => this.elements = metric);
 		console.info("workbookMap : ", this.#workbookMap);
+		debugger;
 	}
 
 	get workbookMap() { return this.#workbookMap; }
@@ -659,6 +644,13 @@ class WorkBooks {
 			}
 		}
 
+		console.log(this.workSheet);
+		debugger;
+		// filters e metriche avanzate
+		// for (const [token, object] of Object.entries(this.workSheet)) {
+		// 	if (object.type === 'filter') this.filters = { token, value: object };
+		// }
+
 		for (const [token, filter] of Object.entries(WorkBookStorage.storage)) {
 			this.json = JSON.parse(filter);
 			if (this.json.type === 'filter' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
@@ -666,20 +658,9 @@ class WorkBooks {
 			}
 		}
 
-		// TODO: 28.04.2025 potrei utilizzare i metodi statici per recuperare tutte
-		// le metriche appartenenti a un determinato WorkBook
-		console.log(Storages.getMetricsByWorkbookId(WorkBookStorage.workBook.token));
-		debugger;
-		for (const [token, metric] of Object.entries(WorkBookStorage.storage)) {
-			// qui vengono recuperate metriche advanced/composite
-			this.json = JSON.parse(metric);
-			if (this.json.metric_type === 'composite' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
-				this.elements = this.json;
-				// if (this.json.metric_type === 'composite') this.elements = this.json;
-			}
-		}
-
-		// metriche e colonne custom (worksheet)
+		// recupero le metriche composte appartenenti al WorkBook passato come argomento
+		// Storages.getCompositeMetricsByWorkbookId(WorkBookStorage.workBook.token).forEach(metric => this.elements = metric);
+		// Storages.getObjectsByWorkbookId(WorkBookStorage.workBook.token, 'metric', 'composite').forEach(metric => this.elements = metric);
 
 		return this;
 	}
