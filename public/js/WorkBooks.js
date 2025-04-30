@@ -620,13 +620,15 @@ class WorkBooks {
 		console.log(this.workSheet);
 		// WARN: 29.04.2025 dopo aver eliminato tutti i filtri dallo storage e salvati
 		// nella proprietà workSheet, questa riga può essere eliminata
+		debugger;
 		// Storages.getObjectsByWorkbookId(token, 'filter').forEach(filter => this.filters = filter);
+		// Storages.getObjectsByWorkbookId(token, 'metric', 'composite').forEach(metric => this.elements = metric);
 
 		return this;
 	}
 
 	checkMetricNames(table, alias) {
-		debugger;
+		// debugger;
 		for (const value of this.elements.values()) {
 			if (table === value.factId) {
 				if (value.alias.toLowerCase() === alias.toLowerCase()) return true;

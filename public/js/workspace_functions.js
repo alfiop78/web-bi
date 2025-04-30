@@ -1764,7 +1764,7 @@ function convertToMetric(e) {
 	}
 	// const token = `_cm_${ e.currentTarget.dataset.token } `;
 	const token = `_${rand().substring(0, 7)}`;
-	const metric = {
+	const object = {
 		token,
 		factId: element.tableId,
 		alias: element.name,
@@ -1778,12 +1778,16 @@ function convertToMetric(e) {
 		cssClass: 'custom'
 	};
 	WorkBook.checkChanges(token);
-	WorkBook.elements = metric;
-	WorkBook.workSheet[token] = metric;
-	// TODO: il metodo update() è da ottimizzare perchè è presente, in save(), un controllo su checkChanges
+	WorkBook.elements = object;
+	debugger;
+	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
+		WorkBook.workSheet[WorkBook.activeTable.id][token] = object :
+		WorkBook.workSheet[WorkBook.activeTable.id] = { [token]: object };
+	// WorkBook.workSheet[token] = object;
 	WorkBook.update();
+	// WorkBook.workSheet[token] = metric;
 	// creo l'elemento da aggiungere
-	appendCustomMetric(metric);
+	appendCustomMetric(object);
 	e.currentTarget.style.visibility = 'hidden';
 }
 
