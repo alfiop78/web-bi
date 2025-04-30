@@ -209,7 +209,6 @@ function columnSave(e) {
 	console.log(object.SQL);
 	console.log(object.formula);
 	// converto l'oggetto Set() tables in un array e lo aggiungo a object.tables
-	debugger;
 	object.tables = [...tables];
 	// TODO: 22.11.2024 logica utilizzata per i filtri, quando sono utilizzate colonne provenienti da diverse tabelle.
 	// Valutare se applicarla anche per le colonne
@@ -266,10 +265,10 @@ function columnSave(e) {
 		dlg__custom_columns.close();
 	}
 	// ripulisco la textarea eliminando solo il nodo #text, lascio il <br />
-	if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
+	if (textarea__custom_column.firstChild.nodeType === 3) textarea__custom_column.firstChild.remove();
 	delete e.target.dataset.token;
 	// document.getElementById('filter-note').value = '';
-	App.showConsole(`Colonna <b>${name}</b> aggiunta al WorkBook`, 'done', 2000);
+	// App.showConsole(`Colonna <b>${name}</b> aggiunta al WorkBook`, 'done', 2000);
 }
 
 btnToggle_table__content.onclick = (e) => {

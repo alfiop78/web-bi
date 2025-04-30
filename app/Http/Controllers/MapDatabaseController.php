@@ -21,9 +21,7 @@ use App\Http\Controllers\BIConnectionsController;
 // uso i Model BIsheet, BIworkbook, BImetric e BIfilter che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
-use App\Models\BIfilter;
 use App\Models\BImetric;
-use App\Models\BIConnections;
 use PhpParser\Node\Stmt\TryCatch;
 use App\Http\Controllers\traitTest;
 
@@ -975,13 +973,19 @@ class MapDatabaseController extends Controller
 				}
 				// dd($process);
 				// recupero i filtri impostati nello Sheet
+				// dump($json_sheet->filters);
 				foreach ($json_sheet->filters as $token) {
-					if (BIfilter::find($token)) {
-						$process->filters->$token = json_decode(BIfilter::where("token", $token)->first('json_value')->json_value);
+					// recupero le definizioni dei filtri dall'oggetto $json_workbook
+					// dd($json_workbook->worksheet->filters);
+					// dump(property_exists($json_workbook->worksheet->filters, $token));
+					// dd($json_workbook->worksheet->filters->$token);
+					if (property_exists($json_workbook->worksheet->filters, $token)) {
+						$process->filters->$token = $json_workbook->worksheet->filters->$token;
 					} else {
-						return "Filtro (objectId: {$token}) non presente nel Database";
+						return "Filtro ({$token}) non presente nel WorkBook";
 					}
 				}
+				// dd($process->filters);
 
 				$timingFunctions = ['last-year', 'last-month', 'ecc..'];
 				foreach ($facts as $fact) {
@@ -1006,20 +1010,22 @@ class MapDatabaseController extends Controller
 									}
 									break;
 								case 'advanced':
-									if (BImetric::find($token)) {
-										$json_advanced_measures = json_decode(BImetric::where("token", $token)->first('json_value')->json_value);
-										// recupero i filtri contenuti all'interno della metrica avanzata in ciclo
+									// dd($json_workbook->worksheet->{$object->factId});
+									// dump(property_exists($json_workbook->worksheet->{$object->factId}, $token));
+									if (property_exists($json_workbook->worksheet->{$object->factId}, $token)) {
+										$json_advanced_measures = $json_workbook->worksheet->{$object->factId}->$token;
+										// dump($json_advanced_measures);
+										// dd("Metrica avanzata $token trovata");
 										$json_filters_metric = (object)[];
 										foreach ($json_advanced_measures->filters as $filterToken) {
 											// se il filtro è un timingFn recupero la definizione $object-timingFn che si trova all'interno della metrica
 											if (in_array($filterToken, $timingFunctions)) {
 												$json_filters_metric->$filterToken = $json_advanced_measures->timingFn->$filterToken;
 											} else {
-												// BUG: verifica se l'elemento è presente (è stato versionato)
-												if (BIfilter::find($filterToken)) {
-													$json_filters_metric->$filterToken = json_decode(BIfilter::where("token", $filterToken)->first('json_value')->json_value);
+												if (property_exists($json_workbook->worksheet->filters, $filterToken)) {
+													$json_filters_metric->$filterToken = $json_workbook->worksheet->filters->$filterToken;
 												} else {
-													return "Filtro (objectId : {$filterToken}) non presente nel Database";
+													return "Filtro ({$filterToken}) della metrica ({$token}) non presente nel WorkBook";
 												}
 											}
 										}
@@ -1032,8 +1038,6 @@ class MapDatabaseController extends Controller
 											"filters" => $json_filters_metric
 										];
 										$process->advancedMeasures->$fact = $advancedMeasures;
-									} else {
-										return "Metrica (objectId : {$token}) non presente nel Database";
 									}
 									break;
 								default:
@@ -1049,6 +1053,7 @@ class MapDatabaseController extends Controller
 									break;
 							}
 						}
+						// dd("STOP");
 					}
 				}
 				// metriche composte

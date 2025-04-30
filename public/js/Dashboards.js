@@ -684,7 +684,6 @@ class Resources extends Dashboards {
 		this.dataViewFinal = new google.visualization.DataView(this.dataGroup);
 		this.dataViewFinal.setColumns(columns.concat(metrics));
 		console.log(this.dataViewFinal.toDataTable());
-		debugger;
 	}
 
 }

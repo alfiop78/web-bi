@@ -70,11 +70,6 @@ class Sheets {
 		this.sheet.sheet.from = this.from;
 		this.sheet.sheet.joins = this.joins;
 		this.sheet.sheet.metrics = {};
-		// this.sheet.sheet.measures = [];
-		// la prop 'measures' include tutti e tre i tipi di metriche, questa proprietà tiene in considerazione l'ordine
-		// in cui sono presenti nel report (anche dopo eventuali drag&drop) e, per ripristinare l'ordine corretto, in fase
-		// di apertura dello Sheet, è necessario fare riferimento a questa prop in sheetSelected()
-		// this.sheet.sheet.measures = Object.fromEntries(this.metrics);
 		this.sheet.workbook_ref = this.sheet.workbook_ref;
 		/* WARN : verifica dei filtri del report.
 		  * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
@@ -470,7 +465,6 @@ class WorkBooks {
 			// non sono in edit mode, salvo sempre 'updated_at'
 			this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
 		}
-		debugger;
 		this.workBook.worksheet = this.workSheet;
 		WorkBookStorage.save(this.workBook);
 	}

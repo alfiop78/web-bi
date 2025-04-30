@@ -900,6 +900,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				// TEST: 11.04.2025 Funzionalità da testare su Sheet multiFact
 				if (Sheet.checkMultiFactFields(token)) {
 					const origin_element = WorkBook.elements.get(token);
+					// Aggiorno le proprietà SQL, name di Sheet.fields recuperandole da WorkBook.elements
+					// WARN: 30.04.2025 probabilmente la stessa logica va applicata anche alle metriche/filtri
+					Sheet.fields.get(token).SQL = origin_element.SQL;
+					Sheet.fields.get(token).name = origin_element.name;
 					// recupero il factId di tutte le tabelle aggiunte allo Sheet. Sheet.fact è un'oggetto Set() quindi non ci sono duplicati
 					Sheet.fact.add(WorkBook.workbookMap.get(origin_element.tableAlias).props.factId);
 					Sheet.tables = origin_element.tableAlias;
@@ -927,8 +931,14 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				let advancedMeasures = new Map(), baseMeasures = new Map();
 				for (const [token, metric] of Sheet.metrics) {
 					const wbMetrics = WorkBook.elements.get(token);
+					// Alcune proprietà delle metriche potrebbero essere state modificate.
+					// In questo caso, nell'oggetto 'process', queste modifiche vengono
+					// aggiornate perchè qui, faccio riferimento a wbMetrics, ma nell'oggetto
+					// Sheet.metrics, queste modifiche non sono viste, quindi le aggiorno qui.
+					Sheet.metrics.get(token).alias = wbMetrics.alias;
 					switch (metric.type) {
 						case 'composite':
+							Sheet.metrics.get(token).SQL = wbMetrics.SQL;
 							process.compositeMeasures[token] = {
 								alias: metric.alias,
 								SQL: wbMetrics.SQL,
@@ -938,6 +948,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 							break;
 						case 'advanced':
 							if (wbMetrics.factId === factId) {
+								// aggiorno eventuali modifiche fatte alla metrica, proprietà distinct e, più sotto, proprietà 'filters'
+								Sheet.metrics.get(token).distinct = wbMetrics.distinct;
 								let obj = {
 									token,
 									alias: metric.alias,
@@ -947,6 +959,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 									filters: {}
 								};
 								if (wbMetrics.filters) {
+									Sheet.metrics.get(token).filters = wbMetrics.filters;
 									wbMetrics.filters.forEach(filterToken => {
 										// se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
 										// ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
@@ -966,6 +979,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 						default:
 							// basic
 							if (metric.factId === factId) {
+								Sheet.metrics.get(token).distinct = wbMetrics.distinct;
 								baseMeasures.set(token, {
 									token,
 									alias: metric.alias,
@@ -1021,17 +1035,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		Sheet.userId = userId;
 		// lo Sheet.datamartId può essere già presente quando è stato aperto
 		if (Sheet.edit === true) {
-			/* Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
-			if (Sheet.changes.length !== 0) {
-			  Sheet.update();
-			  // elimino il datamart perchè è stato modificato
-			  let exist = await Sheet.exist();
-			  if (exist) {
-				let result = await Sheet.delete();
-				console.log('datamart eliminato : ', result);
-				if (result && Resource.tableRef) Resource.tableRef.clearChart();
-			  }
-			} */
+			// TODO: 30.04.2025 Implementazione
 		} else {
 			Sheet.create();
 		}
@@ -1124,11 +1128,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	app.process = async (process) => {
 		Sheet.userId = userId;
-		debugger;
 		if (Sheet.edit === true) {
-			// Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
+			// con il tasto Elabora, aggiorno sempre lo Sheet perchè potrebbero essere state
+			// modificate delle formule, ad esmepio nelle colonne custom, e lo Sheet non viene
+			// contrassegnato come modificato. In questo caso, il report in schedulazione, non
+			// prenderebbe in considerazione le modifiche fatte alla colonna custom.
+			Sheet.update();
+			// process.datamartId = Sheet.sheet.datamartId;
+			// process.userId = Sheet.userId;
 			if (document.querySelectorAll('*[data-adding], *[data-removed], *[data-modified]').length !== 0) {
-				Sheet.update();
+				// debugger;
+				// Sheet.update();
 				process.datamartId = Sheet.sheet.datamartId;
 				process.userId = Sheet.userId;
 			} else {
@@ -1144,7 +1154,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		Resource.setSpecifications();
 
 		console.log(process);
-		debugger;
+		// debugger;
 		// invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
 		const params = JSON.stringify(process);
 		// App.showConsole('Elaborazione in corso...', 'info');

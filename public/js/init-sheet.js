@@ -167,7 +167,7 @@ function drawDatamart() {
 }
 
 function chartWrapperReady() {
-	debugger
+	// debugger
 	console.log('TIMER START (ready)', new Date());
 	const start_time_execution = new Date();
 	// Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
