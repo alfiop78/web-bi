@@ -903,7 +903,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 					// Aggiorno le proprietà SQL, name di Sheet.fields recuperandole da WorkBook.elements
 					// WARN: 30.04.2025 probabilmente la stessa logica va applicata anche alle metriche/filtri
 					Sheet.fields.get(token).SQL = origin_element.SQL;
-					Sheet.fields.get(token).name = origin_element.name;
 					// recupero il factId di tutte le tabelle aggiunte allo Sheet. Sheet.fact è un'oggetto Set() quindi non ci sono duplicati
 					Sheet.fact.add(WorkBook.workbookMap.get(origin_element.tableAlias).props.factId);
 					Sheet.tables = origin_element.tableAlias;
@@ -935,7 +934,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 					// In questo caso, nell'oggetto 'process', queste modifiche vengono
 					// aggiornate perchè qui, faccio riferimento a wbMetrics, ma nell'oggetto
 					// Sheet.metrics, queste modifiche non sono viste, quindi le aggiorno qui.
-					Sheet.metrics.get(token).alias = wbMetrics.alias;
 					switch (metric.type) {
 						case 'composite':
 							Sheet.metrics.get(token).SQL = wbMetrics.SQL;
