@@ -14,7 +14,8 @@ class AddColumnsToBiWorkbooks extends Migration
     public function up()
     {
         Schema::table('bi_workbooks', function (Blueprint $table) {
-			$table->longText('svg')->after('name')->nullable(false);
+			// $table->longText('svg')->after('name')->nullable(false);
+			$table->longText('svg')->after('name')->default(null);
 			$table->longText('worksheet')->after('json_value')->default(null);
 			$date = new DateTimeImmutable();
 			$table->dateTime('workbook_created_at', $precision = 3)->after('connectionId')->default($date->format('Y-m-d H:i:s.v'));
@@ -30,7 +31,10 @@ class AddColumnsToBiWorkbooks extends Migration
     public function down()
     {
         Schema::table('bi_workbooks', function (Blueprint $table) {
-            //
+			$table->dropColumn('svg');
+			$table->dropColumn('worksheet');
+			$table->dropColumn('workbook_created_at');
+			$table->dropColumn('workbook_updated_at');
         });
     }
 }

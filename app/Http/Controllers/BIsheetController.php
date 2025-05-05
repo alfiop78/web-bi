@@ -134,7 +134,7 @@ class BIsheetController extends Controller
 		// $json = json_encode($request->all());
 		// dd($json);
 		$token = $request->collect()->get('token');
-		// cerco nel DB il token del PROCESS da aggiornare
+		// cerco nel DB il token da aggiornare
 		$sheet = $bIsheet::findOrFail($token);
 		$sheet->name = $request->collect()->get('name');
 		$sheet->json_value = json_encode($request->collect()->get('sheet'));

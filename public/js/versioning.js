@@ -47,6 +47,7 @@ var Storage = new SheetStorages();
 				// TODO: 09.04.2025 invece di recuperare tutto il json_value, implementare, come fatto in BisheetController->index()
 				// un result che restituisce solo i dati che servono qui (updated_at, type, workbook_ref, ecc...)
 				const dbElement = (type === "sheet") ? element : JSON.parse(element.json_value);
+				// debugger;
 				// const dbElement = JSON.parse(element.json_value);
 				const localElement = JSON.parse(localStorage.getItem(dbElement.token));
 				// console.log(element, element.token);

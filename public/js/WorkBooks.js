@@ -454,23 +454,27 @@ class WorkBooks {
 			lines: Object.fromEntries(Draw.joinLines)
 		}
 		// console.info('WorkBook : ', this.workBook);
-		if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.#options);
+		if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = Sheets.getISOStringDate(new Date());
+		// if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.#options);
 		if (this.edit) {
 			// sono in edit mode, se sono state fatte modifiche aggiorno 'updated_at'
 			if (this.workBookChange.size !== 0) {
-				this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+				// this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+				this.workBook.updated_at = Sheets.getISOStringDate(new Date());
 				App.showConsole("Salvataggio del WorkBook in corso...", "done", 2000);
 			}
 		} else {
 			// non sono in edit mode, salvo sempre 'updated_at'
-			this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+			// this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+			this.workBook.updated_at = Sheets.getISOStringDate(new Date());
 		}
 		this.workBook.worksheet = this.workSheet;
 		WorkBookStorage.save(this.workBook);
 	}
 
 	update() {
-		this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+		this.workbook.updated_at = Sheets.getISOStringDate(new Date());
+		// this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
 		App.showConsole("WorkBook aggiornato", "done", 1500);
 		debugger;
 		WorkBookStorage.save(this.workBook);
