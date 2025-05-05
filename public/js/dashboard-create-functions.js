@@ -36,6 +36,7 @@ function drawDashboard() {
 		Resource.data = datamart.data;
 		Resource.dashboardWrappers = datamart.specs.wrappers;
 		Resource.specs = JSON.parse(window.localStorage.getItem(datamart.specs.token)).specs;
+		debugger;
 		Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
 		Resource.ref = document.getElementById(datamart.ref);
 		let gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));

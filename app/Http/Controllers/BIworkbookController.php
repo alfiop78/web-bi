@@ -97,7 +97,6 @@ class BIworkbookController extends Controller
     $name = $request->collect()->get('name');
     // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
-    // cerco nel DB il token del PROCESS da aggiornare
     $workbook = $bIworkbook::findOrFail($token);
     $workbook->token = $token;
     $workbook->name = $name;

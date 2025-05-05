@@ -231,11 +231,10 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		// ciclo le resources
 		for (const [token, resource] of Object.entries(Resource.json.resources)) {
 			Resource.resources = resource;
-			debugger;
+			const userId = JSON.parse(window.localStorage.getItem(token)).userId;
 			Resource.arrResources.push(token);
 			// specifiche del chartWrapper
 			Resource.wrapperSpecs.push(resource);
-			debugger;
 			// ciclo sui wrappers per popolare tutti gli elementi della dashboard
 			for (const [ref, wrapper] of Object.entries(resource.wrappers)) {
 				Resource.ref = document.getElementById(ref);
@@ -244,7 +243,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				Resource.ref.dataset.wrapper = wrapper.chartType;
 				Resource.ref.dataset.token = token;
 				Resource.ref.dataset.datamartId = resource.datamartId;
-				Resource.ref.dataset.userId = resource.userId;
+				Resource.ref.dataset.userId = userId;
+				// Resource.ref.dataset.userId = resource.userId;
 				// aggiungo la class 'defined' nel div che contiene il grafico/tabella
 				Resource.ref.classList.add('defined');
 				const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
@@ -253,7 +253,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				if (Object.keys(resource.wrappers).length >= 2) btn__chartWrapper.removeAttribute('disabled');
 			}
 			// urls.push(`/fetch_api/${resource.datamartId}/preview?page=1`)
-			urls.push(`/fetch_api/${resource.datamartId}_${resource.userId}/preview?page=1`)
+			// urls.push(`/fetch_api/${resource.datamartId}_${resource.userId}/preview?page=1`)
+			urls.push(`/fetch_api/${resource.datamartId}_${userId}/preview?page=1`)
 		}
 		app.getAllData(urls);
 		// console.log(Resource.multiData);

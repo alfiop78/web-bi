@@ -6,30 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateBIworkbooksTable extends Migration
 {
-  /**
-   * Run the migrations.
-   *
-   * @return void
-   */
-  public function up()
-  {
-    Schema::create('bi_workbooks', function (Blueprint $table) {
-      // $table->id();
-      $table->string('token')->primary();
-      $table->string('name');
-      $table->longText('json_value');
-      $table->foreignId('connectionId')->constrained('bi_db_connections'); // FK -> bi_db_connections
-      $table->timestamps();
-    });
-  }
+	/**
+	 * Run the migrations.
+	 *
+	 * @return void
+	 */
+	public function up()
+	{
+		Schema::create('bi_workbooks', function (Blueprint $table) {
+			// $table->id();
+			$table->string('token')->primary();
+			$table->string('name');
+			$table->longText('json_value');
+			$table->foreignId('connectionId')->constrained('bi_db_connections'); // FK -> bi_db_connections
+			$table->timestamps();
+		});
+	}
 
-  /**
-   * Reverse the migrations.
-   *
-   * @return void
-   */
-  public function down()
-  {
-    Schema::dropIfExists('bi_workbooks');
-  }
+	/**
+	 * Reverse the migrations.
+	 *
+	 * @return void
+	 */
+	public function down()
+	{
+		Schema::dropIfExists('bi_workbooks');
+	}
 }
