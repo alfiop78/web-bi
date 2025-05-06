@@ -60,18 +60,27 @@ class BIworkbookController extends Controller
 	 */
 	public function store(Request $request)
 	{
-		dd($request->all());
+		// dd($request->all());
 		$token = $request->collect()->get('token');
-		$name = $request->collect()->get('name');
-		$connectionId = $request->collect()->get('databaseId');
 		// codifico tutta la $request in json per poterla inserire nel DB
-		$json = json_encode($request->all());
+		// $json = json_encode($request->all());
 		$workbook = new BIworkbook();
-		// salvo su DB
 		$workbook->token = $token;
-		$workbook->name = $name;
-		$workbook->connectionId = $connectionId;
-		$workbook->json_value = $json;
+		$workbook->name = $request->collect()->get('name');
+		$workbook->svg = json_encode($request->collect()->get('svg'));
+		$workbook->worksheet = json_encode($request->collect()->get('worksheet'));
+		$workbook->connectionId = $request->collect()->get('databaseId');
+		$workbook->json_value = json_encode((object)[
+			'type' => 'workbook',
+			'dataModel' => $request->collect()->get('dataModel'),
+			'dateTime' => $request->collect()->get('dateTime'),
+			'joins' => $request->collect()->get('joins')
+		]);
+		$workbook_created_at = new DateTimeImmutable($request->collect()->get('created_at'));
+		$workbook_updated_at = new DateTimeImmutable($request->collect()->get('updated_at'));
+		$workbook->workbook_created_at = $workbook_created_at->format('Y-m-d H:i:s.v');
+		$workbook->workbook_updated_at = $workbook_updated_at->format('Y-m-d H:i:s.v');
+		// $workbook->json_value = $json;
 		return $workbook->save();
 	}
 
