@@ -938,10 +938,16 @@ class MapDatabaseController extends Controller
 			if (BIworkbook::find($sheet->workbookId)) {
 				// recupero il json del workbook, qui è memorizzato il databaseId al quale si collega questo
 				// sheet (il token dello sheet passato da curl o da jobScheduler)
-				$json_workbook = json_decode(BIworkbook::where("token", $sheet->workbookId)->first('json_value')->json_value);
-				// dd($json_workbook->databaseId);
+				// $workbook = json_decode(BIworkbook::where("token", $sheet->workbookId)->first('json_value')->json_value);
+				$workbook = json_decode(BIworkbook::where("token", $sheet->workbookId)->first(['json_value','connectionId', 'worksheet']));
+				// dd($workbook->connectionId);
+				// dd($workbook->worksheet);
+				$worksheet = json_decode($workbook->worksheet);
+				// dump($worksheet);
+				// dd($worksheet->filters);
+				// dd($workbook->worksheet->filters);
 				// Call un metodo statico che imposterà le variabili di sessione che riguardano la connessione al db
-				BIConnectionsController::curlDBConnection($json_workbook->databaseId);
+				BIConnectionsController::curlDBConnection($workbook->connectionId);
 				// creo l'object 'process' che verrà processato da this->sheetCurlProcess()
 				$process = (object)[
 					'datamartId' => $sheet->datamartId,
@@ -975,12 +981,12 @@ class MapDatabaseController extends Controller
 				// recupero i filtri impostati nello Sheet
 				// dump($json_sheet->filters);
 				foreach ($json_sheet->filters as $token) {
-					// recupero le definizioni dei filtri dall'oggetto $json_workbook
-					// dd($json_workbook->worksheet->filters);
-					// dump(property_exists($json_workbook->worksheet->filters, $token));
-					// dd($json_workbook->worksheet->filters->$token);
-					if (property_exists($json_workbook->worksheet->filters, $token)) {
-						$process->filters->$token = $json_workbook->worksheet->filters->$token;
+					// recupero le definizioni dei filtri dall'oggetto $workbook
+					// dd($workbook->worksheet->filters);
+					// dump(property_exists($workbook->worksheet->filters, $token));
+					// dd($workbook->worksheet->filters->$token);
+					if (property_exists($worksheet->filters, $token)) {
+						$process->filters->$token = $worksheet->filters->$token;
 					} else {
 						return "Filtro ({$token}) non presente nel WorkBook";
 					}
@@ -1010,10 +1016,10 @@ class MapDatabaseController extends Controller
 									}
 									break;
 								case 'advanced':
-									// dd($json_workbook->worksheet->{$object->factId});
-									// dump(property_exists($json_workbook->worksheet->{$object->factId}, $token));
-									if (property_exists($json_workbook->worksheet->{$object->factId}, $token)) {
-										$json_advanced_measures = $json_workbook->worksheet->{$object->factId}->$token;
+									// dd($workbook->worksheet->{$object->factId});
+									// dump(property_exists($workbook->worksheet->{$object->factId}, $token));
+									if (property_exists($worksheet->{$object->factId}, $token)) {
+										$json_advanced_measures = $worksheet->{$object->factId}->$token;
 										// dump($json_advanced_measures);
 										// dd("Metrica avanzata $token trovata");
 										$json_filters_metric = (object)[];
@@ -1022,8 +1028,8 @@ class MapDatabaseController extends Controller
 											if (in_array($filterToken, $timingFunctions)) {
 												$json_filters_metric->$filterToken = $json_advanced_measures->timingFn->$filterToken;
 											} else {
-												if (property_exists($json_workbook->worksheet->filters, $filterToken)) {
-													$json_filters_metric->$filterToken = $json_workbook->worksheet->filters->$filterToken;
+												if (property_exists($worksheet->filters, $filterToken)) {
+													$json_filters_metric->$filterToken = $worksheet->filters->$filterToken;
 												} else {
 													return "Filtro ({$filterToken}) della metrica ({$token}) non presente nel WorkBook";
 												}

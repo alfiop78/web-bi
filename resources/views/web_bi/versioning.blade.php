@@ -170,7 +170,7 @@
 							</div>
 						</div>
 						<!-- Filtri -->
-						<div class="card grid">
+						<!-- <div class="card grid">
 							<div class="row">
 								<section class="col col-5-span">
 									<h1>Filtri</h1>
@@ -197,7 +197,7 @@
 								<button type="button" class="btn-link link" data-unselect-all data-type="filter">Unselect All</button>
 							</div>
 
-						</div>
+						</div> -->
 					</div>
 					<div class="row">
 						<section class="col col-12">

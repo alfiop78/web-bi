@@ -46,7 +46,7 @@ var Storage = new SheetStorages();
 			elements.forEach(element => {
 				// TODO: 09.04.2025 invece di recuperare tutto il json_value, implementare, come fatto in BisheetController->index()
 				// un result che restituisce solo i dati che servono qui (updated_at, type, workbook_ref, ecc...)
-				const dbElement = (type === "sheet") ? element : JSON.parse(element.json_value);
+				const dbElement = (type === "sheet" || type === 'workbook') ? element : JSON.parse(element.json_value);
 				// debugger;
 				// const dbElement = JSON.parse(element.json_value);
 				const localElement = JSON.parse(localStorage.getItem(dbElement.token));
@@ -67,7 +67,7 @@ var Storage = new SheetStorages();
 					// fatto con bi_sheets
 					let db_updated_at;
 					// if (dbElement.token === 'xxiwl72') {
-					if (type === 'sheet') {
+					if (type === 'sheet' || type === 'workbook') {
 						db_updated_at = new Date(dbElement.updated_at);
 						db_updated_at.setUTCHours(db_updated_at.getHours());
 						db_updated_at = db_updated_at.toISOString();
@@ -101,7 +101,7 @@ var Storage = new SheetStorages();
 			'/fetch_api/versioning/workbooks',
 			'/fetch_api/versioning/sheets',
 			'/fetch_api/versioning/metrics',
-			'/fetch_api/versioning/filters',
+			// '/fetch_api/versioning/filters',
 		];
 		// ottengo tutte le risposte in un array
 		await Promise.all(urls.map(url => fetch(url)))
@@ -146,7 +146,7 @@ var Storage = new SheetStorages();
 		switch (object.type) {
 			case 'sheet':
 			case 'workbook':
-			case 'filter':
+				// case 'filter':
 				li.dataset.label = object.name;
 				span.dataset.value = object.name;
 				span.innerText = object.name;
@@ -222,28 +222,51 @@ var Storage = new SheetStorages();
 			.then((data) => {
 				if (data) {
 					data.forEach(json => {
-						if (type === 'sheet') {
-							// aggiungo le specs alla proprietà 'specs' all'interno del json
-							console.log(json);
-							// NOTE: utilizzo di un metodo static
-							const created_at = Sheets.getISOStringDate(json.sheet_created_at);
-							const updated_at = Sheets.getISOStringDate(json.sheet_updated_at);
-							const sheet = {
-								datamartId: +json.datamartId,
-								facts: JSON.parse(json.json_facts),
-								name: json.name,
-								token: json.token,
-								sheet: JSON.parse(json.json_value),
-								specs: JSON.parse(json.json_specs),
-								type: 'sheet',
-								userId: json.userId,
-								workbook_ref: json.workbookId,
-								created_at,
-								updated_at
-							};
-							Storage.save(sheet);
-						} else {
-							Storage.save(JSON.parse(json.json_value));
+						let created_at, updated_at;
+						switch (type) {
+							case 'sheet':
+								// aggiungo le specs alla proprietà 'specs' all'interno del json
+								console.log(json);
+								// NOTE: utilizzo di un metodo static
+								created_at = Sheets.getISOStringDate(json.sheet_created_at);
+								updated_at = Sheets.getISOStringDate(json.sheet_updated_at);
+								const sheet = {
+									datamartId: +json.datamartId,
+									facts: JSON.parse(json.json_facts),
+									name: json.name,
+									token: json.token,
+									sheet: JSON.parse(json.json_value),
+									specs: JSON.parse(json.json_specs),
+									type: 'sheet',
+									userId: json.userId,
+									workbook_ref: json.workbookId,
+									created_at,
+									updated_at
+								};
+								Storage.save(sheet);
+								break;
+							case 'workbook':
+								console.log(json);
+								created_at = Sheets.getISOStringDate(json.workbook_created_at);
+								updated_at = Sheets.getISOStringDate(json.workbook_updated_at);
+								const workbook = {
+									token: json.token,
+									name: json.name,
+									databaseId: +json.connectionId,
+									svg: JSON.parse(json.svg),
+									type: 'workbook',
+									dataModel: JSON.parse(json.json_value).dataModel,
+									dateTime: JSON.parse(json.json_value).dateTime,
+									joins: JSON.parse(json.json_value).joins,
+									worksheet: JSON.parse(json.worksheet),
+									created_at,
+									updated_at
+								};
+								Storage.save(workbook);
+								break;
+							default:
+								Storage.save(JSON.parse(json.json_value));
+								break;
 						}
 						// aggiorno lo status dell'elemento dopo il download
 						const li = document.getElementById(`${json.token}`);

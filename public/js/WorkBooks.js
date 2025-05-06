@@ -473,7 +473,7 @@ class WorkBooks {
 	}
 
 	update() {
-		this.workbook.updated_at = Sheets.getISOStringDate(new Date());
+		this.workBook.updated_at = Sheets.getISOStringDate(new Date());
 		// this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
 		App.showConsole("WorkBook aggiornato", "done", 1500);
 		debugger;

@@ -16,8 +16,19 @@ class BIworkbookController extends Controller
 	public function index()
 	{
 		// $workbooks = BIworkbook::all();
-		$workbooks = BIworkbook::where('connectionId', session('db_id'))->get();
-		return response()->json(['workbook' => $workbooks]);
+		/* $workbooks = BIworkbook::where('connectionId', session('db_id'))->get();
+		return response()->json(['workbook' => $workbooks]); */
+		$workbooks= BIworkbook::select('token','name', 'workbook_updated_at')->where('connectionId', session('db_id'))->get();
+		foreach ($workbooks->collect() as $workbook) {
+			$result[] = [
+				"name" => $workbook->name,
+				"token" => $workbook->token,
+				"updated_at" => $workbook->workbook_updated_at,
+				"type" => 'workbook'
+				// "json_value" => $workbook->json_value // temporaneo, non mi servirà più dopo aver aggiornato tutti gli workbook (issue#292)
+			];
+		}
+		return response()->json(['workbook' => $result]);
 	}
 
 	/**
