@@ -605,9 +605,10 @@ menu {
 
 #preview__filters {
   display: flex;
-  gap: 1em;
-  overflow-x: overlay;
-  flex-wrap: nowrap;
+  /* gap: 1em; */
+  /* overflow-x: overlay; */
+  /* flex-wrap: nowrap; */
+  flex-wrap: wrap;
   padding: 8px;
   align-items: center;
 }

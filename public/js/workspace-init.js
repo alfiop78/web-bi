@@ -191,8 +191,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				Draw.createWindowJoinContent();
 			}
 		}
-		// creo/aggiorno la mappatura di tutte le tabelle del Canvas
-		// WorkBook.createDataModel();
 		// creo una mappatura per popolare il WorkBook nello step successivo
 		app.hierTables();
 		app.checkSessionStorage();
@@ -587,8 +585,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		document.getElementById('workbook-name').innerText = WorkBook.name;
 		document.getElementById('workbook-name').dataset.value = WorkBook.name;
 		document.getElementById('workbook-name').dataset.tempValue = WorkBook.name;
-		// WARN: probabilmente, il DataModel, posso recuperarlo direttamente dallo storage, senza ricrearlo
-		// WorkBook.createDataModel();
 		app.hierTables();
 		Draw.checkResizeSVG();
 		document.querySelector('#btnSchemata').disabled = false;
@@ -823,7 +819,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	app.workbookName.oninput = (e) => App.checkTitle(e.target);
 
-	// tasto Workbook, creazione DataModel
+	// tasto "Workbook" per ritornare allo step 1
 	app.btnWorkBook.onclick = (e) => {
 		const translateRef = document.getElementById('stepTranslate');
 		const steps = document.getElementById('steps');
@@ -834,8 +830,12 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		app.workBookInformations();
 	}
 
-	// tasto "Sheet" :
-	// consente di passare alla visualizzazione Sheet e salvare il WorkBook
+	/* tasto "Sheet" :
+		* Passp allo step 2 (Sheet)
+		*	- Salvataggio del WorkBook
+		*	- Creazione del DataModel e del WorkBookMap
+		*	- Creazione struttura Tabelle, metriche e filtri
+	*/
 	app.btnSheet.onclick = () => {
 		// popolo il dataModel e, con esso, anche il workbookMap
 		WorkBook.createDataModel();
