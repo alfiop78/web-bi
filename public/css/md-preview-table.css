@@ -1,120 +1,123 @@
-table{
-  /* display: block; */
-  display: inline-block;
-  overflow-x: auto;
-  width: 100%;
-  /* height: 100%; */
-  /* height: 1080px; */
-  margin: 0 auto;
-  border-spacing: 0;
+table {
+	/* display: block; */
+	display: inline-block;
+	overflow-x: auto;
+	width: 100%;
+	/* height: 100%; */
+	/* height: 1080px; */
+	margin: 0 auto;
+	border-spacing: 0;
 }
 
 table .col-metrics {
-  /* background-color: var(--mark-color); */
-  /* background-color: #f3f3f3; */
-  /* color: #494949; */
-  font-weight: bold;
+	/* background-color: var(--mark-color); */
+	/* background-color: #f3f3f3; */
+	/* color: #494949; */
+	font-weight: bold;
 }
 
-table tbody{
-  white-space: nowrap;
+table tbody {
+	white-space: nowrap;
 }
 
 th,
-td{
-  padding: 4px 12px;
+td {
+	padding: 4px 12px;
 }
 
 thead {
-  height: 35px;
+	height: 35px;
 }
 
 th {
-  position: sticky;
-  top: 0;
-  vertical-align: middle;
-  border: solid thin white;
-  white-space: nowrap;
+	position: sticky;
+	top: 0;
+	vertical-align: middle;
+	border: solid thin white;
+	white-space: nowrap;
 }
 
 table[data-active="true"] thead th {
-  background-color: var(--mark-color);
+	background-color: var(--mark-color);
 }
 
 table[data-active="false"] thead th {
-  background-color: gainsboro;
+	background-color: gainsboro;
 }
 
-table[data-active="true"] thead th:hover{
-  cursor: pointer;
-  background-color: var(--main-important-color);
-  color: whitesmoke;
+table[data-active="true"] thead th:hover {
+	cursor: pointer;
+	background-color: var(--main-important-color);
+	color: whitesmoke;
 }
 
-thead th[data-token]{
-  background-color: var(--main-primary-color)!important;
-  color: whitesmoke!important;
+thead th[data-token] {
+	background-color: var(--main-primary-color) !important;
+	color: whitesmoke !important;
 }
 
-thead th[data-metric-token]{
-  background-color: peru!important;
-  color: whitesmoke!important;
+thead th[data-metric-token] {
+	background-color: peru !important;
+	color: whitesmoke !important;
 }
 
-.table-preview{
-  overflow: auto;
-  position: relative;
-  background-color: white;
-  display: grid;
-  grid-template-rows: auto 1fr;
+.table-preview {
+	overflow: auto;
+	position: relative;
+	background-color: white;
+	display: grid;
+	grid-template-rows: auto 1fr;
 }
 
-.sheet-preview{
-  /* overflow: auto; */
-  position: relative;
-  background-color: white;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  padding: 8px;
+.sheet-preview {
+	/* overflow: auto; */
+	position: relative;
+	background-color: white;
+	display: grid;
+	grid-template-rows: auto 1fr;
+	/* padding: 8px; */
 }
 
-.table-preview>.table-content{
-  position: relative;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+.table-preview>.table-content {
+	position: relative;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
-.sheet-preview>.table-content{
-  position: relative;
+.sheet-preview>.table-content {
+	position: relative;
+	padding: 8px;
 }
 
 .table-content {
-  display: grid;
-  grid-template-columns: 0px 1fr;
-  transition: grid-template-columns 250ms;
+	display: grid;
+	grid-template-columns: 0px 1fr;
+	transition: grid-template-columns 250ms;
 }
 
 .table-content .sheet__contents {
-  padding: unset;
+	padding: unset;
 }
 
 .table-content #sheet__filters::before {
-  content: unset;
+	content: unset;
 }
 
 .table-content[open] #sheet__filters::before {
-  content: 'Filtri';
+	content: 'Filtri';
 }
 
 .table-content[open] #sheet__columns::before {
-  content: 'Visualizza/Nascondi Colonne';
+	content: 'Visualizza/Nascondi Colonne';
 }
 
 .table-content[open] {
-  grid-template-columns: 300px 1fr;
-  grid-column-gap: .5em;
+	grid-template-columns: 300px 1fr;
+	grid-column-gap: .5em;
 }
 
-.hiddenColumn {opacity: .4;}
+.hiddenColumn {
+	opacity: .4;
+}

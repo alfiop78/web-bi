@@ -22,7 +22,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-table-preview.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/chart_editor.css') }}" />
-	<link rel="stylesheet" type="text/css" href="{{ asset('/css/gcontrols.css') }}" />
+	<link rel="stylesheet" type="text/css" href="{{ asset('/css/gcontrols_sheet.css') }}" />
 	<!-- Icons -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
 	<script src="{{ asset('/js/Application.js') }}"></script>
@@ -1014,8 +1014,8 @@
 														</section>
 													</div>
 												</section>
-												<section id="preview__filters"></section>
 												<section class="sheet-preview">
+													<section id="preview__filters"></section>
 													<dialog id="dlg-sheet-config" data-x="0" data-y="0" class="absolute moveable">
 														<section class="dlg-grid">
 															<h5 class="title moveable">Configurazione</h5>
