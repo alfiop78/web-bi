@@ -48,8 +48,8 @@
 
 *:hover::-webkit-scrollbar {
 	display: block;
-	width: 4px;
-	height: 5px;
+	width: 6px;
+	height: 6px;
 }
 
 *:hover::-webkit-scrollbar-thumb {
@@ -242,7 +242,7 @@ footer>.footerContent {
 
 #body {
 	padding: 1em;
-	border-radius: 4px;
+	/* border-radius: 4px; */
 	background-color: white;
 	display: grid;
 }
@@ -258,7 +258,7 @@ footer>.footerContent {
 
 .wrapper {
 	display: grid;
-	grid-gap: 2em;
+	/* grid-gap: 2em; */
 }
 
 .wrapper.flex {
@@ -294,7 +294,7 @@ menu.standard {
 	padding: 8px;
 	margin: 0;
 	column-gap: 1em;
-	border-radius: 4px;
+	/* border-radius: 4px; */
 	/* justify-content: space-between; */
 	background-color: white;
 	box-shadow: 0px 1px 6px 1px #cac6c6;
