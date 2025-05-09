@@ -355,12 +355,12 @@
 				<menu class="standard">
 					<section data-workbook-menu>
 						<button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
-						<button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
+						<button class="btn-link default" id="btn__workbook_open" value="open">Apri</button>
 						<button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
 						<!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
 					</section>
 					<section data-workbook-menu>
-						<div id="workbook-name" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
+						<div id="input__workbook_name" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
 					</section>
 					<section data-sheet-menu>
 						<button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog" disabled>Nuovo</button>
@@ -397,7 +397,7 @@
 					</nav>
 				</div>
 
-				<dialog id="dlg-schema">
+				<dialog id="dlg__schema">
 					<section class="dlg-grid">
 						<h5 class="">Seleziona schema Database</h5>
 						<section class="dlg-content">
@@ -451,13 +451,13 @@
 					</section>
 				</dialog>
 
-				<dialog id="dialog-new-workbook">
+				<dialog id="dlg__new_workbook">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Titolo WorkBook</h5>
 						<section class="dlg-content">
 							<section class="row">
 								<section class="col">
-									<input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
+									<input type="text" id="input__workbook_title" placeholder="Nome" value="" autocomplete="on" />
 								</section>
 							</section>
 						</section>
@@ -520,7 +520,7 @@
 
 				<div id="context-menu" class="context-menu"></div>
 
-				<dialog id="dialog-workbook-open" class="smallSize">
+				<dialog id="dialog__workbook_open" class="smallSize">
 					<section class="dlg-grid">
 						<h5 class="title">Apri WorkBook</h5>
 						<section class="dlg-content">
