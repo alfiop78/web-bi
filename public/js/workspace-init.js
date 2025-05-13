@@ -555,6 +555,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		// scarico in sessionStorage tutte le tabelle del canvas
 		let urls = [];
 		const tables = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
+		debugger;
 		for (const objects of tables.values()) {
 			WorkBook.activeTable = objects.id;
 			// se la tabella è già presente in sessionStorage non rieseguo la query
@@ -2131,7 +2132,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 	app.dialogNewWorkBook.addEventListener('close', (e) => document.getElementById('input-workbook-name').value = '');
 
 	document.querySelector("#btn-time-dimension").onclick = async () => {
-		debugger;
+		// debugger;
 		// return;
 		// let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
 		// console.dir(jsonDataParsed.report);

@@ -164,6 +164,43 @@ class Cube
 		// dd($this->sql_info);
 	}
 
+	private function getTimeFieldConversion($join)
+	{
+		switch (session('db_driver')) {
+			case 'odbc':
+				switch ($join->from->field) {
+					case 'id':
+						// WB_DATE.id è di tipo DATE, converto il campo proveniente dalla Fact (non il campo WB_DATE.id)
+						$converted = "TO_CHAR({$join->SQL[0]})::DATE";
+						break;
+					case 'week_id':
+						// WB_DATE.week_id è di tipo INTEGER, converto in INT il campo proveniente dalla Fact
+						// TODO: 13.05.2025 da implementare
+						break;
+					default:
+						break;
+				}
+				break;
+			case 'mysql':
+				switch ($join->from->field) {
+					case 'id':
+						// WB_DATE.id è di tipo DATE, converto il campo proveniente dalla Fact in DATE (non il campo WB_DATE.id)
+						$converted = "DATE_FORMAT({$join->SQL[0]}, '%Y-%m-%d')";
+						break;
+					case 'week_id':
+						// WB_DATE.week_id è di tipo INTEGER, converto in INT il campo proveniente dalla Fact
+						$converted = "CAST({$join->SQL[0]} AS UNSIGNED)";
+						break;
+					default:
+						break;
+				}
+				break;
+			default:
+				break;
+		}
+		return $converted;
+	}
+
 	/*
 		* Utilizzo della stessa logica di FROM
 		* @param joins = "token_join" : ['table.field', 'table.field']
@@ -178,8 +215,8 @@ class Cube
 		// dd($joins);
 		// dd($this->process->{"joins"}->{$this->fact});
 		/* TODO: metto in join le tabelle incluse nella FROM_baseTable.
-      Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
-    */
+			Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
+		*/
 		// NOTE : caso in qui viene passato tutto l'object
 		// $this->WHERE_baseTable = [];
 		$this->where_clause = [];
@@ -189,11 +226,13 @@ class Cube
 			// dd($join);
 			// qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
 			if ($join->type === "TIME") {
-				// dump($join);
+				// dd($join);
 				// $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
 				if (property_exists($join, 'datatype')) {
-					if (strtolower($join->datatype) === 'int' || strtolower($join->datatype) === 'integer') {
-						switch (session('db_driver')) {
+					if (strtolower($join->datatype) === 'int' || strtolower($join->datatype) === 'integer' || strtolower($join->datatype) === 'varchar') {
+						// dd($join);
+						$join->SQL[0] = $this->getTimeFieldConversion($join);
+						/* switch (session('db_driver')) {
 							case 'odbc':
 								if ($join->alias === 'WB_DATE') $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
 								// $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
@@ -204,9 +243,10 @@ class Cube
 								break;
 							default:
 								break;
-						}
+						} */
 					}
 				}
+				// dd($join->SQL);
 				$this->where_time_clause[$this->factId][$join->alias] = implode(" = ", $join->SQL);
 
 				if (property_exists($this, 'sql_info')) {
@@ -311,7 +351,12 @@ class Cube
 		$sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
 		// dd(empty($this->where_clause));
 		if (array_key_exists($this->factId, $this->where_time_clause)) {
-			$sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+			// ci sono casi in cui è presente where_time_clause ma NON where_clause
+			if (array_key_exists($this->factId, $this->where_clause)) {
+				$sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+			} else {
+				$sql .= self::WHERE . implode("\nAND ", $this->where_time_clause[$this->factId]);
+			}
 		} elseif (!empty($this->where_clause)) {
 			$sql .= self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
 		} else {

@@ -496,7 +496,7 @@
 										<li class="select-list content" data-field="id" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
 										<li class="select-list content" data-field="id" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
 										<li class="select-list content" data-field="id" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
-										<!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
+										<li class="select-list content" data-field="week_id" data-datatype="integer" data-table="WB_DATE" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li>
 										<li class="select-list content" data-field="id" data-field-ds="date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
 									</ul>
 								</section>
