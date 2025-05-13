@@ -2132,17 +2132,16 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	document.querySelector("#btn-time-dimension").onclick = async () => {
 		debugger;
-		return;
+		// return;
 		// let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
 		// console.dir(jsonDataParsed.report);
 		// const jsonData = { start: "2022-01-01", end: "2023-01-01" };
 		// const params = JSON.stringify(jsonData);
 		// lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
-		const url = "/fetch_api/dimension/time";
 		// const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
 		// const req = new Request(url, init);
 		App.showConsole('Elaborazione in corso...', 'info');
-		await fetch(url)
+		await fetch('/fetch_api/dimension/time')
 			.then((response) => {
 				// TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
 				if (!response.ok) { throw Error(response.statusText); }
@@ -2215,8 +2214,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	// verifica esistenza dimensione time su DB
 	app.timeDimensionExists = async () => {
-		const url = 'fetch_api/time/exists';
-		await fetch(url)
+		// const url = 'fetch_api/time/exists';
+		await fetch('fetch_api/time/exists')
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;

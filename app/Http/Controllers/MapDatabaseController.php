@@ -25,6 +25,8 @@ use App\Models\BImetric;
 use PhpParser\Node\Stmt\TryCatch;
 use App\Http\Controllers\traitTest;
 
+use Illuminate\Support\Facades\Config;
+
 class MapDatabaseController extends Controller
 {
 	private $query = NULL;
@@ -71,7 +73,24 @@ class MapDatabaseController extends Controller
 	public function timeDimensionExists()
 	{
 		// dd(Schema::connection('vertica_odbc')->hasTable('decisyon_cache.WB_DATE')); ok
-		return (Schema::connection(session('db_client_name'))->hasTable('WB_DATE')); // ok (in locale)
+		// dump(session('db_client_name'));
+		BIConnectionsController::getDB();
+		/* Config::set([
+			"database.connections.client_mysql.driver" => session('db_driver'),
+			"database.connections.client_mysql.host" => session('db_host'),
+			"database.connections.client_mysql.port" => session('db_port'),
+			"database.connections.client_mysql.dsn" => session('db_dsn'),
+			"database.connections.client_mysql.database" => session('db_schema'),
+			// TODO: andrà implementato un nome schema di gaiaBi al posto di decisyon_cache
+			"database.connections.client_mysql.schema" => ['decisyon_cache', session('db_schema')],
+			// "database.connections.{$database_name}.schema" => $schemata,
+			"database.connections.client_mysql.username" => session('db_username'),
+			"database.connections.client_mysql.password" => session('db_password'),
+		]); */
+		// dump(session()->get('db_host')); // stesso risultato di session('db_host')
+		// dd(config("database.connections.client_mysql"));
+		// dd(Schema::connection(session('db_client_name')));
+		return (Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
 	}
 
 	// test connessione vertica (senza utilizzo di Eloquen/ORM)
@@ -298,9 +317,9 @@ class MapDatabaseController extends Controller
 		// dd($years);
 		if (session('db_driver') === 'odbc') {
 			$sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_YEARS (
-        id INTEGER PRIMARY KEY,
-        previous INTEGER,
-        year CHAR(6) NOT NULL) INCLUDE SCHEMA PRIVILEGES";
+				id INTEGER PRIMARY KEY,
+				previous INTEGER,
+				year CHAR(6) NOT NULL) INCLUDE SCHEMA PRIVILEGES";
 			$create_stmt = DB::connection(session('db_client_name'))->statement($sql);
 		} else {
 			$create_stmt = Schema::connection(session('db_client_name'))
@@ -354,12 +373,12 @@ class MapDatabaseController extends Controller
 		// dd($json);
 		if (session('db_driver') === 'odbc') {
 			$sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_QUARTERS (
-        id INTEGER PRIMARY KEY,
-        quarter CHAR(3) NOT NULL,
-        previous INTEGER,
-        last INTEGER,
-        year_id INTEGER NOT NULL CONSTRAINT wb_quarters_year_id_foreign REFERENCES decisyon_cache.WB_YEARS (id)
-      ) INCLUDE SCHEMA PRIVILEGES";
+				id INTEGER PRIMARY KEY,
+				quarter CHAR(3) NOT NULL,
+				previous INTEGER,
+				last INTEGER,
+				year_id INTEGER NOT NULL CONSTRAINT wb_quarters_year_id_foreign REFERENCES decisyon_cache.WB_YEARS (id)
+			  ) INCLUDE SCHEMA PRIVILEGES";
 			// nella foreignId utilizzo gli stessi nomi utilizzati da Laravel (tabella_campo_foreign)
 			$create_stmt = DB::connection(session('db_client_name'))->statement($sql);
 		} else {
@@ -373,7 +392,6 @@ class MapDatabaseController extends Controller
 				});
 		}
 		// dd($create_stmt);
-
 		if (!$create_stmt) {
 			// $result : null tabella creata correttamente
 			foreach ($json as $quarter => $value) {
@@ -458,14 +476,16 @@ class MapDatabaseController extends Controller
 				"date" => $currDate->format('Y-m-d'),
 				// "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
 				"weekday" => $currDate->format('l'),
-				"week" => $currDate->format('W'),
+				"week" => "W {$currDate->format('W')}",
+				"week_id" => (int) "{$currDate->format('YW')}",
+				// "week" => $currDate->format('W'),
 				"month_id" => (int) $currDate->format('Ym'),
 				"month" => $currDate->format('F'),
 				/* "month" => (object) [
-          "id" => $currDate->format('m'),
-          "ds" => $currDate->format('F'),
-          "short" => $currDate->format('M')
-        ], */
+				  "id" => $currDate->format('m'),
+				  "ds" => $currDate->format('F'),
+				  "short" => $currDate->format('M')
+				], */
 				"quarter_id" => "{$currDate->format('Y')}0{$quarter}",
 				"quarter" => "Q {$quarter}",
 				// "quarter" => (object) ["id" => $quarter, "ds" => "Q {$quarter}"],
@@ -473,12 +493,12 @@ class MapDatabaseController extends Controller
 				"day_of_year" => $currDate->format('z'),
 				// "lastOfMonth" => $current->format('t'),
 				/* "previous_json" => (object) [
-          "day" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d'),
-          "week" => $currDate->sub(new DateInterval('P1W'))->format('Y-m-d'),
-          "month" => $currDate->sub(new DateInterval('P1M'))->format('Y-m-d'),
-          "quarter" => ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3), // quarter 3 mesi precedenti
-          "year" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d')
-        ], */
+				  "day" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d'),
+				  "week" => $currDate->sub(new DateInterval('P1W'))->format('Y-m-d'),
+				  "month" => $currDate->sub(new DateInterval('P1M'))->format('Y-m-d'),
+				  "quarter" => ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3), // quarter 3 mesi precedenti
+				  "year" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d')
+				], */
 				"last" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
 				"previous" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d')
 			];
@@ -489,18 +509,20 @@ class MapDatabaseController extends Controller
 			// creare le colonne come "strutture dati"
 			// Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
 			$sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_DATE (
-        id DATE PRIMARY KEY,
-        date DATE NOT NULL,
-        year INTEGER,
-        quarter_id INTEGER,
-        quarter VARCHAR,
-        month_id INTEGER NOT NULL CONSTRAINT wb_date_month_id_foreign REFERENCES decisyon_cache.WB_MONTHS (id),
-        month VARCHAR,
-        week CHAR(2),
-        day VARCHAR,
-        previous DATE,
-        last DATE
-        ) INCLUDE SCHEMA PRIVILEGES";
+				id DATE PRIMARY KEY,
+				date DATE NOT NULL,
+				year INTEGER,
+				quarter_id INTEGER,
+				quarter VARCHAR,
+				month_id INTEGER NOT NULL CONSTRAINT wb_date_month_id_foreign REFERENCES decisyon_cache.WB_MONTHS (id),
+				month VARCHAR,
+				week_id INTEGER,
+				week CHAR(4),
+				day VARCHAR,
+				day_of_year INTEGER,
+				previous DATE,
+				last DATE
+				) INCLUDE SCHEMA PRIVILEGES";
 			$create_stmt = DB::connection(session('db_client_name'))->statement($sql);
 		} else {
 			$create_stmt = Schema::connection(session('db_client_name'))
@@ -512,8 +534,10 @@ class MapDatabaseController extends Controller
 					$table->char('quarter');
 					$table->foreignId('month_id')->nullable(false)->constrained('WB_MONTHS');
 					$table->char('month');
-					$table->char('week', 2);
+					$table->unsignedMediumInteger('week_id');
+					$table->char('week', 4);
 					$table->char('day');
+					$table->unsignedSmallInteger('day_of_year');
 					$table->date('previous');
 					$table->date('last');
 				});
@@ -537,8 +561,10 @@ class MapDatabaseController extends Controller
 					'month_id' => $value->month_id,
 					// 'month' => json_encode($value->month),
 					'month' => $value->month,
+					'week_id' => $value->week_id,
 					'week' => $value->week,
 					'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
+					'day_of_year' => $value->day_of_year,
 					'previous' => $value->previous,
 					'last' => $value->last
 					// 'previous_json' => json_encode($value->previous_json)
@@ -556,6 +582,7 @@ class MapDatabaseController extends Controller
 		// dd(Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
 		$this->dropTIMEtables();
 		$start = new DateTime('2019-01-01 00:00:00');
+		// $start = new DateTime('2025-10-01 00:00:00');
 		$end   = new DateTime('2026-01-01 00:00:00');
 		// test
 		// $start = new DateTime('2024-01-01 00:00:00');
@@ -939,7 +966,7 @@ class MapDatabaseController extends Controller
 				// recupero il json del workbook, qui è memorizzato il databaseId al quale si collega questo
 				// sheet (il token dello sheet passato da curl o da jobScheduler)
 				// $workbook = json_decode(BIworkbook::where("token", $sheet->workbookId)->first('json_value')->json_value);
-				$workbook = json_decode(BIworkbook::where("token", $sheet->workbookId)->first(['json_value','connectionId', 'worksheet']));
+				$workbook = json_decode(BIworkbook::where("token", $sheet->workbookId)->first(['json_value', 'connectionId', 'worksheet']));
 				// dd($workbook->connectionId);
 				// dd($workbook->worksheet);
 				$worksheet = json_decode($workbook->worksheet);
