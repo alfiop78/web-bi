@@ -29,6 +29,7 @@ class BIsheetController extends Controller
 			->where('bi_workbooks.connectionId', session('db_id'))
 			->join('bi_workbooks', 'bi_sheets.workbookId', '=', 'bi_workbooks.token')->get();
 		// restituisco solo i dati necessari anzichè tutto il json_value
+		$result = [];
 		foreach ($sheets->collect() as $sheet) {
 			$result[] = [
 				"name" => $sheet->name,

@@ -19,6 +19,7 @@ class BIworkbookController extends Controller
 		/* $workbooks = BIworkbook::where('connectionId', session('db_id'))->get();
 		return response()->json(['workbook' => $workbooks]); */
 		$workbooks= BIworkbook::select('token','name', 'workbook_updated_at')->where('connectionId', session('db_id'))->get();
+		$result = [];
 		foreach ($workbooks->collect() as $workbook) {
 			$result[] = [
 				"name" => $workbook->name,
