@@ -118,12 +118,59 @@ class Cube
 		$this->report_metrics = [];
 		// dd(SELF::ifNullOperator());
 		// dd($this->baseMeasures);
-		foreach ($this->baseMeasures as $token => $value) {
-			// dd($value);
+		/* foreach ($this->baseMeasures as $token => $value) {
+			dump($value);
+			dd((is_array($value->SQL)));
 			// $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
 			$metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS {$value->token}";
 			// dd($metric);
 			$this->report_metrics[$this->factId][] = $metric;
+			// $metrics_base[] = $metric;
+			if (property_exists($this, 'sql_info')) {
+				$this->sql_info->{'METRICS'}->{$value->alias} = $metric;
+			}
+			$this->datamart_baseMeasures[] = "{$this->ifNullOperator}({$this->baseTableName}.{$token}, 0) AS \"{$value->alias}\"";
+		} */
+		foreach ($this->baseMeasures as $token => $value) {
+			// dump($value);
+			// dd((is_array($value->SQL)));
+			$sql = [];
+			if (is_array($value->SQL)) {
+				// ciclo gli elementi dell'array $value->SQL per cercare i nomi delle metriche
+				foreach ($value->SQL as $element) {
+					// dump("element : " . $element);
+					// dump((in_array($element, $value->metrics)));
+
+					// $re = '/[^\.]*$/';
+					$re = '/[^\.]*\w$/';
+					// $str = 'nome_tabella.nome_campo';
+
+					// preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+					// preg_match($re, $str, $matches, PREG_OFFSET_CAPTURE, 0);
+					preg_match($re, $element, $matches);
+
+					// Print the entire match result
+					// dump($matches);
+					// if ($matches) dump($matches[0]);
+					if ($matches) {
+						if (in_array("/", $sql)) {
+							$sql[] = (in_array($matches[0], $value->metrics)) ? "CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END" : trim($element);
+						} else {
+							$sql[] = (in_array($matches[0], $value->metrics)) ? "{$this->ifNullOperator}({$element}, 0)" : trim($element);
+						}
+					} else {
+						$sql[] = trim($element);
+					}
+				}
+				$metric = implode("", $sql);
+			} else {
+				// $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
+				$metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS {$value->token}";
+			}
+			// dump($sql);
+			// dd($metric);
+			$this->report_metrics[$this->factId][] = "\n{$value->aggregateFn}($metric) AS {$value->token}";
+			// dd($this->report_metrics);
 			// $metrics_base[] = $metric;
 			if (property_exists($this, 'sql_info')) {
 				$this->sql_info->{'METRICS'}->{$value->alias} = $metric;

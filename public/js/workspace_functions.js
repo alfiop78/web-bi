@@ -983,36 +983,41 @@ function customBaseMetricSave(e) {
 	let fields = [];
 	const factId = WorkBook.activeTable.dataset.factId;
 	const suggestionsTables = JSON.parse(window.sessionStorage.getItem(WorkBook.activeTable.dataset.table));
-	let SQL = [];
-	const formula = textareaCustomMetric.firstChild.textContent.split(/\b/);
-	// ogni elemento inserito nella formula deve essere verificato, la verifica consiste nel trovare
-	// quello che è stato inserito, se è presente (come colonna) nella tabella
-	formula.forEach(el => {
-		const match = [...suggestionsTables].find(value => el === value.column_name);
-		if (match) {
-			SQL.push(`${WorkBook.activeTable.dataset.alias}.${el}`);
-			fields.push(el);
-		} else {
-			SQL.push(el.trim());
-		}
-	});
+	// let SQL = [];
 	// TODO: 21.11.2024 verificare per quale motivo la creazione dell'object qui è diversa da quella in convertToMetric()
 	const object = {
-		token,
-		factId,
-		alias,
-		SQL: SQL.join(' '),
+		token, factId, alias,
+		SQL: [],
 		distinct: false, // default
-		type: 'metric',
-		metric_type: 'basic',
-		properties: {
-			table: WorkBook.activeTable.dataset.table,
-			fields
-		},
-		formula,
+		type: 'metric', metric_type: 'basic',
+		metrics: new Set(),
+		// TODO: 14.05.2025 valutare se 'properties' viene utilizzata
+		// properties: {
+		// 	table: WorkBook.activeTable.dataset.table,
+		// 	fields
+		// },
+		formula : [],
 		aggregateFn: 'SUM', // default
 		cssClass: 'custom'
 	}
+	object.formula = textareaCustomMetric.firstChild.textContent.split(/\b|(?=[\W])/g);
+	// const formula = textareaCustomMetric.firstChild.textContent.split(/\b/);
+	// ogni elemento inserito nella formula deve essere verificato, la verifica consiste nel trovare
+	// quello che è stato inserito, se è presente (come colonna) nella tabella
+	object.formula.forEach(el => {
+		const match = [...suggestionsTables].find(value => el === value.column_name);
+		if (match) {
+			object.SQL.push(`${WorkBook.activeTable.dataset.alias}.${el}`);
+			object.metrics.add(el);
+			// fields.push(el);
+		} else {
+			// object.SQL.push(el.trim());
+			object.SQL.push(el);
+		}
+	});
+	debugger;
+	// converto in array
+	object.metrics = [...object.metrics];
 	WorkBook.checkChanges(token);
 	WorkBook.elements = object;
 	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
@@ -1097,7 +1102,6 @@ function advancedMetricSave(e) {
 
 // salvataggio metrica composta
 function compositeMetricSave(e) {
-	debugger;
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
 	const alias = document.getElementById('composite-metric-name').value;
 	const date = new Date().toLocaleDateString('it-IT', options);
@@ -1109,6 +1113,7 @@ function compositeMetricSave(e) {
 	// viene inserito un &nbsp che causa il ritorno a capo di tutta la stringa che segue. In questo caso, la stringa che segue, dopo
 	// &nbsp;, non viene memorizzata.
 	// ottengo i token delle metriche che compongono la metrica composta
+	debugger;
 	object.formula.forEach(el => {
 		if (document.querySelector(`li.metrics[data-label='${el}']`)) {
 			const metric_id = document.querySelector(`li.metrics[data-label='${el}']`).dataset.id;

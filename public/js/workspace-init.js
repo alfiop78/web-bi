@@ -979,11 +979,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 							// basic
 							if (metric.factId === factId) {
 								Sheet.metrics.get(token).distinct = wbMetrics.distinct;
+								debugger;
 								baseMeasures.set(token, {
 									token,
 									alias: metric.alias,
 									aggregateFn: metric.aggregateFn,
 									SQL: wbMetrics.SQL,
+									metrics: wbMetrics.metrics,
 									distinct: wbMetrics.distinct
 								});
 							}
