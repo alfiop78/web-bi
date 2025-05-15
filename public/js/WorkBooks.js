@@ -69,7 +69,7 @@ class Sheets {
 		this.sheet.sheet.fields = Object.fromEntries(this.fields);
 		this.sheet.sheet.from = this.from;
 		this.sheet.sheet.joins = this.joins;
-		this.sheet.sheet.metrics = {};
+		// this.sheet.sheet.metrics = {};
 		this.sheet.workbook_ref = this.sheet.workbook_ref;
 		/* WARN : verifica dei filtri del report.
 		  * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
@@ -154,6 +154,18 @@ class Sheets {
 				this.metrics = element;
 			}
 		}
+
+		// ricreo le proprietà 'sheet' e 'specs'
+		this.sheet.name = SheetStorage.sheet.name;
+		this.sheet.facts = SheetStorage.sheet.facts;
+		this.sheet.sheet.fields = Object.fromEntries(this.fields);
+		this.sheet.sheet.from = this.from;
+		this.sheet.sheet.joins = this.joins;
+		this.sheet.sheet.filters = [...this.filters];
+		this.sheet.sheet.metrics = Object.fromEntries(this.metrics);
+		this.sheet.workbook_ref = SheetStorage.sheet.workbook_ref;
+		this.sheet.specs = SheetStorage.sheet.specs;
+		debugger;
 	}
 
 	async exist() {

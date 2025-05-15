@@ -622,8 +622,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 	}
 
 	app.saveSheet = async () => {
-		Sheet.name = input__sheetName.dataset.value;
 		debugger;
+		Sheet.name = input__sheetName.dataset.value;
 		Sheet.userId = userId;
 		// verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
 		// Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
@@ -798,6 +798,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		if (e.target.dataset.tempValue) {
 			e.target.dataset.value = e.target.textContent;
 			Sheet.name = e.target.textContent;
+			Sheet.update();
 			delete e.target.dataset.tempValue;
 		} else {
 			e.target.innerText = e.target.dataset.defaultValue;
@@ -935,9 +936,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 					// In questo caso, nell'oggetto 'process', queste modifiche vengono
 					// aggiornate perchè qui, faccio riferimento a wbMetrics, ma nell'oggetto
 					// Sheet.metrics, queste modifiche non sono viste, quindi le aggiorno qui.
+					Sheet.metrics.get(token).SQL = wbMetrics.SQL;
 					switch (metric.type) {
 						case 'composite':
-							Sheet.metrics.get(token).SQL = wbMetrics.SQL;
+							// Sheet.metrics.get(token).SQL = wbMetrics.SQL;
 							process.compositeMeasures[token] = {
 								alias: metric.alias,
 								SQL: wbMetrics.SQL,
@@ -957,6 +959,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 									distinct: wbMetrics.distinct,
 									filters: {}
 								};
+								// se questa metrica contiene una formula (SQL come array) va aggiunta anche la proprietà 'metrics'
+								if (wbMetrics.metrics) {
+									obj.metrics = wbMetrics.metrics;
+									Sheet.metrics.get(token).metrics = wbMetrics.metrics;
+								}
 								if (wbMetrics.filters) {
 									Sheet.metrics.get(token).filters = wbMetrics.filters;
 									wbMetrics.filters.forEach(filterToken => {
@@ -979,15 +986,18 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 							// basic
 							if (metric.factId === factId) {
 								Sheet.metrics.get(token).distinct = wbMetrics.distinct;
-								debugger;
 								baseMeasures.set(token, {
 									token,
 									alias: metric.alias,
 									aggregateFn: metric.aggregateFn,
 									SQL: wbMetrics.SQL,
-									metrics: wbMetrics.metrics,
 									distinct: wbMetrics.distinct
 								});
+								// se questa metrica contiene una formula (SQL come array) va aggiunta anche la proprietà 'metrics'
+								if (wbMetrics.metrics) {
+									baseMeasures.get(token).metrics = wbMetrics.metrics;
+									Sheet.metrics.get(token).metrics = wbMetrics.metrics;
+								}
 							}
 							break;
 					}

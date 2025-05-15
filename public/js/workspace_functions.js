@@ -980,30 +980,32 @@ function customBaseMetricSave(e) {
 	const generated_token = `_${rand().substring(0, 7)}`;
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `__${token_string}_${generated_token}`;
 	const alias = document.getElementById('input-base-custom-metric-name').value;
-	let fields = [];
+	// let fields = [];
 	const factId = WorkBook.activeTable.dataset.factId;
 	const suggestionsTables = JSON.parse(window.sessionStorage.getItem(WorkBook.activeTable.dataset.table));
 	// let SQL = [];
-	// TODO: 21.11.2024 verificare per quale motivo la creazione dell'object qui è diversa da quella in convertToMetric()
 	const object = {
-		token, factId, alias,
+		token,
+		factId,
+		alias,
 		SQL: [],
 		distinct: false, // default
-		type: 'metric', metric_type: 'basic',
+		type: 'metric',
+		metric_type: 'basic',
 		metrics: new Set(),
 		// TODO: 14.05.2025 valutare se 'properties' viene utilizzata
 		// properties: {
 		// 	table: WorkBook.activeTable.dataset.table,
 		// 	fields
 		// },
-		formula : [],
+		formula: [],
 		aggregateFn: 'SUM', // default
 		cssClass: 'custom'
 	}
 	object.formula = textareaCustomMetric.firstChild.textContent.split(/\b|(?=[\W])/g);
 	// const formula = textareaCustomMetric.firstChild.textContent.split(/\b/);
 	// ogni elemento inserito nella formula deve essere verificato, la verifica consiste nel trovare
-	// quello che è stato inserito, se è presente (come colonna) nella tabella
+	// le colonne della tabella e convertirle in nome_tabella_alias.nome_campo
 	object.formula.forEach(el => {
 		const match = [...suggestionsTables].find(value => el === value.column_name);
 		if (match) {
@@ -1015,15 +1017,21 @@ function customBaseMetricSave(e) {
 			object.SQL.push(el);
 		}
 	});
+	// se l'SQL ha un solo elemento (Es. : [DocVenditaDettaglio_444.Quantita]) non è necessaria la proprietà 'metrics'
+	// nell'object che verrà creato, inoltre la proprietà 'SQL' può anche essere una stringa anziché un array.
+	if (object.SQL.length === 1) {
+		object.SQL = object.SQL.join('');
+		delete object.metrics;
+	} else {
+		// converto Set() -> Array() per poterlo salvare in localStorage
+		object.metrics = [...object.metrics];
+	}
 	debugger;
-	// converto in array
-	object.metrics = [...object.metrics];
 	WorkBook.checkChanges(token);
 	WorkBook.elements = object;
 	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
 		WorkBook.workSheet[WorkBook.activeTable.id][token] = object :
 		WorkBook.workSheet[WorkBook.activeTable.id] = { [token]: object };
-	// WorkBook.workSheet[token] = object;
 	WorkBook.update();
 	if (!e.target.dataset.token) {
 		appendCustomMetric(object);
@@ -1055,10 +1063,11 @@ function advancedMetricSave(e) {
 		factId: metric.factId,
 		aggregateFn,
 		SQL: metric.SQL,
-		distinct,
-		// workbook_ref: WorkBook.workBook.token,
-		// updated_at: date
+		distinct
 	};
+	// se è presente la proprietà 'metrics' la aggiungo. Questa proprietà è presente nei casi in cui la metrica
+	// contiene una formula (non un solo campo della tabella)
+	if (metric.metrics) object.metrics = metric.metrics;
 	// recupero tutti i filtri droppati in #filter-drop
 	// salvo solo il riferimento al filtro e non tutta la definizione del filtro
 	dlg__advancedMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
@@ -1078,10 +1087,10 @@ function advancedMetricSave(e) {
 	if (filters.size !== 0) object.filters = [...filters];
 	WorkBook.elements = object;
 	// salvo la nuova metrica nel 'worksheet'
+	// OPTIMIZE: 15.05.2025 Codice ripetuto
 	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
 		WorkBook.workSheet[WorkBook.activeTable.id][token] = object :
 		WorkBook.workSheet[WorkBook.activeTable.id] = { [token]: object };
-	// WorkBook.workSheet[token] = object;
 	WorkBook.update();
 	// window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
 	if (!e.target.dataset.token) {
@@ -1748,12 +1757,12 @@ function createCustomColumn(e) {
 	input__column_name.focus();
 }
 
+/*
+ * Converto una colonna con datatype numerico in una metrica di base
+ * */
 function convertToMetric(e) {
-	// elemento (colonna) da cui convertire in metrica
 	WorkBook.activeTable = e.currentTarget.dataset.tableId;
-	// const referenceElement = document.querySelector(`.drag-list.columns[data-id='${e.currentTarget.dataset.token}']`);
-	// console.log(token);
-	// recupero l'elemento da convertire
+	// elemento (colonna) da cui convertire in metrica
 	const element = WorkBook.elements.get(e.currentTarget.dataset.token);
 	// console.log(element);
 	// creo la metrica che salverò in customMetrics, queste verranno salvate in storage, insiemen al WorkBook e alle metriche
@@ -1767,7 +1776,6 @@ function convertToMetric(e) {
 			aggregateFn = 'SUM';
 			break;
 	}
-	// const token = `_cm_${ e.currentTarget.dataset.token } `;
 	const token = `_${rand().substring(0, 7)}`;
 	const object = {
 		token,
@@ -1779,18 +1787,16 @@ function convertToMetric(e) {
 		metric_type: 'basic',
 		aggregateFn,
 		formula: [element.name],
-		dependencies: false,
+		// dependencies: false, // FIX: 15.05.2025 In customBaseMetricSave() questa proprietà non è utilizzata
 		cssClass: 'custom'
 	};
 	WorkBook.checkChanges(token);
 	WorkBook.elements = object;
-	debugger;
+	// OPTIMIZE: 15.05.2025 Questo codice viene utilizzato anche in altre occasioni, creare una Fn riutilizzabile
 	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
 		WorkBook.workSheet[WorkBook.activeTable.id][token] = object :
 		WorkBook.workSheet[WorkBook.activeTable.id] = { [token]: object };
-	// WorkBook.workSheet[token] = object;
 	WorkBook.update();
-	// WorkBook.workSheet[token] = metric;
 	// creo l'elemento da aggiungere
 	appendCustomMetric(object);
 	e.currentTarget.style.visibility = 'hidden';

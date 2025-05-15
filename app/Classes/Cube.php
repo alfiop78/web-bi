@@ -114,46 +114,25 @@ class Cube
 
 	public function metrics_new()
 	{
-		// metriche di base
+		// metriche di base / base custom
 		$this->report_metrics = [];
-		// dd(SELF::ifNullOperator());
-		// dd($this->baseMeasures);
-		/* foreach ($this->baseMeasures as $token => $value) {
-			dump($value);
-			dd((is_array($value->SQL)));
-			// $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
-			$metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS {$value->token}";
-			// dd($metric);
-			$this->report_metrics[$this->factId][] = $metric;
-			// $metrics_base[] = $metric;
-			if (property_exists($this, 'sql_info')) {
-				$this->sql_info->{'METRICS'}->{$value->alias} = $metric;
-			}
-			$this->datamart_baseMeasures[] = "{$this->ifNullOperator}({$this->baseTableName}.{$token}, 0) AS \"{$value->alias}\"";
-		} */
 		foreach ($this->baseMeasures as $token => $value) {
-			// dump($value);
-			// dd((is_array($value->SQL)));
+			// dump($value->alias);
 			$sql = [];
 			if (is_array($value->SQL)) {
 				// ciclo gli elementi dell'array $value->SQL per cercare i nomi delle metriche
 				foreach ($value->SQL as $element) {
 					// dump("element : " . $element);
-					// dump((in_array($element, $value->metrics)));
-
 					// $re = '/[^\.]*$/';
-					$re = '/[^\.]*\w$/';
-					// $str = 'nome_tabella.nome_campo';
-
+					// NOTE: REGEX cerco tutti caratteri \w dopo il punto. es.: nome_tabella.nome_campo = nome_campo
+					$regex = '/[^\.]*\w$/';
 					// preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
 					// preg_match($re, $str, $matches, PREG_OFFSET_CAPTURE, 0);
-					preg_match($re, $element, $matches);
-
-					// Print the entire match result
+					preg_match($regex, $element, $matches);
 					// dump($matches);
-					// if ($matches) dump($matches[0]);
 					if ($matches) {
 						if (in_array("/", $sql)) {
+							// la formula contiene l'operatore di divisione, imposto il CASE...WHEN
 							$sql[] = (in_array($matches[0], $value->metrics)) ? "CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END" : trim($element);
 						} else {
 							$sql[] = (in_array($matches[0], $value->metrics)) ? "{$this->ifNullOperator}({$element}, 0)" : trim($element);
@@ -163,22 +142,17 @@ class Cube
 					}
 				}
 				$metric = implode("", $sql);
+				$this->report_metrics[$this->factId][] = "\n{$value->aggregateFn}($metric) AS {$value->token}";
 			} else {
-				// $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
+				// formula non in formato array (è una formula con una sola colonna)
 				$metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS {$value->token}";
+				$this->report_metrics[$this->factId][] = $metric;
 			}
-			// dump($sql);
-			// dd($metric);
-			$this->report_metrics[$this->factId][] = "\n{$value->aggregateFn}($metric) AS {$value->token}";
-			// dd($this->report_metrics);
-			// $metrics_base[] = $metric;
-			if (property_exists($this, 'sql_info')) {
-				$this->sql_info->{'METRICS'}->{$value->alias} = $metric;
-			}
+			if (property_exists($this, 'sql_info')) $this->sql_info->{'METRICS'}->{$value->alias} = $metric;
+			// verrà inserita nella creazione del datamart finale
 			$this->datamart_baseMeasures[] = "{$this->ifNullOperator}({$this->baseTableName}.{$token}, 0) AS \"{$value->alias}\"";
 		}
 		// dd($this->report_metrics);
-
 		// dd($this->sql_info);
 		// dd($this->datamart_baseMeasures);
 	}
@@ -428,6 +402,7 @@ class Cube
 			default:
 				break;
 		}
+		// dd($this->where_clause);
 		// dd($createStmt);
 		// var_dump($query);
 		// dump($createStmt);
@@ -640,6 +615,7 @@ class Cube
 	public function createMetricDatamarts_new()
 	{
 		// dd($this->groupMetricsByFilters);
+		$sqlFilteredMetrics = [];
 		foreach ($this->groupMetricsByFilters as $groupToken => $advancedMetric) {
 			$groupAdvancedMeasures = [];
 			$tableName = "WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
@@ -659,36 +635,61 @@ class Cube
 			$this->FROM_metricTable = [];
 			$this->WHERE_metricTable = [];
 			// dd($advancedMetric);
-			foreach ($advancedMetric as $metric) {
+			foreach ($advancedMetric as $value) {
 				unset($this->sqlAdvancedMeasures);
 				// dd($metric);
-				// dd($metric->sql);
-				// dump(($metric->distinct));
-
-				$groupAdvancedMeasures[$this->factId][$metric->token] = ($metric->distinct) ?
-					"{$this->ifNullOperator}({$metric->aggregateFn}(DISTINCT {$metric->SQL}), 0) AS {$metric->token}" :
-					"{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS {$metric->token}";
-				// $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
-				// dd($groupAdvancedMeasures);
+				// dump($value->SQL);
+				// applico la stessa logica delle base metrics
+				$sql = [];
+				if (is_array($value->SQL)) {
+					// ciclo la formula SQL per identificare i nomi delle colonne, queste verranno implementate con la funzione IFNULL/NVL e
+					// con il CASE...WHEN, in caso di formula contenente l'operatore di divisione "/"
+					foreach ($value->SQL as $element) {
+						// dump("element : " . $element);
+						$regex = '/[^\.]*\w$/';
+						preg_match($regex, $element, $matches);
+						if ($matches) {
+							if (in_array("/", $sql)) {
+								// la formula contiene l'operatore di divisione, imposto il CASE...WHEN
+								$sql[] = (in_array($matches[0], $value->metrics)) ? "CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END" : trim($element);
+							} else {
+								$sql[] = (in_array($matches[0], $value->metrics)) ? "{$this->ifNullOperator}({$element}, 0)" : trim($element);
+							}
+						} else {
+							$sql[] = trim($element);
+						}
+					}
+					$metric = implode("", $sql);
+					// $groupAdvancedMeasures[$this->factId][$value->token] = $metric;
+					$groupAdvancedMeasures[$this->factId][$value->token] = ($value->distinct) ?
+						"{$this->ifNullOperator}({$value->aggregateFn}(DISTINCT {$metric}), 0) AS {$value->token}" :
+						"{$this->ifNullOperator}({$value->aggregateFn}({$metric}), 0) AS {$value->token}";
+				} else {
+					// in questo caso la proprietà SQL non è un array
+					$metric = ($value->distinct) ?
+						"{$this->ifNullOperator}({$value->aggregateFn}(DISTINCT {$value->SQL}), 0) AS {$value->token}" :
+						"{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS {$value->token}";
+					$groupAdvancedMeasures[$this->factId][$value->token] = $metric;
+				}
 				if (property_exists($this, 'sql_info')) {
-					// TODO: testare con un alias contenente spazi
-					$this->json_info_advanced[$tableName]->METRICS->{"$metric->token"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS {$metric->token}";
+					// $this->json_info_advanced[$tableName]->METRICS->{"$metric->token"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS {$metric->token}";
+					$this->json_info_advanced[$tableName]->METRICS->{"$value->token"} = $metric;
 					// dd($this->json_info_advanced);
 				}
-				// dd($groupAdvancedMeasures);
+				// dump($groupAdvancedMeasures);
 				// _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
 				// TODO: probabilmente posso creare questo array nello stesso modo di datamart_baseMeasures
 				// (quindi senza le keys $tablename e $metric->alias)
 				// $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
 				// $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
 
-				$this->datamart_advancedMeasures[] = "{$this->ifNullOperator}({$metric->token}, 0) AS \"{$metric->alias}\"";
-				// $this->datamart_advancedMeasures[] = "NVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
+				// metrica che verrà inserita nella creazione del datamart finale
+				$this->datamart_advancedMeasures[] = "{$this->ifNullOperator}({$value->token}, 0) AS \"{$value->alias}\"";
 				// aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
-				$this->setFiltersMetricTable_new($metric->filters, $tableName);
+				$this->setFiltersMetricTable_new($value->filters, $tableName);
 				// dd($this->json_info_advanced);
 				// per ogni filtro presente nella metrica avanzata...
-				foreach ($metric->filters as $filter) {
+				foreach ($value->filters as $filter) {
 					// if (property_exists($filter, 'from')) $this->setFromMetricTable($filter->from, $tableName);
 					// dd($filter);
 					// le funzioni temporali non contengono la clausola FROM
@@ -740,16 +741,28 @@ class Cube
 			$this->sqlAdvancedMeasures .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
 		}
 		$this->sqlAdvancedMeasures .= self::WHERE;
-		$this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
-
+		// OPTIMIZE: 15.05.2025 da ottimizzare (START)
+		// dd($this->sqlAdvancedMeasures);
 		if (array_key_exists($this->factId, $this->WHERE_metricTable)) {
-			$this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
+			// esistono condizioni WHERE sulle metriche avanzate
+			// se esistono WHERE anche sulla base table faccio un merge con quell della metrica avanzata
+			if (array_key_exists($this->factId, $this->where_clause)) {
+				// $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->WHERE_metricTable[$this->factId]));
+				$this->sqlAdvancedMeasures .= implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->WHERE_metricTable[$this->factId]));
+			} else {
+				$this->sqlAdvancedMeasures .= implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
+			}
+		} elseif (array_key_exists($this->factId, $this->where_clause)) {
+			// esiste condizione WHERE sulla tabella BASE
+			$this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
+		} else {
+			// non esistono condizioni di WHERE, sia nella tabella base che nelle metriche avanzate
+			$this->sqlAdvancedMeasures .= "TRUE";
 		}
-
+		// dd($this->sqlAdvancedMeasures);
 		// utilizzo array_merge, verranno unite le join della TIME e, quelle con key uguale, verranno sovrascirtte
 		// dal secondo array passato come argomento. In questo caso, se è prsente una metrica con timing function sovrrascive
 		// le join della TIME "originale"
-
 		switch (true) {
 			case (array_key_exists($this->factId, $this->WHERE_timingFn)):
 				$this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
@@ -760,11 +773,12 @@ class Cube
 			default:
 				break;
 		}
-
+		// OPTIMIZE: 15.05.2025 da ottimizzare (END)
 		// dd($this->sqlAdvancedMeasures);
 		$this->WHERE_timingFn = [];
 		// aggiungo i filtri del report e i filtri contenuti nella metrica
 		$this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
+		// dd($this->sqlAdvancedMeasures);
 		if (array_key_exists($this->factId, $this->filters_metricTable)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->filters_metricTable[$this->factId]);
 		$this->sqlAdvancedMeasures .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
 		$comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics[$this->factId])) . "\n*/\n";

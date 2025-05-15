@@ -799,6 +799,11 @@ class MapDatabaseController extends Controller
 		return response()->json($data);
 	}
 
+	/*
+	 * Viene creata una struttura in cui le metriche vengono raggruppate in base allo stesso contenuto dei filtri
+	 * Se due metriche contengono gli stessi filtri (quindi possono essere calcolate nella stessa query) le raggruppo
+	 * in base a un token
+	 * */
 	private function calcAdvancedMetrics()
 	{
 		$this->query->filteredMetrics = $this->query->process->advancedMeasures->{$this->query->fact};
@@ -1070,6 +1075,8 @@ class MapDatabaseController extends Controller
 											"distinct" => $json_advanced_measures->distinct,
 											"filters" => $json_filters_metric
 										];
+										if (property_exists($json_advanced_measures, 'metrics')) $advancedMeasures->$token->metrics = $json_advanced_measures->metrics;
+										// dd($advancedMeasures);
 										$process->advancedMeasures->$fact = $advancedMeasures;
 									}
 									break;
@@ -1082,6 +1089,8 @@ class MapDatabaseController extends Controller
 										"SQL" => $json_sheet->metrics->{$token}->SQL,
 										"distinct" => $json_sheet->metrics->{$token}->distinct
 									];
+									if (property_exists($json_sheet->metrics->{$token}, 'metrics')) $metrics->$token->metrics = $json_sheet->metrics->{$token}->metrics;
+									// dd($metrics);
 									$process->baseMeasures->$fact = $metrics;
 									break;
 							}
