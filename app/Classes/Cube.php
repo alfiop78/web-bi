@@ -120,6 +120,7 @@ class Cube
 			// dump($value->alias);
 			$sql = [];
 			if (is_array($value->SQL)) {
+				// dd($value->SQL);
 				// ciclo gli elementi dell'array $value->SQL per cercare i nomi delle metriche
 				foreach ($value->SQL as $element) {
 					// dump("element : " . $element);
@@ -133,15 +134,23 @@ class Cube
 					if ($matches) {
 						if (in_array("/", $sql)) {
 							// la formula contiene l'operatore di divisione, imposto il CASE...WHEN
+							// $sql[] = (in_array($matches[0], $value->metrics)) ? " CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END " : trim($element);
 							$sql[] = (in_array($matches[0], $value->metrics)) ? "CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END" : trim($element);
 						} else {
 							$sql[] = (in_array($matches[0], $value->metrics)) ? "{$this->ifNullOperator}({$element}, 0)" : trim($element);
 						}
 					} else {
-						$sql[] = trim($element);
+						// if (is_null($element)) dd("STOP");
+						if (is_null($element)) $element = " ";
+						// $sql[] = trim($element);
+						$sql[] = $element;
 					}
 				}
-				$metric = implode("", $sql);
+				// dump($sql);
+				// $metric = implode(" ", $sql);
+				// $metric = implode("", $sql);
+				$metric = implode($sql);
+				// dd($metric);
 				$this->report_metrics[$this->factId][] = "\n{$value->aggregateFn}($metric) AS {$value->token}";
 			} else {
 				// formula non in formato array (è una formula con una sola colonna)
@@ -183,43 +192,6 @@ class Cube
 		}
 		// dd($this->from_clause);
 		// dd($this->sql_info);
-	}
-
-	private function getTimeFieldConversion($join)
-	{
-		switch (session('db_driver')) {
-			case 'odbc':
-				switch ($join->from->field) {
-					case 'id':
-						// WB_DATE.id è di tipo DATE, converto il campo proveniente dalla Fact (non il campo WB_DATE.id)
-						$converted = "TO_CHAR({$join->SQL[0]})::DATE";
-						break;
-					case 'week_id':
-						// WB_DATE.week_id è di tipo INTEGER, converto in INT il campo proveniente dalla Fact
-						// TODO: 13.05.2025 da implementare
-						break;
-					default:
-						break;
-				}
-				break;
-			case 'mysql':
-				switch ($join->from->field) {
-					case 'id':
-						// WB_DATE.id è di tipo DATE, converto il campo proveniente dalla Fact in DATE (non il campo WB_DATE.id)
-						$converted = "DATE_FORMAT({$join->SQL[0]}, '%Y-%m-%d')";
-						break;
-					case 'week_id':
-						// WB_DATE.week_id è di tipo INTEGER, converto in INT il campo proveniente dalla Fact
-						$converted = "CAST({$join->SQL[0]} AS UNSIGNED)";
-						break;
-					default:
-						break;
-				}
-				break;
-			default:
-				break;
-		}
-		return $converted;
 	}
 
 	/*
@@ -685,10 +657,13 @@ class Cube
 								$sql[] = (in_array($matches[0], $value->metrics)) ? "{$this->ifNullOperator}({$element}, 0)" : trim($element);
 							}
 						} else {
-							$sql[] = trim($element);
+							// $sql[] = trim($element);
+							if (is_null($element)) $element = " ";
+							$sql[] = $element;
 						}
 					}
-					$metric = implode("", $sql);
+					// $metric = implode("", $sql);
+					$metric = implode($sql);
 					// $groupAdvancedMeasures[$this->factId][$value->token] = $metric;
 					$groupAdvancedMeasures[$this->factId][$value->token] = ($value->distinct) ?
 						"{$this->ifNullOperator}({$value->aggregateFn}(DISTINCT {$metric}), 0) AS {$value->token}" :
