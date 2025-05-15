@@ -1760,6 +1760,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		//   `TO_CHAR(${data.tableAlias}.${data.column})::DATE` : `${data.tableAlias}.${data.column}`;
 
 		// field della Fact
+		// debugger;
 		WorkBook.join = {
 			token: token_join,
 			value: {
@@ -1770,8 +1771,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				// SQL: [`TO_CHAR(${tableAlias}.${tableColumn})::DATE`, `WEB_BI_TIME.${web_bi_timeField}`],
 				SQL: [`${data.tableAlias}.${data.column}`, `${data.timeTable}.${data.timeColumn}`],
 				factId: WorkBook.activeTable.dataset.factId,
-				from: { table: data.timeTable, alias: data.timeTable, field: data.timeColumn },
-				to: { table: data.table, alias: data.tableAlias, field: data.column }
+				from: { table: data.timeTable, alias: data.timeTable, field: data.timeColumn, datatype: data.timeColumnType },
+				to: { table: data.table, alias: data.tableAlias, field: data.column, datatype: data.columnType }
 			}
 		};
 		WorkBook.joins = token_join;
@@ -1818,6 +1819,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		// concateno il nome della tabella time (WB_YEARS) con le ultime 5 cifre della svg-data-XXXXX (factId)
 		const token_join = `${fieldsData.descTable.id}-${WorkBook.activeTable.dataset.factId.substring(9)}`;
 		const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
+		debugger;
 		app.setDataTimeDimension(token_join, token_table, fieldsData);
 
 		Draw.currentTable = Draw.tables.get(token_table);

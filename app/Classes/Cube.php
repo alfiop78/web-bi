@@ -244,31 +244,60 @@ class Cube
 		$this->where_time_clause = [];
 		foreach ($this->process->{"joins"}->{$this->fact} as $token => $join) {
 			// il token è l'identificativo della join
-			// dd($join);
 			// qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
 			if ($join->type === "TIME") {
 				// dd($join);
-				// $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
-				if (property_exists($join, 'datatype')) {
-					if (strtolower($join->datatype) === 'int' || strtolower($join->datatype) === 'integer' || strtolower($join->datatype) === 'varchar') {
-						// dd($join);
-						$join->SQL[0] = $this->getTimeFieldConversion($join);
-						/* switch (session('db_driver')) {
+				if (property_exists($join->from, 'datatype') && property_exists($join->to, 'datatype')) {
+					// legame tra TIME e Fact
+					// dd($join);
+					// dd(($join->from->datatype === $join->to->datatype));
+					// $join->from è relativo alla tabella della dimensione TIME, $join->to invece alla tabella collegata (Fact)
+					if ($join->from->datatype === $join->to->datatype) {
+						// dd(($join->from->datatype === $join->to->datatype));
+						// datatype uguali tra il campo della Fact e quello della dimensione Time messo in relazione
+						$this->where_time_clause[$this->factId][$join->alias] = implode(" = ", $join->SQL);
+					} else {
+						// datatype diversi, è necessaria la conversione del campo della tabella Fact.
+						// Questo campo, nella join->SQL è posizionata all'indice [0], mentre [1] corrisponde al
+						// campo della dimensione TIME
+						// dd("datatype diversi");
+						switch (session('db_driver')) {
 							case 'odbc':
-								if ($join->alias === 'WB_DATE') $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
-								// $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
+								switch ($join->from->field) {
+									case 'id':
+										// WB_DATE.id è di tipo DATE, converto il campo proveniente dalla Fact in DATE (non il campo WB_DATE.id)
+										$join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
+										break;
+									case 'week_id':
+										// WB_DATE.week_id è di tipo INTEGER, converto in INT il campo proveniente dalla Fact
+										// $join->SQL[0] = "CAST({$join->SQL[0]} AS UNSIGNED)";
+										break;
+									default:
+										break;
+								}
 								break;
 							case 'mysql':
-								// TEST: da testare con il WorkBook Multifact
-								if ($join->alias === 'WB_DATE') $join->SQL[0] = "DATE_FORMAT({$join->SQL[0]}, '%Y-%m-%d')";
+								switch ($join->from->field) {
+									case 'id':
+										// WB_DATE.id è di tipo DATE, converto il campo proveniente dalla Fact in DATE (non il campo WB_DATE.id)
+										$join->SQL[0] = "DATE_FORMAT({$join->SQL[0]}, '%Y-%m-%d')";
+										break;
+									case 'week_id':
+										// WB_DATE.week_id è di tipo INTEGER, converto in INT il campo proveniente dalla Fact
+										$join->SQL[0] = "CAST({$join->SQL[0]} AS UNSIGNED)";
+										break;
+									default:
+										break;
+								}
 								break;
 							default:
 								break;
-						} */
+						}
 					}
 				}
-				// dd($join->SQL);
 				$this->where_time_clause[$this->factId][$join->alias] = implode(" = ", $join->SQL);
+				// dd($join->SQL);
+				// $this->where_time_clause[$this->factId][$join->alias] = implode(" = ", $join->SQL);
 
 				if (property_exists($this, 'sql_info')) {
 					// in questo caso imposto nella prop 'WHERE-TIME' anzichè nella 'WHERE'. In questo
