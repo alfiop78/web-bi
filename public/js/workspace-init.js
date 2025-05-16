@@ -56,36 +56,15 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 (() => {
 	var app = {
+		// TODO: 15.05.2025 Aggiungere qui solo le variabili che vengono utilizzate in questa IIEF
 		// templates
-		tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
-		// contextMenuRef: document.getElementById('context-menu'),
-		contextMenuColumnRef: document.getElementById('context-menu-column'),
 		tmplDetails: document.getElementById('tmpl-details-element'),
-		tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
 		tmplAdvMetricsDefined: document.getElementById('tmpl-adv-metric'),
-		tmplFiltersDefined: document.getElementById('tmpl-filters-defined'),
-		tmplFormula: document.getElementById('tmpl-formula'),
-		tmplCompositeFormula: document.getElementById('tmpl-composite-formula'),
-		// dialogs
-		dialogWorkBook: document.getElementById('dialog-workbook-open'),
-		dialogSQL: document.getElementById('dlg-sql-info'),
-		// dialogSheet: document.getElementById('dialog-sheet-open'),
-		dialogTables: document.getElementById('dlg-tables'),
-		dialogFilters: document.getElementById('dlg-filters'),
-		dialogCustomMetric: document.getElementById('dlg-custom-metric'),
-		dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
 		dialogRename: document.getElementById('dialog-rename'),
 		dialogJoin: document.getElementById('dlg-join'),
 		dialogTime: document.getElementById('dialog-time'),
-		// dialogInfo: document.getElementById('dlg-info'),
 		dialogSchema: document.getElementById('dlg-schema'),
-		dialogNewWorkBook: document.getElementById('dialog-new-workbook'),
 		dialogNewSheet: document.getElementById('dialog-new-sheet'),
-		// buttons
-		btnSelectSchema: document.getElementById('btn-select-schema'),
-		btnSaveSheet: document.getElementById('btn-sheet-save'),
-		btnWorkBookNew: document.getElementById('btn-workbook-new'),
-		btnVersioning: document.getElementById('btn-versioning'),
 		btnAdvancedMetricSave: document.getElementById("btn-metric-save"),
 		btnWorkBook: document.getElementById('workbook'),
 		btnSheet: document.getElementById('sheet'),
@@ -96,18 +75,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		// body
 		body: document.getElementById('body'),
 		translate: document.getElementById('translate'),
-		wjTitle: document.querySelector('#window-join .wj-title'),
 		workbookTablesStruct: document.querySelector('#workbook-objects'),
-		// columns and rows dropzone (step 2)
-		columnsDropzone: document.getElementById('dropzone-columns'),
-		// filtersDropzone: document.getElementById('dropzone-filters'),
-		txtAreaIdColumn: document.getElementById('textarea-column-id'),
-		txtAreaDsColumn: document.getElementById('textarea-column-ds'),
 		// popup
 		tablePopup: document.getElementById("table-popup"),
 		// INPUTS
 		inputAdvMetricName: document.getElementById("input-advanced-metric-name"),
-		workbookName: document.getElementById('workbook-name')
 	}
 	const userId = +document.querySelector('h5[data-uid]').dataset.uid;
 	console.info('workspace-init');
@@ -192,21 +164,27 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			}
 		}
 		// creo una mappatura per popolare il WorkBook nello step successivo
-		app.hierTables();
-		app.checkSessionStorage();
+		// app.hierTables();
+		// app.checkSessionStorage();
+		// debugger;
+		checkTablesStorage();
 	}
 
 	// imposto un alias per tabella aggiunta al canvas
 	app.setAliasTable = () => app.dialogRename.showModal();
 
 	app.saveAliasTable = () => {
+		debugger;
 		// recupero lo struct all'interno del <defs>
 		const struct = Draw.svg.querySelector(`#struct-${WorkBook.activeTable.id}`);
 		const input = document.getElementById('table-alias');
 		struct.querySelector('text').innerHTML = input.value;
 		Draw.svg.querySelector(`#${WorkBook.activeTable.id}`).dataset.name = input.value;
 		// modifico la prop 'name' di WorkBook.hierTables. Questa viene letta da
+		// BUG: 16.05.2025 da rivedere perchè hierTables non viene più utilizzato
+		debugger;
 		WorkBook.hierTables.get(WorkBook.activeTable.id).name = input.value;
+		return;
 		// WorkBook.svg
 		Draw.tables.get(WorkBook.activeTable.id).name = input.value;
 		app.dialogRename.close();
@@ -263,90 +241,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		e.currentTarget.classList.remove('dropping');
 	}
 	/* NOTE: END DRAG&DROP EVENTS */
-
-
-	/* app.editMetricAlias = (e) => {
-	  const dropzone = document.getElementById("dropzone-columns");
-	  dropzone.dataset.error = (Sheet.checkMetricNames(e.target.dataset.token, e.target.innerText)) ? true : false;
-	  if (dropzone.dataset.error === "true") {
-		App.showConsole("Sono presenti metriche con nomi uguali, rinominare la metrica", "error", 2500);
-	  } else {
-		// imposto l'attributo [data-modified] in modo da aggiornare lo Sheet in localStorage
-		// e, alla successiva apertura dello Sheet, ritrovarmi con le stesse modifiche fatte qui
-		// (come per l'edit della funzione di aggregazione)
-		if (Sheet.edit) {
-		  if (Sheet.metrics.get(e.target.dataset.token).alias.toLowerCase() !== e.target.innerText.toLowerCase()) e.target.dataset.modified = true;
-		}
-		Sheet.metrics.get(e.target.dataset.token).alias = e.target.innerText;
-	  }
-	} */
-
-	/* app.columnDrop = (e) => {
-	  e.preventDefault();
-	  debugger;
-	  // e.currentTarget.classList.replace('dropping', 'dropped');
-	  e.currentTarget.classList.remove('dropping');
-	  if (!e.currentTarget.classList.contains('dropzone')) return;
-	  const elementId = e.dataTransfer.getData('text/plain');
-	  const elementRef = document.getElementById(elementId);
-	  // elementRef : è l'elemento nella lista di sinistra che ho draggato
-	  let tmpl = app.tmplColumnsDefined.content.cloneNode(true);
-	  let field = tmpl.querySelector('.column-defined');
-	  let span = field.querySelector('span');
-	  // field.dataset.type = elementRef.dataset.type;
-	  field.dataset.id = elementRef.id;
-	  const metric = { ...WorkBook.metrics.get(elementRef.id) };
-	  switch (metric.metric_type) {
-		case 'basic':
-		case 'advanced':
-		  // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
-		  Sheet.metrics = { token: metric.token, factId: metric.factId, alias: metric.alias, type: metric.metric_type, aggregateFn: metric.aggregateFn, dependencies: false };
-		  app.addMetric(e.currentTarget, elementRef.id);
-		  // 26.07.2024 verifico, se nello Sheet, è presente una metrica con lo stesso nome
-		  // In caso positivo devo mostrare una dialog per poter modificare il nome della metrica, il nome
-		  // verrà modificato SOLO per questo Sheet e non nel WorkBook
-		  // Questo controllo è aggiunto dopo addMetric in modo da poter impostare il focus sull'elemento
-		  // già presente nel DOM.
-		  if (Sheet.checkMetricNames(metric.token, metric.alias)) {
-			App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
-			// imposto il cursore nel <code> da modificare
-			document.querySelector(`.metric-defined > code[data-token='${elementRef.id}']`).focus({ focusVisible: true });
-			e.currentTarget.dataset.error = true;
-		  }
-		  break;
-		case 'composite':
-		  if (Sheet.checkMetricNames(metric.token, metric.alias)) {
-			App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
-			// imposto il cursore nel <code> da modificare
-			document.querySelector(`.metric-defined > code[data-token='${elementRef.id}']`).focus({ focusVisible: true });
-			e.currentTarget.dataset.error = true;
-		  }
-		  Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
-		  app.addMetric(e.currentTarget, elementRef.id);
-		  // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
-		  // ...al suo interno per consentirne l'elaborazione
-		  for (const token of Object.keys(Sheet.metrics.get(elementRef.id).metrics)) {
-			// nell'oggetto Sheet.metrics aggiungo una prop 'dependencies' per specificare
-			// ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
-			// verifico se la metrica all'interno di quella composta è stata già aggiunta allo Sheet
-			if (!Sheet.metrics.has(token)) {
-			  // la metrica in ciclo non è stata aggiunta allo Sheet, la aggiungo con la prop 'dependencies'
-			  //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
-			  // NOTE: clonazione di un object con syntax ES6.
-			  const nestedMetric = { ...WorkBook.metrics.get(token) };
-			  Sheet.metrics = { token: nestedMetric.token, factId: nestedMetric.factId, alias: nestedMetric.alias, type: nestedMetric.metric_type, aggregateFn: nestedMetric.aggregateFn, dependencies: true };
-			  // nestedMetric.dependencies = true;
-			  // Sheet.metrics = nestedMetric;
-			}
-		  }
-		  break;
-		default:
-		  // column
-		  span.innerHTML = elementRef.dataset.field;
-		  Sheet.fields = elementRef.id;
-		  break;
-	  }
-	} */
 
 	// drop filtri nella creazione della metrica avanzata
 	// WARN: 21.11.2024 utilizzata?
@@ -513,85 +407,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		Sheet.metrics.get(token).alias = e.target.innerText;
 		document.querySelector(`.defined[data-id='${token}']`).dataset.label = e.target.innerText;
 		console.log('alias metrica modificato :', Sheet.metrics.get(token));
-	}
-
-	// apertura dialog con lista WorkBooks
-	document.querySelector('#btn-workbook-open').onclick = () => {
-		// carico elenco dei workBook presenti
-		const parent = document.getElementById("ul-workbooks");
-		// reset list
-		parent.querySelectorAll('li').forEach(workbook => workbook.remove());
-		for (const [token, object] of Object.entries(WorkBookStorage.workBooks(+document.querySelector('main').dataset.databaseId))) {
-			const tmpl = template_li.content.cloneNode(true);
-			const li = tmpl.querySelector('li.select-list');
-			const span = li.querySelector('span');
-			li.dataset.fn = 'workBookSelected';
-			li.dataset.elementSearch = "workbooks";
-			li.dataset.token = token;
-			li.dataset.label = object.name;
-			li.dataset.name = object.name;
-			span.innerHTML = object.name;
-			parent.appendChild(li);
-		}
-		app.dialogWorkBook.showModal();
-	}
-
-	app.btnWorkBookNew.onclick = () => app.dialogNewWorkBook.showModal();
-
-	app.newWorkBook = () => {
-		const name = document.getElementById('input-workbook-name').value;
-		WorkBook = new WorkBooks(name);
-		debugger;
-		WorkBook.databaseId = +document.querySelector('main').dataset.databaseId;
-		Draw = new DrawSVG('svg');
-		app.workbookName.dataset.value = name;
-		app.workbookName.innerText = name;
-		// abilito il tasto "carica Schema"
-		document.querySelector('#btnSchemata').disabled = false;
-		app.dialogNewWorkBook.close();
-	}
-
-	app.checkSessionStorage = async () => {
-		// scarico in sessionStorage tutte le tabelle del canvas
-		let urls = [];
-		const tables = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
-		debugger;
-		for (const objects of tables.values()) {
-			WorkBook.activeTable = objects.id;
-			// se la tabella è già presente in sessionStorage non rieseguo la query
-			if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
-				urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
-			}
-		}
-		if (urls.length !== 0) {
-			App.showConsole('Recupero tabelle in corso...', 'info');
-			WorkBookStorage.saveTables(await getTables(urls));
-			App.closeConsole();
-		}
-	}
-
-	// apertura del WorkBook
-	app.workBookSelected = async (e) => {
-		Draw = new DrawSVG('svg');
-		WorkBook = new WorkBooks(e.currentTarget.dataset.name);
-		WorkBook = WorkBook.open(e.currentTarget.dataset.token);
-		WorkBook.workBook.token = e.currentTarget.dataset.token;
-		WorkBook.name = e.currentTarget.dataset.name;
-		// scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
-		await app.checkSessionStorage();
-		// Gli elementi del canvas sono stati disegnati, creo il workbookMap
-		WorkBook.workbookMap = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
-		app.workBookInformations();
-		// modifico il nome del WorkBook in #workbook-name
-		document.getElementById('workbook-name').innerText = WorkBook.name;
-		document.getElementById('workbook-name').dataset.value = WorkBook.name;
-		document.getElementById('workbook-name').dataset.tempValue = WorkBook.name;
-		app.hierTables();
-		Draw.checkResizeSVG();
-		document.querySelector('#btnSchemata').disabled = false;
-		app.dialogWorkBook.close();
-		// il WorkBook è già creato quindi da questo momento è in fase di edit
-		WorkBook.edit = true;
 	}
 
 	app.openSheetDialog = () => {
@@ -807,20 +622,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	input__sheetName.oninput = (e) => App.checkTitle(e.target);
 
-	app.workbookName.onblur = (e) => {
-		if (e.target.dataset.tempValue) {
-			e.target.dataset.value = e.target.textContent;
-			if (WorkBook) {
-				WorkBook.name = e.target.textContent;
-				delete e.target.dataset.tempValue;
-			}
-		} else {
-			e.target.innerText = e.target.dataset.defaultValue;
-		}
-	}
-
-	app.workbookName.oninput = (e) => App.checkTitle(e.target);
-
 	// tasto "Workbook" per ritornare allo step 1
 	app.btnWorkBook.onclick = (e) => {
 		const translateRef = document.getElementById('stepTranslate');
@@ -829,7 +630,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		translateRef.dataset.step = 1;
 		app.body.dataset.step = 1;
 		// carico le proprietà del Workbook nel boxInfo
-		app.workBookInformations();
+		workBookInformations()
 	}
 
 	/* tasto "Sheet" :
@@ -1072,7 +873,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			.then((response) => {
 				if (response) {
 					// console.log('data : ', response);
-					// app.dialogSQL.show();
 					showSQLInfo(response);
 				} else {
 					App.showConsole("Errori nella generazione dell'SQL", 'error', 5000);
@@ -1828,67 +1628,14 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		Draw.drawTime();
 
 		app.setPropertyTimeDimension(fieldsData);
-		app.checkSessionStorage();
-		app.hierTables();
+		// debugger;
+		// checkTablesStorage();
+		// app.checkSessionStorage();
+		// app.hierTables();
 
 		WorkBook.checkChanges('time');
 		app.dialogTime.close();
 	}
-
-	// "Aggiorna" nella dialog time
-	/* app.updateTimeDimension = (e) => {
-	  // TODO: 25.11.2024 Rivedere tutta la Fn
-	  const fieldsData = app.getFieldsFromTimeDimension();
-	  // elimino tutte le join appartenenti alla dimensione TIME (per la fact corrente)
-	  const factId = WorkBook.activeTable.dataset.factId.substring(9); // ultime 5 cifre
-	  const fact = WorkBook.activeTable.dataset.factId;
-	  let recursive = (table) => {
-		const relatedTable = Draw.svg.querySelector(`g#time-dimension > desc#${table}`);
-		WorkBook.join.delete(`${relatedTable.dataset.table}-${factId}`);
-		delete WorkBook.joins.get(relatedTable.dataset.table)[`${relatedTable.dataset.table}-${factId}`];
-		if (Object.keys(WorkBook.joins.get(relatedTable.dataset.table)).length === 0) WorkBook.joins.delete(relatedTable.dataset.table);
-		Draw.tables.delete(`${relatedTable.dataset.table}-${fact}`);
-		Draw.svg.querySelector(`use.time#${relatedTable.dataset.table}-${fact}`).remove();
-		if (Draw.svg.querySelector(`use.time:not(#${relatedTable.dataset.table})`)) {
-		  WorkBook.field.delete(`tok_${relatedTable.dataset.table}`);
-		  WorkBook.fields.delete(relatedTable.dataset.table);
-		}
-		if (relatedTable.dataset.relatedJoin) recursive(relatedTable.dataset.relatedJoin);
-	  }
-	  // elimino, in modo ricorsivo, le proprietà dell'attuale join e gli elementi
-	  // <use> aggiunti al DOM
-	  const refTimeTable = Draw.svg.querySelector(`g#time-dimension > desc#${e.target.dataset.timeTable}`);
-	  WorkBook.join.delete(`${refTimeTable.id}-${factId}`);
-	  delete WorkBook.joins.get(refTimeTable.id)[`${refTimeTable.id}-${factId}`];
-	  if (Object.keys(WorkBook.joins.get(refTimeTable.id)).length === 0) WorkBook.joins.delete(refTimeTable.id);
-	  // console.log(WorkBook.join);
-	  // la key di Draw.tables è uguale all'id dell'elemento #use
-	  Draw.tables.delete(`${refTimeTable.id}-${fact}`);
-	  // console.log(Draw.tables);
-	  Draw.svg.querySelector(`use.time#${e.target.dataset.timeTable}-${fact}`).remove();
-	  // se non sono presenti altri cubi che utilizzano e.target.dataset.timeTable
-	  // elimino anche i relativi campi da WorkBook.field/s
-	  if (Draw.svg.querySelector(`use.time:not(#${e.target.dataset.timeTable})`)) {
-		WorkBook.field.delete(`tok_${e.target.dataset.timeTable}`);
-		WorkBook.fields.delete(e.target.dataset.timeTable);
-	  }
-	  if (refTimeTable.dataset.relatedJoin) recursive(refTimeTable.dataset.relatedJoin);
-
-	  // nuova join
-	  const token_join = `${fieldsData.descTable.id}-${factId}`;
-	  // token per il nuovo campo della tabella time selezionato
-	  const token_table = `${fieldsData.descTable.id}-${fact}`;
-
-	  app.setDataTimeDimension(token_join, token_table, fieldsData);
-	  Draw.currentTable = Draw.tables.get(token_table);
-	  WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
-	  Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;
-	  Draw.drawTime();
-	  // sovrascrivo i campi della TIME precedentemente memorizzati in WorkBook.fields
-	  app.setPropertyTimeDimension(fieldsData);
-	  app.hierTables();
-	  app.dialogTime.close();
-	} */
 
 	// inserisco la colonna selezionata per la creazione della join
 	app.addFieldToJoin = (e) => {
@@ -2143,8 +1890,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	app.inputAdvMetricName.addEventListener("input", app.inputAdvancedMetric);
 
-	app.dialogNewWorkBook.addEventListener('close', (e) => document.getElementById('input-workbook-name').value = '');
-
 	document.querySelector("#btn-time-dimension").onclick = async () => {
 		// debugger;
 		// return;
@@ -2191,21 +1936,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		// stepTranslate.style.setProperty("--page-width", `${translateValue}px`);
 		// stepTranslate.style.transform = `translateX(${stepTranslate.offsetWidth}px)`;
 	});
-
-	app.workBookInformations = () => {
-		document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
-		if (WorkBook) {
-			document.querySelector('#info.informations').classList.remove('none');
-			for (const [key, value] of Object.entries(WorkBook.getInformations())) {
-				const ref = document.getElementById(key);
-				if (ref) {
-					ref.hidden = false;
-					const refContent = document.getElementById(`${key}_content`);
-					refContent.textContent = value;
-				}
-			}
-		}
-	}
 
 	app.btnShowInfo.onclick = () => {
 		const boxInfo = document.getElementById('boxInfo');
