@@ -33,6 +33,7 @@ class Cube
 	private $segmented = [];
 	private $time_sql = [];
 	private $sql_union_clause = [];
+	private $operators = ["+", "-", "*", "/", "%"];
 	public $results = [];
 	public $datamart_fields = [];
 	public $compositeMeasures = [];
@@ -112,7 +113,7 @@ class Cube
 		// dd($this->select_clause);
 	}
 
-	public function metrics_new()
+	public function createMetrics()
 	{
 		// metriche di base / base custom
 		$this->report_metrics = [];
@@ -134,21 +135,25 @@ class Cube
 					if ($matches) {
 						if (in_array("/", $sql)) {
 							// la formula contiene l'operatore di divisione, imposto il CASE...WHEN
-							// $sql[] = (in_array($matches[0], $value->metrics)) ? " CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END " : trim($element);
-							$sql[] = (in_array($matches[0], $value->metrics)) ? "CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END" : trim($element);
+							// OPTIMIZE: 15.05.2025 Molto probabilmente il codice non raggiunge mai l'else di questo operatore ternario, qui
+							// perchè il matches cerca i nomi colonna, dopo il punto, quindi è sicuramente una metrica. Anche nell'else (sotto)
+							// c'è la stessa logica
+							$sql[] = (in_array($matches[0], $value->metrics))
+								? "CASE WHEN {$this->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->ifNullOperator}({$element}, 0) END"
+								: trim($element);
 						} else {
 							$sql[] = (in_array($matches[0], $value->metrics)) ? "{$this->ifNullOperator}({$element}, 0)" : trim($element);
 						}
 					} else {
-						// if (is_null($element)) dd("STOP");
 						if (is_null($element)) $element = " ";
-						// $sql[] = trim($element);
+						// dump($element);
+						// aggiungo uno spazio prima/dopo se $element corrisponde a un operatore [+, -, *, /, %]
+						if (in_array($element, $this->operators)) $element = str_pad($element, 3, " ", STR_PAD_BOTH);
+						// dump($element);
 						$sql[] = $element;
 					}
 				}
 				// dump($sql);
-				// $metric = implode(" ", $sql);
-				// $metric = implode("", $sql);
 				$metric = implode($sql);
 				// dd($metric);
 				$this->report_metrics[$this->factId][] = "\n{$value->aggregateFn}($metric) AS {$value->token}";
@@ -351,7 +356,6 @@ class Cube
 	{
 		// $this->select_new();
 		// dd(!empty($this->process->baseMeasures));
-		// dd("metriche di base presenti");
 		$sql = NULL;
 		// dump("calcolo metriche di base");
 		// dump($this->process->baseMeasures);
@@ -359,13 +363,9 @@ class Cube
 			if (property_exists($this->process->baseMeasures, $this->fact)) {
 				// metriche per la fact in ciclo presenti
 				$this->baseMeasures = $this->process->baseMeasures->{$this->fact};
-				$this->metrics_new();
+				$this->createMetrics();
 			}
 		}
-		// $this->from_new();
-		// $this->where_new();
-		// $this->createFilters();
-		// $this->groupBy_new();
 		// dd($this->select_clause[$this->factId]);
 		$sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
 		// aggiungo, alla clausola SELECT di $this->baseQuerySQL, le metriche di base da calcolare
@@ -659,12 +659,11 @@ class Cube
 						} else {
 							// $sql[] = trim($element);
 							if (is_null($element)) $element = " ";
+							if (in_array($element, $this->operators)) $element = str_pad($element, 3, " ", STR_PAD_BOTH);
 							$sql[] = $element;
 						}
 					}
-					// $metric = implode("", $sql);
 					$metric = implode($sql);
-					// $groupAdvancedMeasures[$this->factId][$value->token] = $metric;
 					$groupAdvancedMeasures[$this->factId][$value->token] = ($value->distinct) ?
 						"{$this->ifNullOperator}({$value->aggregateFn}(DISTINCT {$metric}), 0) AS {$value->token}" :
 						"{$this->ifNullOperator}({$value->aggregateFn}({$metric}), 0) AS {$value->token}";
