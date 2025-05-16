@@ -354,13 +354,13 @@
 				<!-- menu workbook -->
 				<menu class="standard">
 					<section data-workbook-menu>
-						<button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
-						<button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
+						<button class="btn-link default" id="btn__workbook_new" value="Nuovo">Nuovo</button>
+						<button class="btn-link default" id="btn__workbook_openDialog" value="open">Apri</button>
 						<button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
 						<!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
 					</section>
 					<section data-workbook-menu>
-						<div id="workbook-name" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
+						<div id="input__workbook_title" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
 					</section>
 					<section data-sheet-menu>
 						<button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog" disabled>Nuovo</button>
@@ -451,19 +451,20 @@
 					</section>
 				</dialog>
 
-				<dialog id="dialog-new-workbook">
+				<dialog id="dlg__workbook_new">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Titolo WorkBook</h5>
 						<section class="dlg-content">
 							<section class="row">
 								<section class="col">
-									<input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
+									<input type="text" id="input__workbook_name" placeholder="Nome" value="" autocomplete="on" />
 								</section>
 							</section>
 						</section>
 						<section class="dlg-buttons">
 							<button name="cancel" value="chiudi">Chiudi</button>
-							<button data-fn="newWorkBook" value="ok">Salva</button>
+							<!-- <button data-fn="newWorkBook" value="ok">Salva</button> -->
+							<button id="btn__workbook_create" value="ok">Crea</button>
 						</section>
 					</section>
 				</dialog>
@@ -520,7 +521,7 @@
 
 				<div id="context-menu" class="context-menu"></div>
 
-				<dialog id="dialog-workbook-open" class="smallSize">
+				<dialog id="dlg__workbook_open" class="smallSize">
 					<section class="dlg-grid">
 						<h5 class="title">Apri WorkBook</h5>
 						<section class="dlg-content">
@@ -1190,6 +1191,7 @@
 	</footer>
 	<script type="text/javascript" src="{{ asset('/js/workspace-init.js') }}"></script>
 	<script type="text/javascript" src="{{ asset('/js/workspace_functions.js') }}" defer></script>
+	<script type="text/javascript" src="{{ asset('/js/workbook_functions.js') }}" defer></script>
 	<script type="text/javascript" src="{{ asset('/js/workspace_sheet.js') }}" defer></script>
 	<script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
 	<script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
