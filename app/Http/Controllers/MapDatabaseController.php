@@ -428,15 +428,15 @@ class MapDatabaseController extends Controller
 
 		if (session('db_driver') === 'odbc') {
 			$sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_MONTHS (
-        id INTEGER PRIMARY KEY,
-        month VARCHAR NOT NULL,
-        previous INTEGER,
-        last INTEGER,
-        quarter_id INTEGER NOT NULL CONSTRAINT wb_months_quarter_id_foreign REFERENCES decisyon_cache.WB_QUARTERS (id)
-        ) INCLUDE SCHEMA PRIVILEGES";
+				id INTEGER PRIMARY KEY,
+				month VARCHAR NOT NULL,
+				previous INTEGER,
+				last INTEGER,
+				quarter_id INTEGER NOT NULL CONSTRAINT wb_months_quarter_id_foreign REFERENCES decisyon_cache.WB_QUARTERS (id)
+				) INCLUDE SCHEMA PRIVILEGES";
 			$create_stmt = DB::connection(session('db_client_name'))->statement($sql);
 		} else {
-			// la tabella non esiste, la creo
+			// mysql
 			$create_stmt = Schema::connection(session('db_client_name'))
 				->create('WB_MONTHS', function (Blueprint $table) {
 					$table->unsignedBigInteger('id')->primary();
@@ -449,13 +449,14 @@ class MapDatabaseController extends Controller
 		if (!$create_stmt) {
 			// $result : null tabella creata correttamente
 			foreach ($json as $month_id => $value) {
-				DB::connection(session('db_client_name'))->table('decisyon_cache.WB_MONTHS')->insert([
-					'id' => $month_id,
-					'month' => $value->month,
-					'previous' => $value->previous,
-					'last' => $value->last,
-					'quarter_id' => $value->quarter_id
-				]);
+				DB::connection(session('db_client_name'))
+					->table('decisyon_cache.WB_MONTHS')->insert([
+						'id' => $month_id,
+						'month' => $value->month,
+						'previous' => $value->previous,
+						'last' => $value->last,
+						'quarter_id' => $value->quarter_id
+					]);
 			}
 			// return DB::connection(session('db_client_name'))->statement('COMMIT;');
 			// DB::connection(session('db_client_name'))->statement('COMMIT;');
@@ -504,6 +505,7 @@ class MapDatabaseController extends Controller
 			];
 		}
 
+		// dd(session('db_driver'));
 		if (session('db_driver') === 'odbc') {
 			// TODO: utilizzare il complex datatype ROW (vertica) per gli OBJECT, ad esempio la colonna 'last', per
 			// creare le colonne come "strutture dati"
@@ -513,17 +515,52 @@ class MapDatabaseController extends Controller
 				date DATE NOT NULL,
 				year INTEGER,
 				quarter_id INTEGER,
-				quarter VARCHAR,
+				quarter CHAR(3),
 				month_id INTEGER NOT NULL CONSTRAINT wb_date_month_id_foreign REFERENCES decisyon_cache.WB_MONTHS (id),
 				month VARCHAR,
 				week_id INTEGER,
 				week CHAR(4),
-				day VARCHAR,
+				-- day VARCHAR,
 				day_of_year INTEGER,
 				previous DATE,
 				last DATE
 				) INCLUDE SCHEMA PRIVILEGES";
-			$create_stmt = DB::connection(session('db_client_name'))->statement($sql);
+			// $create_stmt = DB::connection(session('db_client_name'))->statement($sql);
+			$create_stmt = DB::connection('client_odbc')->statement($sql);
+			// dd($create_stmt);
+			if (!$create_stmt) {
+				// dd($create_stmt);
+				// $result : null tabella creata correttamente
+				foreach ($json as $date => $value) {
+					// $str = json_encode($value);
+					// dd(json_encode($value->previous_json));
+					// $quarter = json_encode($value->quarter);
+					// $month = json_encode($value->month);
+					// NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
+					// INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
+
+					DB::connection('client_odbc')->table('decisyon_cache.WB_DATE')->insert([
+						// DB::connection(session('db_client_name'))->table('decisyon_cache.WB_DATE')->insert([
+						'id' => $date,
+						'date' => $date,
+						'year' => $value->year,
+						'quarter_id' => (int) $value->quarter_id,
+						'quarter' => $value->quarter,
+						// 'quarter' => json_encode($value->quarter),
+						'month_id' => $value->month_id,
+						// 'month' => json_encode($value->month),
+						'month' => $value->month,
+						'week_id' => $value->week_id,
+						'week' => $value->week,
+						'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
+						'day_of_year' => $value->day_of_year,
+						'previous' => $value->previous,
+						'last' => $value->last
+						// 'previous_json' => json_encode($value->previous_json)
+					]);
+				}
+				DB::connection('client_odbc')->statement('COMMIT;');
+			}
 		} else {
 			$create_stmt = Schema::connection(session('db_client_name'))
 				->create('WB_DATE', function (Blueprint $table) {
@@ -531,48 +568,53 @@ class MapDatabaseController extends Controller
 					$table->date('date')->nullable(false);
 					$table->unsignedSmallInteger('year');
 					$table->unsignedMediumInteger('quarter_id');
-					$table->char('quarter');
+					$table->char('quarter', 3);
 					$table->foreignId('month_id')->nullable(false)->constrained('WB_MONTHS');
 					$table->char('month');
 					$table->unsignedMediumInteger('week_id');
 					$table->char('week', 4);
-					$table->char('day');
+					// $table->char('day');
 					$table->unsignedSmallInteger('day_of_year');
 					$table->date('previous');
 					$table->date('last');
 				});
-		}
-		if (!$create_stmt) {
-			foreach ($json as $date => $value) {
-				// $str = json_encode($value);
-				// dd(json_encode($value->previous_json));
-				// $quarter = json_encode($value->quarter);
-				// $month = json_encode($value->month);
-				// NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
-				// INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
+			if (!$create_stmt) {
+				// dd($create_stmt);
+				// $result : null tabella creata correttamente
+				foreach ($json as $date => $value) {
+					// $str = json_encode($value);
+					// dd(json_encode($value->previous_json));
+					// $quarter = json_encode($value->quarter);
+					// $month = json_encode($value->month);
+					// NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
+					// INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
 
-				DB::connection(session('db_client_name'))->table('decisyon_cache.WB_DATE')->insert([
-					'id' => $date,
-					'date' => $date,
-					'year' => $value->year,
-					'quarter_id' => (int) $value->quarter_id,
-					'quarter' => $value->quarter,
-					// 'quarter' => json_encode($value->quarter),
-					'month_id' => $value->month_id,
-					// 'month' => json_encode($value->month),
-					'month' => $value->month,
-					'week_id' => $value->week_id,
-					'week' => $value->week,
-					'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
-					'day_of_year' => $value->day_of_year,
-					'previous' => $value->previous,
-					'last' => $value->last
-					// 'previous_json' => json_encode($value->previous_json)
-				]);
+					// DB::connection('client_odbc')->table('decisyon_cache.WB_DATE')->insert([
+					DB::connection(session('db_client_name'))->table('decisyon_cache.WB_DATE')->insert([
+						'id' => $date,
+						'date' => $date,
+						'year' => $value->year,
+						'quarter_id' => (int) $value->quarter_id,
+						'quarter' => $value->quarter,
+						// 'quarter' => json_encode($value->quarter),
+						'month_id' => $value->month_id,
+						// 'month' => json_encode($value->month),
+						'month' => $value->month,
+						'week_id' => $value->week_id,
+						'week' => $value->week,
+						// 'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
+						'day_of_year' => $value->day_of_year,
+						'previous' => $value->previous,
+						'last' => $value->last
+						// 'previous_json' => json_encode($value->previous_json)
+					]);
+				}
 			}
 		}
 		// return DB::connection(session('db_client_name'))->statement('COMMIT;');
 		// DB::connection(session('db_client_name'))->statement('COMMIT;');
+		// DB::connection('client_odbc')->statement('COMMIT;');
+		// return DB::connection('client_odbc')->statement('COMMIT;');
 	}
 
 	public function dimensionTIME()
@@ -581,8 +623,12 @@ class MapDatabaseController extends Controller
 		// TODO: utilizzare il try...catch
 		// dd(Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
 		$this->dropTIMEtables();
-		$start = new DateTime('2019-01-01 00:00:00');
-		// $start = new DateTime('2025-10-01 00:00:00');
+		BIConnectionsController::getDB();
+		// dd(session()->get('db_host')); // stesso risultato di session('db_host')
+		// dd(session()->get('db_client_name')); // stesso risultato di session('db_host')
+		// dd(Schema::connection(session('db_client_name')));
+		$start = new DateTime('2020-01-01 00:00:00');
+		// $end   = new DateTime('2019-02-01 00:00:00');
 		$end   = new DateTime('2026-01-01 00:00:00');
 		// test
 		// $start = new DateTime('2024-01-01 00:00:00');

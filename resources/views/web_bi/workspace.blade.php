@@ -356,7 +356,7 @@
 					<section data-workbook-menu>
 						<button class="btn-link default" id="btn__workbook_new" value="Nuovo">Nuovo</button>
 						<button class="btn-link default" id="btn__workbook_openDialog" value="open">Apri</button>
-						<button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
+						<button class="btn-link default" id="btn-time-dimension" value="open" disabled>Tabella TIME</button>
 						<!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
 					</section>
 					<section data-workbook-menu>
