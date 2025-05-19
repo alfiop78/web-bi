@@ -63,6 +63,7 @@ class BIdashboardController extends Controller
 		$dashboard->name = $name;
 		$dashboard->published = $request->collect()->get('published');
 		$dashboard->json_value = $json;
+		// dd($json);
 		$dashboard->connectionId = session('db_id');
 		return $dashboard->save();
 	}

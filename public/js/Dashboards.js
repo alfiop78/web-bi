@@ -1,6 +1,7 @@
 class Dashboards {
 	#json = {};
 	#dashboard = {};
+	#refresh = 0;
 	constructor() {
 		this.dashboardFilters = new Map();
 		this.dashboardControls = [];
@@ -171,6 +172,14 @@ class Dashboards {
 	}
 
 	get dashboard() { return this.#dashboard; }
+
+	set refreshTime(milliseconds) {
+		this.#refresh = milliseconds;
+	}
+
+	get refreshTime() {
+		return this.#refresh;
+	}
 
 }
 

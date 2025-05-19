@@ -178,6 +178,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 
 				Resource.json = JSON.parse(data.json_value);
 				console.log(Resource.json);
+				// refresh time, se presente
+				if (Resource.json.options) input__refresh_time.value = Resource.json.options.refresh_time
 				// imposto il template della dashboard selezionata
 				Template.id = Resource.json.layout;
 				// creo l'anteprima nel DOM
@@ -358,13 +360,11 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			return false;
 		}
 
-		const refreshTimeToMillisecond = select__refresh_time.value;
-		// const refreshTime = select__column_datatype.options.item(select__refresh_time.selectedIndex).value;
-		debugger;
 		const options = {
-			refresh: +select__refresh_time.value
+			refresh: Number(input__refresh_time.value.split(':')[0]) * 60 * 60 * 1000 + Number(input__refresh_time.value.split(':')[1]) * 60 * 1000,
+			refresh_time: input__refresh_time.value
 		};
-		debugger;
+		// return;
 
 		const note = document.getElementById('note').value;
 		// salvo il json 'dashboard-token' in bi_dashboards
@@ -384,10 +384,11 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			options
 		}
 		console.log(Resource.dashboard);
-		debugger;
 		// Salvo la Dashboard su database
 		const url = (e.target.dataset.token) ? '/fetch_api/json/dashboard_update' : '/fetch_api/json/dashboard_store';
 		const params = JSON.stringify(Resource.dashboard);
+		console.log(params);
+		debugger;
 		const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
 		const req = new Request(url, init);
 		await fetch(req)

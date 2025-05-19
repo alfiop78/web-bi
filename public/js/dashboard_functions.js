@@ -124,6 +124,7 @@ function ready() {
 // Recupero il Layout impostato per la dashboard selezionata
 async function getLayout() {
 	console.log('getLayout');
+	// debugger;
 	await fetch(`/js/json-templates/${Resource.json.layout}.json`)
 		.then((response) => {
 			// console.log(response);
@@ -316,4 +317,30 @@ function export_datatable_XLS() {
 
 	zipcelx(config);
 	App.showConsole('Esportazione completata', 'done', 1500);
+}
+
+async function executeDashboard(token) {
+	// scarico il json dal DB, lo salvo in sessionStorage
+	console.info('EXECUTE DASHBOARD : ', token);
+	await fetch(`/fetch_api/name/${token}/dashboard_show`)
+		.then((response) => {
+			// console.log(response);
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		})
+		.then((response) => response.json())
+		.then(data => {
+			Resource = new Resources();
+			// console.log(data);
+			Resource.json = JSON.parse(data.json_value);
+			(Resource.json.options) ?
+				Resource.refreshTime = Resource.json.options.refresh :
+				Resource.refreshTime = 0;
+			document.querySelector('h1.title').innerHTML = Resource.json.title;
+			getLayout();
+		})
+		.catch(err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
 }
