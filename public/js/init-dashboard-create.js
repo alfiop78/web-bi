@@ -313,6 +313,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 	// Salvataggio della Dashboard
 	app.save = async (e) => {
 		e.target.disabled = true;
+		const input__refresh_time = document.getElementById('input__refresh_time');
 		// se è presente dataset.token sto aggiornando una dashboard esistente
 		const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
 		if (!app.dashboardName.dataset.value) {
@@ -357,6 +358,14 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			return false;
 		}
 
+		const refreshTimeToMillisecond = select__refresh_time.value;
+		// const refreshTime = select__column_datatype.options.item(select__refresh_time.selectedIndex).value;
+		debugger;
+		const options = {
+			refresh: +select__refresh_time.value
+		};
+		debugger;
+
 		const note = document.getElementById('note').value;
 		// salvo il json 'dashboard-token' in bi_dashboards
 		// TODO: aggiungere la prop 'published' (bool). Questa mi consentirà
@@ -371,7 +380,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			published: false,
 			dashboardFilters: Object.fromEntries(Resource.dashboardFilters),
 			resources: Object.fromEntries(Resource.resources),
-			layout: Template.id
+			layout: Template.id,
+			options
 		}
 		console.log(Resource.dashboard);
 		debugger;

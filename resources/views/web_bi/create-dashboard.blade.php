@@ -200,7 +200,7 @@
 												<ul id="ul__workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar">
 													{{-- @foreach($workbooks as $workbook) --}}
 													<!-- <li data-li data-element-search="workbooks" class="select-list" data-label="{{-- $workbook->name --}}" data-searchable="true" data-token="{{-- $workbook->token --}}" data-fn="workbookSelected"> -->
-														<!-- <span>{{-- $workbook->name --}}</span> -->
+													<!-- <span>{{-- $workbook->name --}}</span> -->
 													<!-- </li> -->
 													{{-- @endforeach --}}
 												</ul>
@@ -279,17 +279,31 @@
 
 					<div class="row">
 						<div class="card col col-6">
-							<h1>Parametri</h1>
+							<h1>Opzioni Dashboard</h1>
 							<p>description</p>
 							<div class="visual">
-
 								<fieldset>
-									<legend>Parametri Dashboard</legend>
+									<legend>Opzioni</legend>
 
 									<div>
-										<section>
-											<!-- <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p> -->
-											<!-- <button type="button" class="btn-link" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Selezione del Layout</button> -->
+										<section class="row">
+											<section class="col col-8-span">
+												<!-- <div class="field label"> -->
+												<!-- <label for="input__refresh_time">Imposta aggiornamento automatico ogni</label> -->
+												<!-- <input id="input__refresh_time" min="00:00" max="24:00" type="time" value="00:05" /> -->
+												<div class="field label">
+													<label for="select__refresh_time">Tipo di dato</label>
+													<select id="select__refresh_time">
+														<option id="min__5" value="300000">5 min</option>
+														<option id="min__10" value="600000">10 min</option>
+														<option id="min__20" value="1200000">20 min</option>
+														<option id="min__30" value="1800000">30 min</option>
+														<option id="min__60" value="3600000">1 ora</option>
+														<option id="min__120" value="7200000">2 ore</option>
+													</select>
+												</div>
+												<!-- </div> -->
+											</section>
 										</section>
 										<p>Opzioni del grafico/Tabella</p>
 									</div>
