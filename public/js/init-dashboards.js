@@ -15,7 +15,6 @@ let intervalId, messageIntervalId;
 	document.querySelectorAll('a[data-token]').forEach(a => {
 		a.addEventListener('click', async (e) => {
 			dashboardToken = e.currentTarget.dataset.token;
-			// TODO: Aggiungere clearInterval
 			if (intervalId) {
 				clearInterval(intervalId);
 				clearInterval(messageIntervalId);
@@ -25,6 +24,7 @@ let intervalId, messageIntervalId;
 			console.log('execute end');
 			// debugger;
 			console.log(Resource.refreshTime);
+			// se è presente un refreshTime per questa Dashboard aggiungo i setInterval()
 			if (Resource.refreshTime !== 0) {
 				console.log(Resource.refreshTime);
 				messageIntervalId = setInterval(function() {

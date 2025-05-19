@@ -42,6 +42,11 @@
 	<template id="template__btn_export_XLS">
 		<button type="button" data-fn value="Excel" onclick="export_datatable_XLS()">Excel</button>
 	</template>
+
+	<template id="template__options_button">
+		<button type="button" id="btn__refresh" class="btn__options_main" data-fn value="Aggiorna" onclick="dashboardUpdate()">Aggiorna</button>
+	</template>
+
 	<header>
 		<div class="nav-button">
 			<a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
@@ -72,12 +77,12 @@
 			<a href="#" title="Settings"><i class="material-symbols-rounded white">settings</i><span>Impostazioni</span></a>
 		</nav>
 	</div>
-	<template id="tmpl-actions-resource">
+	<!-- <template id="tmpl-actions-resource">
 		<section class="resourceActions">
 			<button class="material-symbols-rounded" data-fn="resourceSettings">settings</button>
 			<button class="material-symbols-rounded" data-fn="resourceRemove">delete</button>
 		</section>
-	</template>
+	</template> -->
 
 	<main>
 		<div id="content" class="custom-scrollbar">

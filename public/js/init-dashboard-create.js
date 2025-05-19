@@ -179,7 +179,11 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				Resource.json = JSON.parse(data.json_value);
 				console.log(Resource.json);
 				// refresh time, se presente
-				if (Resource.json.options) input__refresh_time.value = Resource.json.options.refresh_time
+				if (Resource.json.options) {
+					input__refresh_time.value = Resource.json.options.refresh_time;
+					// questa if deve essere rimossa dopo aver "ricreato" tutte le dashboard con le nuove opzioni
+					if (Resource.json.options.buttons) input__refresh_button.checked = Resource.json.options.buttons.refresh
+				}
 				// imposto il template della dashboard selezionata
 				Template.id = Resource.json.layout;
 				// creo l'anteprima nel DOM
@@ -316,6 +320,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 	app.save = async (e) => {
 		e.target.disabled = true;
 		const input__refresh_time = document.getElementById('input__refresh_time');
+		const input__refresh_button = document.getElementById('input__refresh_button');
 		// se è presente dataset.token sto aggiornando una dashboard esistente
 		const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
 		if (!app.dashboardName.dataset.value) {
@@ -362,9 +367,13 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 
 		const options = {
 			refresh: Number(input__refresh_time.value.split(':')[0]) * 60 * 60 * 1000 + Number(input__refresh_time.value.split(':')[1]) * 60 * 1000,
-			refresh_time: input__refresh_time.value
+			refresh_time: input__refresh_time.value,
+			buttons: {
+				refresh: input__refresh_button.checked
+			}
 		};
-		// return;
+		console.log(options);
+		debugger;
 
 		const note = document.getElementById('note').value;
 		// salvo il json 'dashboard-token' in bi_dashboards

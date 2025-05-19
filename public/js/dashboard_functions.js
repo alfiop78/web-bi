@@ -319,6 +319,10 @@ function export_datatable_XLS() {
 	App.showConsole('Esportazione completata', 'done', 1500);
 }
 
+function dashboardUpdate() {
+	debugger;
+}
+
 async function executeDashboard(token) {
 	// scarico il json dal DB, lo salvo in sessionStorage
 	console.info('EXECUTE DASHBOARD : ', token);

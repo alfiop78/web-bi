@@ -78,10 +78,7 @@
 					"childs": [
 						{
 							"tag": "div",
-							"id": "options__button",
-							"classes": [
-								"options__button"
-							],
+							"classes": [],
 							"attributes": {}
 						}
 					]

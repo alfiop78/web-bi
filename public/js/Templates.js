@@ -2,6 +2,7 @@ class Templates {
 	#data = new Map();
 	constructor() {
 		this.resourceActionsTmpl = document.getElementById('tmpl-actions-resource');
+		this.template__options_button = document.getElementById('template__options_button');
 	}
 
 	set data(value) {
@@ -31,6 +32,7 @@ class Templates {
 					tag.dataset[key] = value
 				}
 				parent.appendChild(tag);
+				// debugger;
 				if (child.actions) {
 					this.actionsContent = this.resourceActionsTmpl.content.cloneNode(true);
 					this.resourceAction = this.actionsContent.querySelector('.resourceActions');
@@ -43,6 +45,24 @@ class Templates {
 						this.resourceAction.appendChild(this.btn);
 
 					});
+				}
+				if (child.id === "options__button" && this.template__options_button) {
+					// console.log(Resource.json.options);
+					this.current = document.getElementById(child.id);
+					console.log(this.current);
+					// questa if deve essere rimossa dopo aver "ricreato" tutte le dashboard con le nuove opzioni
+					if (Resource.json.options) {
+						// questa if deve essere rimossa dopo aver "ricreato" tutte le dashboard con le nuove opzioni
+						if (Resource.json.options.buttons) {
+							for (const [key, value] of Object.entries(Resource.json.options.buttons)) {
+								if (value) {
+									this.test = this.template__options_button.content.cloneNode(true);
+									this.btn = this.test.querySelector(`#btn__${key}`);
+									this.current.appendChild(this.btn);
+								}
+							}
+						}
+					}
 				}
 				if (child.childs) this.recursive(tag, child.childs);
 			});

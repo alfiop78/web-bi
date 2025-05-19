@@ -288,13 +288,20 @@
 									<div>
 										<section class="row">
 											<section class="col col-8-span">
-												<div class="field label">
-													<label for="input__refresh_time">Imposta aggiornamento automatico ogni</label>
-													<input id="input__refresh_time" min="00:00" max="24:00" type="time" value="00:05" />
+												<div class="field label" style="display: inline-block;">
+													<label for="input__refresh_time">Imposta aggiornamento automatico (hh:mm)</label>
+													<input id="input__refresh_time" min="00:00" max="24:00" type="time" value="00:00" />
 												</div>
 											</section>
 										</section>
-										<p>Opzioni del grafico/Tabella</p>
+										<section class="row">
+											<section class="col col-8-span">
+												<div class="field label" style="display: inline-block;">
+													<input id="input__refresh_button" type="checkbox" />
+													<label for="input__refresh_button">Visualizza tasto di aggiornamento</label>
+												</div>
+											</section>
+										</section>
 									</div>
 
 									<div>
