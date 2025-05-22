@@ -319,8 +319,42 @@ function export_datatable_XLS() {
 	App.showConsole('Esportazione completata', 'done', 1500);
 }
 
-function dashboardUpdate() {
-	debugger;
+async function dashboardUpdate() {
+	const url = '/py_scripts/as400.py';
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "/py_scripts/as400.py", true);
+	xhr.setRequestHeader('Content-Type', 'application/json');
+	xhr.send(JSON.stringify({
+		value: 'value'
+	}));
+	xhr.onload = function() {
+		console.log("HELLO")
+		console.log(this.responseText);
+		var data = JSON.parse(this.responseText);
+		console.log(data);
+	}
+	return;
+
+
+
+	// const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST' };
+	// const req = new Request(url, init);
+	await fetch(url)
+		.then((response) => {
+			// console.log(response);
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		})
+		// .then((response) => response.json())
+		.then((response) => response.text())
+		.then(data => {
+			debugger;
+		})
+		.catch(err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
 }
 
 async function executeDashboard(token) {
