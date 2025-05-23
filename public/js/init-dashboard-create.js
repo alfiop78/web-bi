@@ -186,7 +186,9 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 					if (Resource.json.options.buttons.hasOwnProperty('refresh')) {
 						input__refresh_button.checked = Resource.json.options.buttons.refresh.value;
 						input__script_file_name.hidden = !Resource.json.options.buttons.refresh.value;
-						input__script_file_name.value = Resource.json.options.buttons.refresh.script_file_name;
+						input__script_file_name.value = (Resource.json.options.buttons.refresh.script_file_name !== undefined) ?
+							Resource.json.options.buttons.refresh.script_file_name :
+							null;
 					}
 				}
 				// imposto il template della dashboard selezionata
@@ -327,12 +329,12 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		const input__refresh_time = document.getElementById('input__refresh_time');
 		const input__refresh_button = document.getElementById('input__refresh_button');
 		console.log(input__script_file_name);
-		debugger;
 		// se è presente dataset.token sto aggiornando una dashboard esistente
 		const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
 		if (!app.dashboardName.dataset.value) {
 			App.showConsole('Titolo non inserito', 'error', 2000);
 			app.dashboardName.focus();
+			e.target.disabled = false;
 			return false;
 		}
 
@@ -364,11 +366,11 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				filters: specs.filters,
 				wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
 			};
-			debugger;
 		});
 		// verifica di validità
 		if (Resource.resources.size === 0) {
 			App.showConsole('Nessun oggetto aggiunto alla Dashboard', 'error', 2000);
+			e.target.disabled = false;
 			return false;
 		}
 
@@ -376,9 +378,17 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			refresh: Number(input__refresh_time.value.split(':')[0]) * 60 * 60 * 1000 + Number(input__refresh_time.value.split(':')[1]) * 60 * 1000,
 			refresh_time: input__refresh_time.value,
 			buttons: {
+				// refresh: { value: input__refresh_button.checked, script_file_name: (input__script_file_name.value) ? input__script_file_name.value : null }
 				refresh: { value: input__refresh_button.checked, script_file_name: input__script_file_name.value }
 			}
 		};
+		if (input__refresh_button.checked) {
+			if (input__script_file_name.value.length === 0) {
+				App.showConsole("Il nome del file non può essere vuoto", 'error', 2000);
+				e.target.disabled = false;
+				return false;
+			}
+		}
 		console.log(options);
 		debugger;
 
