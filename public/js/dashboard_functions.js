@@ -183,6 +183,57 @@ async function getResources() {
 	await getAllData(urls);
 }
 
+function copy(from, to) {
+	const url = `/fetch_api/copy_from/${from}/copy_to/${to}/copy_table`;
+	fetch(url)
+		.then((response) => {
+			// console.log(response);
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		})
+		.then((response) => response.json())
+		// .then((response) => response.text())
+		.then((data) => {
+			console.log(data);
+			App.closeConsole();
+			getResources();
+		})
+		.catch(err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
+}
+
+async function scheduleResource() {
+	let urls = [];
+	let copy_from, copy_to;
+	// ciclo le resources
+	for (const [token, resource] of Object.entries(Resource.json.resources)) {
+		urls.push(`/curl/process/${token}/schedule`);
+		copy_from = `${resource.datamartId}_${resource.userId}`;
+		copy_to = `${resource.datamartId}`;
+	}
+
+	App.showConsole("Aggiornamento dati...", null, null);
+	// FIX: 23.05.2025 Per ora utilizzo solo una risorsa, quindi dashboard con più risorse non può funzionare l'aggiornamento
+	await fetch(urls[0])
+		.then((response) => {
+			// console.log(response);
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		})
+		// .then((response) => response.json())
+		.then((response) => response.text())
+		.then(async data => {
+			// console.log(data);
+			if (data === "OK\n") copy(copy_from, copy_to);
+		})
+		.catch(err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
+}
+
 async function getAllData(urls) {
 	console.log('getAllData');
 	// const progressBar = document.getElementById('progressBar');
@@ -333,11 +384,41 @@ async function dashboardRefresh(e) {
 		})
 		// .then((response) => response.json())
 		.then((response) => response.text())
-		.then(data => {
+		.then(async data => {
 			console.log(data);
 			// 23.05.2025 Rieseguo la query sul datamart per ottenere i dati aggiornati
 			App.closeConsole();
-			executeDashboard();
+			console.log('start schedule');
+			await scheduleResource();
+			console.log('end schedule');
+			// executeDashboard();
+			updateDashboard();
+		})
+		.catch(err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
+}
+
+async function updateDashboard() {
+	// scarico il json dal DB, lo salvo in sessionStorage
+	console.info('EXECUTE DASHBOARD : ', Resource.dashboard);
+	await fetch(`/fetch_api/name/${Resource.dashboard}/dashboard_show`)
+		.then((response) => {
+			// console.log(response);
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		})
+		.then((response) => response.json())
+		.then(data => {
+			// Resource = new Resources();
+			// console.log(data);
+			Resource.json = JSON.parse(data.json_value);
+			// configuro le opzioni selezionate in fase di creazione dashboard
+			(Resource.json.options) ?
+				Resource.refreshTime = Resource.json.options.refresh :
+				Resource.refreshTime = 0;
+			document.querySelector('h1.title').innerHTML = Resource.json.title;
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');

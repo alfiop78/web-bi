@@ -35,7 +35,8 @@ let intervalId, messageIntervalId;
 					App.showConsole('La Dashboard si aggiorna tra 5 secondi', 'info', 4500);
 				}, Resource.refreshTime - 5000);
 				// setInterval(executeDashboardInterval, Resource.refreshTime, dashboardToken);
-				intervalId = setInterval(getResources, Resource.refreshTime, Resource.dashboard);
+				// intervalId = setInterval(getResources, Resource.refreshTime, Resource.dashboard);
+				intervalId = setInterval(scheduleResource, Resource.refreshTime, Resource.dashboard);
 			}
 			// debugger;
 			// scarico il json dal DB, lo salvo in sessionStorage
