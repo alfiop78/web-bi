@@ -182,7 +182,12 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				if (Resource.json.options) {
 					input__refresh_time.value = Resource.json.options.refresh_time;
 					// questa if deve essere rimossa dopo aver "ricreato" tutte le dashboard con le nuove opzioni
-					if (Resource.json.options.buttons) input__refresh_button.checked = Resource.json.options.buttons.refresh
+					// if (Resource.json.options.buttons) input__refresh_button.checked = Resource.json.options.buttons.refresh
+					if (Resource.json.options.buttons.hasOwnProperty('refresh')) {
+						input__refresh_button.checked = Resource.json.options.buttons.refresh.value;
+						input__script_file_name.hidden = !Resource.json.options.buttons.refresh.value;
+						input__script_file_name.value = Resource.json.options.buttons.refresh.script_file_name;
+					}
 				}
 				// imposto il template della dashboard selezionata
 				Template.id = Resource.json.layout;
@@ -321,6 +326,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		e.target.disabled = true;
 		const input__refresh_time = document.getElementById('input__refresh_time');
 		const input__refresh_button = document.getElementById('input__refresh_button');
+		console.log(input__script_file_name);
+		debugger;
 		// se è presente dataset.token sto aggiornando una dashboard esistente
 		const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
 		if (!app.dashboardName.dataset.value) {
@@ -329,7 +336,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			return false;
 		}
 
-		// TODO: filtri della Dashboard
+		// filtri della Dashboard
 		document.querySelectorAll('#filter__dashboard>.filters>i').forEach(filter => {
 			Resource.dashboardFilters.set(filter.dataset.id, {
 				id: filter.dataset.name,
@@ -341,7 +348,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			});
 		});
 
-		// TODO: 10.12.2024 Recupero le risorse aggiunte alla dashboard
+		// 10.12.2024 Recupero le risorse aggiunte alla dashboard
 		document.querySelectorAll('.chartContent[data-resource]>.chart-elements').forEach(sheet => {
 			const token = sheet.dataset.token;
 			const specs = JSON.parse(window.localStorage.getItem(token)).specs;
@@ -369,7 +376,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			refresh: Number(input__refresh_time.value.split(':')[0]) * 60 * 60 * 1000 + Number(input__refresh_time.value.split(':')[1]) * 60 * 1000,
 			refresh_time: input__refresh_time.value,
 			buttons: {
-				refresh: input__refresh_button.checked
+				refresh: { value: input__refresh_button.checked, script_file_name: input__script_file_name.value }
 			}
 		};
 		console.log(options);

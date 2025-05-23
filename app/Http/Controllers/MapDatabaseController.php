@@ -93,6 +93,15 @@ class MapDatabaseController extends Controller
 		return (Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
 	}
 
+	public function executePythonScript($script)
+	{
+		// dd("python scripts {$script}");
+		// $command = escapeshellcmd('python3 py_scripts/test.py'); // OK
+		$command = escapeshellcmd("python3 py_scripts/{$script}"); // OK
+		$output = shell_exec($command);
+		return $output;
+	}
+
 	// test connessione vertica (senza utilizzo di Eloquen/ORM)
 	public function test_vertica()
 	{

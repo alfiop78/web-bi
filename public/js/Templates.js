@@ -1,9 +1,21 @@
 class Templates {
 	#data = new Map();
+	#fn;
 	constructor() {
 		this.resourceActionsTmpl = document.getElementById('tmpl-actions-resource');
 		this.template__options_button = document.getElementById('template__options_button');
+		// indico, per ogni tasto che si può aggiungere alla dashboard, la relativa Fn da richiamare nel codice
+		// Es. : per il tasto 'refresh' deve essere richiamata la Fn dashboardRefresh()
+		this.btn__options = {
+			refresh: dashboardRefresh
+		}
 	}
+
+	set fn(value) {
+		this.#fn = this.btn__options[value];
+	}
+
+	get fn() {return this.#fn; }
 
 	set data(value) {
 		// this.#data = value;
@@ -55,9 +67,13 @@ class Templates {
 						// questa if deve essere rimossa dopo aver "ricreato" tutte le dashboard con le nuove opzioni
 						if (Resource.json.options.buttons) {
 							for (const [key, value] of Object.entries(Resource.json.options.buttons)) {
-								if (value) {
-									this.test = this.template__options_button.content.cloneNode(true);
-									this.btn = this.test.querySelector(`#btn__${key}`);
+								if (value.value) {
+									this.btn__template = this.template__options_button.content.cloneNode(true);
+									this.btn = this.btn__template.querySelector(`#btn__${key}`);
+									this.fn = key;
+									this.btn.dataset.scriptName = value.script_file_name;
+									this.btn.addEventListener('click', this.fn);
+									// this.btn.addEventListener('click', dashboardRefresh);
 									this.current.appendChild(this.btn);
 								}
 							}

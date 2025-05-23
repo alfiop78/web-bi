@@ -30,8 +30,6 @@ print(year)
 today = "1" + today
 print(today)
 
-
-
 #%%
 
 # [ASP_14]
@@ -84,7 +82,7 @@ try:
     print("Connection to AS/400 established successfully!")
 
     cursor.execute(f"SELECT * FROM VUEUGES.OTLAV02L where OTLIDI = '{today}' ")
-
+    
     # Fetch and print results
     rows = cursor.fetchall()
     # for row in rows:
@@ -101,11 +99,11 @@ try:
             "OTLCOP", "OTLNRP", "OTLIDI", "OTLHOI", "OTLIDF", "OTLHOF",
             "OTLMAR", "OTLSED", "OTLFI1"
         ]
-
-
+    
+    
     # Convert to DataFrame
     df = pd.DataFrame(row_data, columns=column_names)
-
+        
 
 # join con matricole from automotive bi data 2.13 codMatricola operaio table
 # then merge
@@ -128,7 +126,7 @@ db_connection_prod = {
         'database': 'automotive_bi_data'
     }
 
-
+    
 print("Getting id Azienda")
 db = pymysql.connect(**db_connection_prod)
 cur = db.cursor()
@@ -136,10 +134,10 @@ cur = db.cursor()
 # Construct parameterized query
 query_matr = """
         select
-            Codice as OTLMAT, Descrizione
-        from
+            Codice as OTLMAT, Descrizione 
+        from 
             automotive_bi_data.CodMatricolaOperaio
-        where
+        where 
             id_Azienda = 453; -- easycar
 
 """
@@ -151,15 +149,21 @@ cur.execute(query_matr)
 mats = cur.fetchall()
 cols = [desc[0] for desc in cur.description]
 
-matricole  = pd.DataFrame(mats, columns=cols)
+print("mats:", mats)
+print("type of mats:", type(mats))
+print("cols:", cols)
+print("type of cols:", type(cols))
+
+# matricole  = pd.DataFrame(mats, columns=cols)
+matricole = pd.DataFrame(list(mats), columns=cols)
 
 
 
 # Close connection
-if db_connection_prod:
+if db_connection_prod: 
     cur.close()
     db.close()
-
+    
 print("Database connection closed.")
 #%%
 # print(df['OTLMAT'].dtype, matricole['OTLMAT'].dtype)  # Check data t
@@ -216,7 +220,7 @@ try:
     print("Connection to AS/400 established successfully!")
 
     cursor.execute(f"SELECT * FROM VUEUGES.MFTTE00F where MNMCOM LIKE '{year}%'")
-
+    
     # Fetch and print results
     rows = cursor.fetchall()
     # for row in rows:
@@ -229,7 +233,7 @@ try:
 # for each matricola get last timbratura  of the day:
     # Get column names from cursor.description
     column_names = [
-
+    
     'MNMRII', 'MCDCLI', 'MRAGS1', 'MRAGS2', 'MFILL7', 'MPROVI', 'MCOAVP', 'MCDFIS', 'MTPMOV', 'MCDSED',
     'MMAGDE', 'MFLTPD', 'MIDAP7', 'MNMBFO', 'MIDBFO', 'MAUTOR', 'MNMORD', 'MIDORD', 'MCDAGE', 'MDEPAG',
     'MIMX01', 'MIMX02', 'MIMX03', 'MIVX01', 'MIVX02', 'MIVX03', 'MCDVA1', 'MFLFTD', 'MDEFER', 'MAPSTA',
@@ -242,13 +246,13 @@ try:
     'MMODCO', 'MANNUL', 'MINDIR', 'MLOCAL', 'MNTLF1', 'MNTLF2', 'MEMAIL', 'MTPVEI', 'MFLSTK', 'MTOBOP',
     'MCDPOR', 'MCAUTR', 'MTRACU', 'MASPBE', 'MNMCOL', 'MDTITR', 'MORITR', 'MTARAI', 'MCNODV', 'MCCLDV',
     'MCNOVE', 'MCFOVE', 'MPAIVA', 'MCNAZI', 'MNAZIO', 'MKVTPI', 'MKVCMC', 'MKVNMR', 'MUMUSR', 'MUMWST',
-    'MUMDAT', 'MUMORA', 'MDSEXT'
+    'MUMDAT', 'MUMORA', 'MDSEXT'            
         ]
-
-
+    
+    
     # Convert to DataFrame
     df2 = pd.DataFrame(row_data, columns=column_names)
-
+    
     selected_columns = ['MNMCOM', 'MRAGS1','MNTELA', 'MNMTAR']
     df2 = df2[selected_columns]
 
@@ -275,7 +279,7 @@ df_combined = pd.merge(
     df_combined,
     df2,
     on="MNMCOM",
-    how="left"
+    how="left" 
 )
 
 end_time = time.time()
@@ -311,10 +315,10 @@ db.commit()
 print('Deleting rows...')
 
 
-if db_connection_test:
+if db_connection_test: 
         cur.close()
         db.close()
-
+        
 print("Database connection closed.")
 
 #%%
@@ -330,41 +334,41 @@ cur = db.cursor()
 # Insert rows into the table
 rows_inserted = 0
 
-# new_df = new_df.fillna('')
+# new_df = new_df.fillna('')  
 for index, row in df_combined.iterrows():
+    
+    
 
 
-
-
-    matr = row['OTLMAT']
-    annul = row['OTLANN']
-    aco = row['OTLACO']
-    tco = row['OTLTCO']
-    nco = row['OTLNCO']
-
-    inc = row['OTLINC']
-    cop = row['OTLCOP']
-    nrp = row['OTLNRP']
-    dinit = row['OTLIDI']
-    oinit = row['OTLHOI']
-
-    dfin = row['OTLIDF']
-    ofin = row['OTLHOF']
-    marca = row['OTLMAR']
-    sed = row['OTLSED']
-    filler = row['OTLFI1']
-
-    descr = row['Descrizione']
-    updat = row['updated']
-
-    nomcli = row['MRAGS1']
-    plate = row['MNMTAR']
-    vin = row['MNTELA']
-
+    matr = row['OTLMAT'] 
+    annul = row['OTLANN'] 
+    aco = row['OTLACO'] 
+    tco = row['OTLTCO'] 
+    nco = row['OTLNCO'] 
+    
+    inc = row['OTLINC'] 
+    cop = row['OTLCOP'] 
+    nrp = row['OTLNRP'] 
+    dinit = row['OTLIDI'] 
+    oinit = row['OTLHOI'] 
+    
+    dfin = row['OTLIDF'] 
+    ofin = row['OTLHOF'] 
+    marca = row['OTLMAR'] 
+    sed = row['OTLSED'] 
+    filler = row['OTLFI1'] 
+ 
+    descr = row['Descrizione'] 
+    updat = row['updated'] 
+    
+    nomcli = row['MRAGS1'] 
+    plate = row['MNMTAR'] 
+    vin = row['MNTELA'] 
+    
     # Construct parameterized query
     query_insert = """
         INSERT INTO automotive_bi_data.Timbrature_Lavori_Operai (
-
+            
                 codiceMatricola,
                 annullo,
                 annoCommessa,
@@ -385,17 +389,17 @@ for index, row in df_combined.iterrows():
                 nomeCliente,
                 targa,
                 telaio
-
+                  
             )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
-    values = (matr, annul, aco, tco, nco,
-        inc, cop, nrp, dinit, oinit,
-        dfin, ofin, marca, sed, filler,
+    values = (matr, annul, aco, tco, nco, 
+        inc, cop, nrp, dinit, oinit, 
+        dfin, ofin, marca, sed, filler, 
         descr, updat,
         nomcli, plate, vin
 )
-
+    
 
     # Execute the query
     cur.execute(query_insert, values)
@@ -406,10 +410,10 @@ for index, row in df_combined.iterrows():
 print(f"Inserted {rows_inserted} rows")
 
     # Close connection
-if db_connection_test:
+if db_connection_test: 
         cur.close()
         db.close()
-
+        
 print("Database connection closed.")
 
 

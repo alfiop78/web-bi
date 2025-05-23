@@ -232,6 +232,8 @@ class Resources extends Dashboards {
 	}
 
 	constructor(ref) {
+		// WARN: 23.05.2025 Verificare in quale istanza della classe Resources viene passato l'argomento al Costruttore.
+		// Nella visualizzazione della dashboard non viene passato nessun argomento
 		super();
 		this.ref = document.getElementById(ref);
 		// chartWrapper default è una Table. indica il wrapper corrente

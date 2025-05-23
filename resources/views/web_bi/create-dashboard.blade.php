@@ -295,10 +295,11 @@
 											</section>
 										</section>
 										<section class="row">
-											<section class="col col-8-span">
+											<section class="col col-12">
 												<div class="field label" style="display: inline-block;">
 													<input id="input__refresh_button" type="checkbox" />
 													<label for="input__refresh_button">Visualizza tasto di aggiornamento</label>
+													<input id="input__script_file_name" type="text" hidden placeholder="File da eseguire : Es.: file_name.py" />
 												</div>
 											</section>
 										</section>

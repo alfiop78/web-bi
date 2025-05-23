@@ -44,7 +44,8 @@
 	</template>
 
 	<template id="template__options_button">
-		<button type="button" id="btn__refresh" class="btn__options_main" data-fn value="Aggiorna" onclick="dashboardUpdate()">Aggiorna</button>
+		<!-- <button type="button" id="btn__refresh" class="btn__options_main" value="Aggiorna" onclick="dashboardUpdate(this.dataset.scriptName)">Aggiorna</button> -->
+		<button type="button" id="btn__refresh" class="btn__options_main" value="Aggiorna">Aggiorna</button>
 	</template>
 
 	<header>

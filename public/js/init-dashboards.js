@@ -20,9 +20,12 @@ let intervalId, messageIntervalId;
 				clearInterval(messageIntervalId);
 			}
 			console.log('execute start');
-			await executeDashboard(dashboardToken);
+			// imposto il token della Dashboard
+			Resource = new Resources();
+			Resource.dashboard = dashboardToken;
+			await executeDashboard();
+			// await executeDashboard(dashboardToken);
 			console.log('execute end');
-			// debugger;
 			console.log(Resource.refreshTime);
 			// se è presente un refreshTime per questa Dashboard aggiungo i setInterval()
 			if (Resource.refreshTime !== 0) {
@@ -32,7 +35,7 @@ let intervalId, messageIntervalId;
 					App.showConsole('La Dashboard si aggiorna tra 5 secondi', 'info', 4500);
 				}, Resource.refreshTime - 5000);
 				// setInterval(executeDashboardInterval, Resource.refreshTime, dashboardToken);
-				intervalId = setInterval(getResources, Resource.refreshTime, dashboardToken);
+				intervalId = setInterval(getResources, Resource.refreshTime, Resource.dashboard);
 			}
 			// debugger;
 			// scarico il json dal DB, lo salvo in sessionStorage

@@ -319,28 +319,13 @@ function export_datatable_XLS() {
 	App.showConsole('Esportazione completata', 'done', 1500);
 }
 
-async function dashboardUpdate() {
-	const url = '/py_scripts/as400.py';
-
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "/py_scripts/as400.py", true);
-	xhr.setRequestHeader('Content-Type', 'application/json');
-	xhr.send(JSON.stringify({
-		value: 'value'
-	}));
-	xhr.onload = function() {
-		console.log("HELLO")
-		console.log(this.responseText);
-		var data = JSON.parse(this.responseText);
-		console.log(data);
-	}
-	return;
-
-
-
-	// const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST' };
-	// const req = new Request(url, init);
-	await fetch(url)
+async function dashboardRefresh(e) {
+	const script_name = e.target.dataset.scriptName;
+	// debugger;
+	App.showConsole("Aggiornamento dei dati in corso...", "info");
+	// await fetch('python_scripts/as400.py')
+	// await fetch('python_scripts/test.py')
+	await fetch(`python_scripts/${script_name}`)
 		.then((response) => {
 			// console.log(response);
 			if (!response.ok) { throw Error(response.statusText); }
@@ -349,7 +334,10 @@ async function dashboardUpdate() {
 		// .then((response) => response.json())
 		.then((response) => response.text())
 		.then(data => {
-			debugger;
+			console.log(data);
+			// 23.05.2025 Rieseguo la query sul datamart per ottenere i dati aggiornati
+			App.closeConsole();
+			executeDashboard();
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');
@@ -357,10 +345,10 @@ async function dashboardUpdate() {
 		});
 }
 
-async function executeDashboard(token) {
+async function executeDashboard() {
 	// scarico il json dal DB, lo salvo in sessionStorage
-	console.info('EXECUTE DASHBOARD : ', token);
-	await fetch(`/fetch_api/name/${token}/dashboard_show`)
+	console.info('EXECUTE DASHBOARD : ', Resource.dashboard);
+	await fetch(`/fetch_api/name/${Resource.dashboard}/dashboard_show`)
 		.then((response) => {
 			// console.log(response);
 			if (!response.ok) { throw Error(response.statusText); }
@@ -368,9 +356,10 @@ async function executeDashboard(token) {
 		})
 		.then((response) => response.json())
 		.then(data => {
-			Resource = new Resources();
+			// Resource = new Resources();
 			// console.log(data);
 			Resource.json = JSON.parse(data.json_value);
+			// configuro le opzioni selezionate in fase di creazione dashboard
 			(Resource.json.options) ?
 				Resource.refreshTime = Resource.json.options.refresh :
 				Resource.refreshTime = 0;

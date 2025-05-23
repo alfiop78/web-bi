@@ -1,3 +1,5 @@
+const checkbox__refresh_button = document.getElementById('input__refresh_button');
+const input__script_file_name = document.getElementById('input__script_file_name');
 let wrappers = [];
 let app = {
 	number: function(properties) {
@@ -13,6 +15,7 @@ let app = {
 		return new google.visualization.NumberFormat(prop); */
 	}
 }
+
 function getDataView() {
 	// esempio utilizzato senza impostare le metriche contenute nelle composite
 	console.log('onReady');
@@ -411,4 +414,12 @@ async function getData(url) {
 			App.showConsole(err, 'error');
 			console.error(err);
 		});
+}
+
+// checkbox per aggiungere il tasto "aggiorna" sulla dashboard.
+// Da questa checkbox:true viene visualizzata la input per poter inserire il nome dello script file
+function handleOptionRefresh(e) {
+	// console.log(e.target.checked);
+	input__script_file_name.hidden = !e.target.checked
+	input__script_file_name.focus();
 }

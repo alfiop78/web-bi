@@ -40,7 +40,6 @@ Route::get('/dashboard', function () {
 	return view('dashboard');
 });
 
-
 Route::get('/dashboard', function () {
   return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
@@ -204,6 +203,9 @@ Route::get('/dashboards/test/{token}', function (Request $request, $token) {
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP
 Route::get('/mapping/vertica_odbc', [MapDatabaseController::class, 'vertica_odbc']); // connessione con ORM / Facade di Laravel
+
+// python script
+Route::get('/python_scripts/{script}', [MapDatabaseController::class, 'executePythonScript']);
 
 // routes
 
