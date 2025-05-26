@@ -487,7 +487,7 @@ class MapDatabaseController extends Controller
 				// "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
 				"weekday" => $currDate->format('l'),
 				"week" => "W {$currDate->format('W')}",
-				"week_id" => (int) "{$currDate->format('YW')}",
+				"week_id" => (int) "{$currDate->format('oW')}",
 				// "week" => $currDate->format('W'),
 				"month_id" => (int) $currDate->format('Ym'),
 				"month" => $currDate->format('F'),
@@ -513,6 +513,7 @@ class MapDatabaseController extends Controller
 				"previous" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d')
 			];
 		}
+		// dd($json);
 
 		// dd(session('db_driver'));
 		if (session('db_driver') === 'odbc') {
