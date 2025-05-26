@@ -133,7 +133,8 @@ class Cube
 					preg_match($regex, $element, $matches);
 					// dump($matches);
 					if ($matches) {
-						if (in_array("/", $sql)) {
+						// FIX: 26.05.2025 Ricercare questo operatore con il regex e non in questo modo
+						if (in_array("/", $sql) || in_array(" / ", $sql)) {
 							// la formula contiene l'operatore di divisione, imposto il CASE...WHEN
 							// OPTIMIZE: 15.05.2025 Molto probabilmente il codice non raggiunge mai l'else di questo operatore ternario, qui
 							// perchè il matches cerca i nomi colonna, dopo il punto, quindi è sicuramente una metrica. Anche nell'else (sotto)

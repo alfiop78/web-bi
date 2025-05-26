@@ -306,7 +306,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		const input = document.getElementById('input-base-custom-metric-name');
 		input.value = metric.alias;
 		btnSave.dataset.token = e.currentTarget.dataset.token;
-		const text = document.createTextNode(metric.formula.join(''));
+		// NOTE: la memorizzazione su DB converte, (json_encode) gli spazi " " in elementi NULL nella formula e nell'SQL.
+		// Qui li riconverto per visualizzare la formula nel modo in cui è stata inserita, se è stata inserita con gli spazi.
+		const formula = metric.formula.map(item => (item) ? item : ' ');
+		const text = document.createTextNode(formula.join(''));
 		// aggiungo il testo della formula prima del tag <br>
 		textarea.insertBefore(text, textarea.lastChild);
 		dlgCustomMetric.showModal();

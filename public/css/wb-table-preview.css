@@ -43,7 +43,7 @@ table {
 
 /* colonne con metriche */
 .g-header-cell.col-metrics {
-  color: #494949;
+  /* color: #494949; */
   background-color: var(--mark-color);
 }
 

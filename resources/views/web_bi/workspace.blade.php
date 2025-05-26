@@ -708,7 +708,7 @@
 											<div class="popup__suggestions">
 												<ul></ul>
 											</div>
-											<div id="textarea-custom-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+											<div id="textarea-custom-metric" contenteditable="true" class="textarea dropzone code" spellcheck="false" tabindex="2"><br /></div>
 										</div>
 										<textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
 									</section>
@@ -820,7 +820,7 @@
 											<div class="popup__suggestions">
 												<ul></ul>
 											</div>
-											<div id="textarea-filter" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+											<div id="textarea-filter" contenteditable="true" class="textarea dropzone code" spellcheck="false" tabindex="2"><br /></div>
 										</div>
 										<textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
 									</section>
@@ -856,7 +856,7 @@
 												<div class="popup__suggestions">
 													<ul></ul>
 												</div>
-												<div id="textarea__custom_column" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+												<div id="textarea__custom_column" contenteditable="true" class="textarea dropzone code" spellcheck="false" tabindex="2"><br /></div>
 											</div>
 										</section>
 									</section>

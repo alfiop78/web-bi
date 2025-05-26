@@ -647,6 +647,6 @@ span.markContent {
 }
 
 code.code,
-textarea.code {
+.textarea.code {
 	font-family: 'Source Code Pro', monospace !important;
 }

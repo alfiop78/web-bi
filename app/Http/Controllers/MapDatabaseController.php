@@ -907,7 +907,8 @@ class MapDatabaseController extends Controller
 						// metrica composta annidata
 						$sql[] = recursive($nestedElement, $metrics, $ifNullOperator);
 					} else {
-						if (in_array("/", $el)) {
+						// FIX: 26.05.2025 Ricercare questo operatore con il regex e non in questo modo
+						if (in_array("/", $el) || in_array(" / ", $el)) {
 							$sql[] = (in_array($nestedElement, $metrics)) ? "CASE WHEN {$ifNullOperator}({$nestedElement}, 0) = 0 THEN NULL ELSE {$ifNullOperator}({$nestedElement}, 0) END" : trim($nestedElement);
 						} else {
 							$sql[] = (in_array($nestedElement, $metrics)) ? "{$ifNullOperator}({$nestedElement}, 0)" : trim($nestedElement);
@@ -933,7 +934,8 @@ class MapDatabaseController extends Controller
 						// metrica composta "semplice"
 						// se nella formula è presente il simbolo della divisione, tutte le metriche susseguenti avranno il CASE...WHEN
 						// BUG: quando l'elemento dell'array è ") /" l'operatore della divisione non viene trovato
-						if (in_array("/", $sql)) {
+						// FIX: 26.05.2025 Ricercare questo operatore con il regex e non in questo modo
+						if (in_array("/", $sql) || in_array(" / ", $sql)) {
 							$sql[] = (in_array($element, $metric->metrics)) ? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->query->ifNullOperator}({$element}, 0) END" : trim($element);
 						} else {
 							$sql[] = (in_array($element, $metric->metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);

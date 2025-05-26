@@ -87,6 +87,7 @@ function createSheetColumns(data) {
 }
 
 function draw() {
+	debugger;
 	console.clear();
 	console.log('TIMER START', new Date());
 	const start_time_execution = new Date();
@@ -458,10 +459,10 @@ saveColumnConfig.onclick = () => {
 	Resource.dataTable.setColumnLabel(Resource.dataTableIndex, input__column_label.value);
 	switch (format) {
 		case 'currency':
-			formatterProperties = { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits };
+			formatterProperties = { suffix: ' €', negativeColor: 'brown', negativeParens: false, fractionDigits };
 			break;
 		case 'percent':
-			formatterProperties = { suffix: ' %', negativeColor: 'brown', negativeParens: true, fractionDigits };
+			formatterProperties = { suffix: ' %', negativeColor: 'brown', negativeParens: false, fractionDigits };
 			break;
 		case 'date':
 			// TODO: da implementare
