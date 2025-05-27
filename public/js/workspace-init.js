@@ -1902,9 +1902,12 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		// const params = JSON.stringify(jsonData);
 		// lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
 		// const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-		// const req = new Request(url, init);
+		const url = '/fetch_api/dimension/time';
+		const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST' };
+		const req = new Request(url, init);
 		App.showConsole('Elaborazione in corso...', 'info');
-		await fetch('/fetch_api/dimension/time')
+		// await fetch('/fetch_api/dimension/time')
+		await fetch(req)
 			.then((response) => {
 				// TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
 				if (!response.ok) { throw Error(response.statusText); }
@@ -1915,7 +1918,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				console.log(response);
 				if (response) {
 					App.closeConsole();
-					App.showConsole('result', 'done', 5000);
+					App.showConsole('Tabelle TIME create correttamente', 'done', 5000);
 				} else {
 					// TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
 					debugger;

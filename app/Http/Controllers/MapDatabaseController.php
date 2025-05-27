@@ -535,8 +535,8 @@ class MapDatabaseController extends Controller
 				previous DATE,
 				last DATE
 				) INCLUDE SCHEMA PRIVILEGES";
-			// $create_stmt = DB::connection(session('db_client_name'))->statement($sql);
-			$create_stmt = DB::connection('client_odbc')->statement($sql);
+			$create_stmt = DB::connection(session('db_client_name'))->statement($sql);
+			// $create_stmt = DB::connection('client_odbc')->statement($sql);
 			// dd($create_stmt);
 			if (!$create_stmt) {
 				// dd($create_stmt);
@@ -549,8 +549,8 @@ class MapDatabaseController extends Controller
 					// NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
 					// INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
 
-					DB::connection('client_odbc')->table('decisyon_cache.WB_DATE')->insert([
-						// DB::connection(session('db_client_name'))->table('decisyon_cache.WB_DATE')->insert([
+					// DB::connection('client_odbc')->table('decisyon_cache.WB_DATE')->insert([
+					DB::connection(session('db_client_name'))->table('decisyon_cache.WB_DATE')->insert([
 						'id' => $date,
 						'date' => $date,
 						'year' => $value->year,
@@ -562,14 +562,15 @@ class MapDatabaseController extends Controller
 						'month' => $value->month,
 						'week_id' => $value->week_id,
 						'week' => $value->week,
-						'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
+						// 'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
 						'day_of_year' => $value->day_of_year,
 						'previous' => $value->previous,
 						'last' => $value->last
 						// 'previous_json' => json_encode($value->previous_json)
 					]);
 				}
-				DB::connection('client_odbc')->statement('COMMIT;');
+				// DB::connection('client_odbc')->statement('COMMIT;');
+				DB::connection(session('db_client_name'))->statement('COMMIT;');
 			}
 		} else {
 			$create_stmt = Schema::connection(session('db_client_name'))
