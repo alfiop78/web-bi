@@ -1967,7 +1967,7 @@ function redrawChart() {
 	if (Resource.specs.wrapper.hasOwnProperty(chartType)) {
 		// aggiorno le options del grafico
 		if (chartType === 'Table') {
-			options.allowHTML = true;
+			options.allowHtml = true;
 			options.page = 'enable';
 			options.width = '100%';
 			options.height = '100%';

@@ -125,7 +125,7 @@ function draw() {
 	Resource.chartWrapper.setDataTable(Resource.dataTable);
 	// console.log(Resource.specs.wrapper.Table.options);
 	Resource.chartWrapper.setOption('height', 'auto');
-	Resource.chartWrapper.setOption('allowHTML', true);
+	Resource.chartWrapper.setOption('allowHtml', true);
 	Resource.chartWrapper.setOption('page', 'enabled');
 	Resource.chartWrapper.setOption('pageSize', 15);
 	Resource.chartWrapper.setOption('width', '100%');
@@ -172,7 +172,7 @@ function onReady() {
 	Resource.chartWrapperView.setContainerId(Resource.ref.id);
 	if (Resource.wrapper === 'Table') {
 		Resource.chartWrapperView.setOption('height', 'auto');
-		Resource.chartWrapperView.setOption('allowHTML', true);
+		Resource.chartWrapperView.setOption('allowHtml', true);
 		Resource.chartWrapperView.setOption('page', 'enabled');
 		Resource.chartWrapperView.setOption('pageSize', 15);
 		Resource.chartWrapperView.setOption('width', '100%');

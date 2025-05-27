@@ -87,11 +87,11 @@ function createSheetColumns(data) {
 }
 
 function draw() {
-	debugger;
 	console.clear();
 	console.log('TIMER START', new Date());
 	const start_time_execution = new Date();
 	const prepareData = Resource.prepareData();
+	// console.log(prepareData);
 	// Creo l'elenco di colonne/metriche elaborate dallo Sheet. Da qui
 	// potranno essere visualizzate/nascoste le colonne o le metriche per poter
 	// creare diverse "visualizzazioni"
@@ -193,6 +193,11 @@ function chartWrapperReady() {
 	}); */
 	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
 	Resource.dataGroup = Resource.createDataTableGrouped();
+	Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
+		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
+	});
+	// console.log(Resource.dataGroup);
 	Resource.createDataViewGrouped();
 	Resource.chartWrapperView = new google.visualization.ChartWrapper();
 	Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
@@ -224,10 +229,11 @@ function chartWrapperReady() {
 	//   let formatter = app[value.type](value.prop);
 	//   formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
 	// }
-	Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
+	/* Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
 		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
 		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
 	});
+	console.log(Resource.dataGroup); */
 	// console.log('dataGroup():', Resource.dataGroup);
 	// console.log(Resource.dataGroup.getColumnIndex())
 	// Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare

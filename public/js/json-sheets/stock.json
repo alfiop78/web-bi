@@ -279,7 +279,7 @@
       "page": "enabled",
       "frozenColumns": 2,
       "pageSize": 20,
-      "allowHTML": true,
+      "allowHtml": true,
       "cssClassNames": {
         "headerRow": "g-table-header",
         "tableRow": "g-table-row",

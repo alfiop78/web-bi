@@ -613,7 +613,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		debugger;
 		// Resource.chartWrapper.setOptions(Resource.specs.wrapper.Table.options);
 		Resource.chartWrapper.setOption('height', 'auto');
-		Resource.chartWrapper.setOption('allowHTML', true);
+		Resource.chartWrapper.setOption('allowHtml', true);
 		Resource.chartWrapper.setOption('page', 'enabled');
 		Resource.chartWrapper.setOption('pageSize', 15);
 		Resource.chartWrapper.setOption('width', '100%');

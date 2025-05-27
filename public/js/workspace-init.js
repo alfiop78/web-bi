@@ -1971,7 +1971,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			.then((response) => response.text())
 			.then(async (response) => {
 				console.log(response);
-				App.closeConsole();
+				// App.closeConsole();
 				if (response) {
 					// se le tabelle TIME non sono presenti in sessionStorage le recupero
 					let urls = [];
@@ -1981,7 +1981,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 						}
 					});
 					if (urls.length !== 0) WorkBookStorage.saveTables(await getTables(urls));
-					App.showConsole('Tabelle TIME presenti', 'done', 2000);
+					// App.showConsole('Tabelle TIME presenti', 'done', 2000);
 				} else {
 					// debugger;
 					App.showConsole('Tabelle TIME non presenti, da creare', 'warning', 3000);

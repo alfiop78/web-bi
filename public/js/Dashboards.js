@@ -203,7 +203,7 @@ class Resources extends Dashboards {
 				chartType: 'Table',
 				options: {
 					showRowNumber: false,
-					allowHTML: true,
+					allowHtml: true,
 					frozenColumns: 0,
 					page: 'enable',
 					pageSize: 100,
@@ -692,6 +692,7 @@ class Resources extends Dashboards {
 		// console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
 		// console.log(Resource.dataGroup.getColumnProperties(0));
 		// dataGroup.setColumnProperty(5, 'className', 'cssc1')
+		console.log(this.dataGroup);
 		this.dataViewFinal = new google.visualization.DataView(this.dataGroup);
 		this.dataViewFinal.setColumns(columns.concat(metrics));
 		console.log(this.dataViewFinal.toDataTable());
