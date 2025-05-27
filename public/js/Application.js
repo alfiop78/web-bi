@@ -253,16 +253,20 @@ class Application {
 		this.#messageConsole.innerHTML = message;
 		this.#iconConsole.setAttribute('data-icon', icon);
 		this.#iconConsole.innerText = icon;
+		// console.log(message, this.#console);
+		// se non è aperta la apro
 		if (!this.#console.hasAttribute('open')) this.#console.toggleAttribute('open');
 		if (time) {
 			setTimeout(() => {
 				// chiudo la console dopo "time" secondi
-				this.#console.toggleAttribute('open');
+				this.#console.removeAttribute('open');
 			}, time);
 		}
 	}
 
-	closeConsole() { this.#console.toggleAttribute('open'); }
+	closeConsole() {
+		if (this.#console.hasAttribute('open')) this.#console.removeAttribute('open');
+	}
 
 	checkTitle(target) {
 		if (target.textContent.length === 0) {

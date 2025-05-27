@@ -88,10 +88,12 @@ function createSheetColumns(data) {
 
 function draw() {
 	console.clear();
-	console.log('TIMER START', new Date());
+	// debugger;
+	// console.log('TIMER START', new Date());
+	App.showConsole('Preparazione dei dati in corso...', 'info', null);
 	const start_time_execution = new Date();
 	const prepareData = Resource.prepareData();
-	// console.log(prepareData);
+	console.log(prepareData);
 	// Creo l'elenco di colonne/metriche elaborate dallo Sheet. Da qui
 	// potranno essere visualizzate/nascoste le colonne o le metriche per poter
 	// creare diverse "visualizzazioni"
@@ -111,8 +113,9 @@ function draw() {
 	Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
 	google.visualization.events.addListener(Resource.gdashboard, 'ready', chartWrapperReady);
 	Resource.gdashboard.draw(Resource.dataTable);
-	console.log('TIMER END', new Date());
+	// console.log('TIMER END', new Date());
 	console.info(`ExecutionTime : ${new Date() - start_time_execution}ms`);
+	// App.closeConsole();
 }
 
 // NOTE: qui è commentata tutta la logica utilizzata anche nelle Dashboard.
@@ -168,8 +171,8 @@ function drawDatamart() {
 }
 
 function chartWrapperReady() {
-	// debugger
-	console.log('TIMER START (ready)', new Date());
+	// debugger;
+	// console.log('TIMER START (chartWrapperReady)', new Date());
 	const start_time_execution = new Date();
 	// Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
 	// Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
@@ -288,10 +291,9 @@ function chartWrapperReady() {
 	// console.log(Resource.specs.wrapper[Resource.wrapper].options);
 	Resource.chartWrapperView.setDataTable(Resource.dataViewFinal);
 	Resource.chartWrapperView.draw();
-	console.log('TIMER END', new Date());
+	// console.log('TIMER END', new Date());
 	console.info(`ExecutionTime (ChartWrapperReady) : ${new Date() - start_time_execution}ms`);
 	App.closeConsole();
-	App.loaderStop();
 	// google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
 	// Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.specs.wrapper[Resource.wrapper].options);
 	// var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataViewGrouped);
@@ -545,10 +547,11 @@ saveColumnConfig.onclick = () => {
 	Resource.bind();
 
 	console.log('specifications : ', Resource.specs);
-	debugger;
+	// debugger;
 	const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
 	sheet.specs = Resource.specs;
 	window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
+	App.showConsole('Formattazione dati in corso...', 'info', null);
 	Resource.gdashboard.draw(Resource.dataTable);
 	if (Resource.dashboardControls[Resource.dataGroupIndex]) Resource.dashboardControls[Resource.dataGroupIndex].draw();
 
@@ -609,6 +612,7 @@ function columnHander(e) {
 	const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
 	sheet.specs = Resource.specs;
 	window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
+	App.showConsole('Formattazione dati in corso...', 'info', null);
 	Resource.gdashboard.draw(Resource.dataTable);
 	updatedSheet();
 }

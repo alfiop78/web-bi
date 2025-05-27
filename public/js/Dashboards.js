@@ -444,6 +444,7 @@ class Resources extends Dashboards {
 			}
 			let rowValue = [];
 			for (const [key, value] of Object.entries(row)) {
+				// console.log(key);
 				switch (this.specs.data.columns[key].type) {
 					case 'date':
 						rowValue.push({ v: new Date(value), f: new Date(value), p: { className: 'myClass' } });
@@ -451,7 +452,12 @@ class Resources extends Dashboards {
 					case 'number':
 						// TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
 						// di GoogleChart
-						(isNaN(parseFloat(value))) ? rowValue.push({ v: null }) : rowValue.push({ v: parseFloat(value) });
+						// (isNaN(parseFloat(value))) ? rowValue.push({ v: null }) : rowValue.push({ v: parseFloat(value) });
+						(isNaN(parseFloat(value))) ? rowValue.push({ v: 0 }) : rowValue.push({ v: parseFloat(value) });
+						/* if (key === 'marginalita' && isNaN(parseFloat(value))) {
+							console.log(value);
+							console.info(rowValue);
+						} */
 						// (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
 						break;
 					default:
@@ -641,6 +647,7 @@ class Resources extends Dashboards {
 						// in formula ciclo tutti gli elementi della Formula, imposto i
 						// valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
 						metric.SQL.forEach(item => {
+							// console.log(metric);
 							const recursive = (nested) => {
 								let nested_formula = [];
 								nested.forEach(item => {
@@ -671,6 +678,7 @@ class Resources extends Dashboards {
 						// effettuo un controllo sul risultato in caso fosse NaN
 						// console.log(eval(formula.join(' ')));
 						const result = (isNaN(eval(formula.join(' ')))) ? 0 : eval(formula.join(' '));
+						// console.log(result);
 						let total = (result) ? { v: result } : { v: result, f: '-' };
 						// console.log(total);
 						// formattazione della cella con formatValue()
@@ -692,7 +700,7 @@ class Resources extends Dashboards {
 		// console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
 		// console.log(Resource.dataGroup.getColumnProperties(0));
 		// dataGroup.setColumnProperty(5, 'className', 'cssc1')
-		console.log(this.dataGroup);
+		console.log('dataGroup : ', this.dataGroup);
 		this.dataViewFinal = new google.visualization.DataView(this.dataGroup);
 		this.dataViewFinal.setColumns(columns.concat(metrics));
 		console.log(this.dataViewFinal.toDataTable());

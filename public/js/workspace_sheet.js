@@ -102,7 +102,7 @@ async function preview() {
 	const progressTo = document.getElementById('progress-to');
 	const progressTotal = document.getElementById('progress-total');
 	const progressLabel = document.querySelector("label[for='progress-bar']");
-	App.showConsole('Recupero dati in corso...', null, null);
+	App.showConsole('Recupero dati in corso...', 'info', null);
 	await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.sheet.userId}/preview`)
 		.then((response) => {
 			// console.log(response);
@@ -141,6 +141,8 @@ async function preview() {
 							console.log('tutte le paginate completate :', partialData);
 							Resource.data = partialData;
 							// google.charts.setOnLoadCallback(drawDatamart());
+							// App.closeConsole();
+							App.loaderStop();
 							google.charts.setOnLoadCallback(draw());
 							sheetInformations();
 						}
@@ -156,14 +158,14 @@ async function preview() {
 					// Non sono presenti altre pagine, visualizzo la dashboard
 					Resource.data = partialData;
 					// google.charts.setOnLoadCallback(drawDatamart());
-					google.charts.setOnLoadCallback(draw());
-					// App.loaderStop();
 					// App.closeConsole();
+					App.loaderStop();
+					google.charts.setOnLoadCallback(draw());
 					sheetInformations();
 				}
 			} else {
-				App.loaderStop();
 				App.closeConsole();
+				App.loaderStop();
 				App.showConsole('Nessun dato presente', 'warning', 2000);
 			}
 		})
