@@ -453,11 +453,9 @@ class Resources extends Dashboards {
 						// TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
 						// di GoogleChart
 						// (isNaN(parseFloat(value))) ? rowValue.push({ v: null }) : rowValue.push({ v: parseFloat(value) });
-						(isNaN(parseFloat(value))) ? rowValue.push({ v: 0 }) : rowValue.push({ v: parseFloat(value) });
-						/* if (key === 'marginalita' && isNaN(parseFloat(value))) {
-							console.log(value);
-							console.info(rowValue);
-						} */
+						// (isNaN(parseFloat(value))) ? rowValue.push({ v: 0 }) : rowValue.push({ v: parseFloat(value) });
+						// isFinite() verifica che il numero non sia Infinity Negative/Positive e anche che non sia NaN
+						(!Number.isFinite(parseFloat(value))) ? rowValue.push({ v: 0 }) : rowValue.push({ v: parseFloat(value) });
 						// (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
 						break;
 					default:
@@ -678,13 +676,14 @@ class Resources extends Dashboards {
 						// effettuo un controllo sul risultato in caso fosse NaN
 						// console.log(eval(formula.join(' ')));
 						const result = (isNaN(eval(formula.join(' ')))) ? 0 : eval(formula.join(' '));
-						// console.log(result);
-						let total = (result) ? { v: result } : { v: result, f: '-' };
+						// let total = (result) ? { v: result } : { v: result, f: '-' };
 						// console.log(total);
 						// formattazione della cella con formatValue()
 						const formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
-						const resultFormatted = (result) ? formatter.formatValue(result) : '-';
-						total = { v: result, f: resultFormatted };
+						const resultFormatted = (isFinite(result)) ? formatter.formatValue(result) : '-';
+						const total = (result < 0) ? { v: result, f: resultFormatted, p: { style: 'color:#a52a2a;' } } : { v: result, f: resultFormatted }
+						// const total = { v: result, f: resultFormatted };
+
 						// resultFormatted = (result) ? result : '-';
 						// total = (result) ? { v: result } : { v: result, f: '-' };
 						return total;
@@ -703,7 +702,7 @@ class Resources extends Dashboards {
 		console.log('dataGroup : ', this.dataGroup);
 		this.dataViewFinal = new google.visualization.DataView(this.dataGroup);
 		this.dataViewFinal.setColumns(columns.concat(metrics));
-		console.log(this.dataViewFinal.toDataTable());
+		// console.log(this.dataViewFinal.toDataTable());
 	}
 
 }

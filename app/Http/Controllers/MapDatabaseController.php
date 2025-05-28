@@ -936,11 +936,16 @@ class MapDatabaseController extends Controller
 						// metrica composta "semplice"
 						// se nella formula è presente il simbolo della divisione, tutte le metriche susseguenti avranno il CASE...WHEN
 						// BUG: quando l'elemento dell'array è ") /" l'operatore della divisione non viene trovato
-						// FIX: 26.05.2025 Ricercare questo operatore con il regex e non in questo modo
+						// FIX: 29.05.2025 Utilizzare la stessa logica di createMetrics() utilizzando STR_PAD_BOTH
 						if (in_array("/", $sql) || in_array(" / ", $sql)) {
-							$sql[] = (in_array($element, $metric->metrics)) ? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->query->ifNullOperator}({$element}, 0) END" : trim($element);
+							$sql[] = (in_array($element, $metric->metrics))
+								? "CASE WHEN {$this->query->ifNullOperator}({$element}, 0) = 0 THEN NULL ELSE {$this->query->ifNullOperator}({$element}, 0) END"
+								: trim($element);
 						} else {
-							$sql[] = (in_array($element, $metric->metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);
+							// FIX: 29.05.2025 Utilizzare la stessa logica di createMetrics() utilizzando STR_PAD_BOTH
+							$sql[] = (in_array($element, $metric->metrics))
+								? "{$this->query->ifNullOperator}({$element}, 0)"
+								: trim($element);
 						}
 					}
 				}

@@ -990,11 +990,12 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				console.log(response);
 				// elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
 				// precedente del report
+				debugger;
 				document.querySelectorAll('*[data-adding]').forEach(el => {
 					el.dataset.added = 'true;'
 					delete el.dataset.adding;
 				});
-				document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
+				document.querySelectorAll('*[data-removed]').forEach(el => el.remove());
 				document.querySelectorAll('*[data-modified]').forEach(node => delete node.dataset.modified);
 				// imposto Sheet.edit = true perchè da questo momento qualsiasi cosa aggiunta allo Sheet avrà
 				// lo contrassegna come "modificato" e quindi verrà, alla prossima elaborazione, eliminata la tabella dal DB

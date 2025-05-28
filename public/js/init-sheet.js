@@ -196,12 +196,13 @@ function chartWrapperReady() {
 	}); */
 	Resource.group = Resource.specs.wrapper[Resource.wrapper].group;
 	Resource.dataGroup = Resource.createDataTableGrouped();
+	// console.log(Resource.dataGroup);
+	Resource.createDataViewGrouped();
 	Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
+		if (metric.dependencies) return false;
 		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
 		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
 	});
-	// console.log(Resource.dataGroup);
-	Resource.createDataViewGrouped();
 	Resource.chartWrapperView = new google.visualization.ChartWrapper();
 	Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
 	Resource.chartWrapperView.setContainerId(Resource.ref.id);
@@ -290,6 +291,8 @@ function chartWrapperReady() {
 	// console.log(Resource.wrapper);
 	// console.log(Resource.specs.wrapper[Resource.wrapper].options);
 	Resource.chartWrapperView.setDataTable(Resource.dataViewFinal);
+	// debugger;
+	// Resource.chartWrapperView.setDataTable(Resource.dataGroup);
 	Resource.chartWrapperView.draw();
 	// console.log('TIMER END', new Date());
 	console.info(`ExecutionTime (ChartWrapperReady) : ${new Date() - start_time_execution}ms`);
