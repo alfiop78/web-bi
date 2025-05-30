@@ -45,6 +45,11 @@
 		<button type="button" data-fn value="Excel" onclick="export_datatable_XLS()">Excel</button>
 	</template>
 
+	<template id="template__options_button">
+		<!-- <button type="button" id="btn__refresh" class="btn__options_main" value="Aggiorna" onclick="dashboardUpdate(this.dataset.scriptName)">Aggiorna</button> -->
+		<button type="button" id="btn__refresh" class="btn__options_main" value="Aggiorna">Aggiorna</button>
+	</template>
+
 	<main>
 		<div id="content" class="custom-scrollbar">
 
@@ -78,8 +83,8 @@
 			<circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
 		</svg>
 	</div>
-	<script type="text/javascript" src="{{ asset('/js/dashboards/init.js') }}"></script>
-	<script type="text/javascript" src="{{ asset('/js/dashboard_functions.js') }}" defer></script>
+	<script type="text/javascript" src="{{ asset('/js/dashboards/init.js') }}" defer></script>
+	<script type="text/javascript" src="{{ asset('/js/dashboard_functions.js') }}"></script>
 </body>
 
 </html>

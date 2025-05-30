@@ -139,6 +139,7 @@ async function getLayout() {
 			Template.id = data.id;
 			// creo il template nel DOM
 			Template.create();
+			document.querySelector('h1.title').innerHTML = Resource.json.title;
 			// carico le risorse (sheet) necessarie alla dashboard
 			getResources();
 		})
@@ -258,6 +259,10 @@ async function getAllData(urls) {
 			console.log('paginateData : ', paginateData);
 			paginateData.forEach((pagData, index) => {
 				console.log(pagData.data);
+				if (pagData.data.length === 0) {
+					App.showConsole("Nessun dato presente", 'info', null);
+					return false;
+				}
 				progressBar.value = +((pagData.to / pagData.total) * 100);
 				progressLabel.hidden = false;
 				progressTo.innerText = pagData.to;
@@ -376,7 +381,7 @@ async function dashboardRefresh(e) {
 	App.showConsole("Aggiornamento dei dati in corso...", "info");
 	// await fetch('python_scripts/as400.py')
 	// await fetch('python_scripts/test.py')
-	await fetch(`python_scripts/${script_name}`)
+	await fetch(`/python_scripts/${script_name}`)
 		.then((response) => {
 			// console.log(response);
 			if (!response.ok) { throw Error(response.statusText); }
@@ -444,7 +449,6 @@ async function executeDashboard() {
 			(Resource.json.options) ?
 				Resource.refreshTime = Resource.json.options.refresh :
 				Resource.refreshTime = 0;
-			document.querySelector('h1.title').innerHTML = Resource.json.title;
 			getLayout();
 		})
 		.catch(err => {

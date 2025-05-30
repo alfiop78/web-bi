@@ -4,6 +4,7 @@ const progressBar = document.getElementById('progressBar');
 const progressTo = document.getElementById('progressTo');
 const progressTotal = document.getElementById('progressTotal');
 const progressLabel = document.querySelector("label[for='progressBar']");
+let dashboardToken, intervalId, messageIntervalId;
 (() => {
 	App.init();
 	// Load the Visualization API and the corechart package.
@@ -44,26 +45,57 @@ const progressLabel = document.querySelector("label[for='progressBar']");
 	observerList.observe(document.getElementById('template-layout'), config); */
 
 	// scarico il json dal DB, lo salvo in sessionStorage
-	const template__layout = document.getElementById('template-layout');
+	// const template__layout = document.getElementById('template-layout');
 	// {method: 'GET', headers: {'Authorization': 'Basic ' + btoa('lynxuser:password')}}
-	fetch(`/fetch_api/name/${template__layout.dataset.token}/dashboard_show`)
-		.then((response) => {
-			// console.log(response);
-			if (!response.ok) { throw Error(response.statusText); }
-			return response;
-		})
-		.then((response) => response.json())
-		.then(async data => {
-			Resource = new Resources();
-			// console.log(data);
-			Resource.json = JSON.parse(data.json_value);
-			document.getElementsByTagName('title')[0].innerText = Resource.json.title;
-			getLayout();
-		})
-		.catch(err => {
-			App.showConsole(err, 'error');
-			console.error(err);
-		});
+	// fetch(`/fetch_api/name/${template__layout.dataset.token}/dashboard_show`)
+	// 	.then((response) => {
+	// 		// console.log(response);
+	// 		if (!response.ok) { throw Error(response.statusText); }
+	// 		return response;
+	// 	})
+	// 	.then((response) => response.json())
+	// 	.then(async data => {
+	// 		Resource = new Resources();
+	// 		// console.log(data);
+	// 		Resource.json = JSON.parse(data.json_value);
+	// 		document.getElementsByTagName('title')[0].innerText = Resource.json.title;
+	// 		getLayout();
+	// 	})
+	// 	.catch(err => {
+	// 		App.showConsole(err, 'error');
+	// 		console.error(err);
+	// 	});
+
+	init = async () => {
+		const template__layout = document.getElementById('template-layout');
+		dashboardToken = template__layout.dataset.token;
+		if (intervalId) {
+			clearInterval(intervalId);
+			clearInterval(messageIntervalId);
+		}
+		console.log('execute start');
+		// imposto il token della Dashboard
+		Resource = new Resources();
+		Resource.dashboard = dashboardToken;
+		await executeDashboard();
+		// await executeDashboard(dashboardToken);
+		console.log('execute end');
+		console.log(Resource.refreshTime);
+		// se è presente un refreshTime per questa Dashboard aggiungo i setInterval()
+		if (Resource.refreshTime !== 0) {
+			console.log(Resource.refreshTime);
+			messageIntervalId = setInterval(function() {
+				console.log('UPDATE');
+				App.showConsole('La Dashboard si aggiorna tra 5 secondi', 'info', 4500);
+			}, Resource.refreshTime - 5000);
+			// setInterval(executeDashboardInterval, Resource.refreshTime, dashboardToken);
+			// intervalId = setInterval(getResources, Resource.refreshTime, Resource.dashboard);
+			intervalId = setInterval(scheduleResource, Resource.refreshTime, Resource.dashboard);
+		}
+
+	}
+
+	init();
 
 })();
 
