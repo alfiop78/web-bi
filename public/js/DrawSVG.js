@@ -102,6 +102,7 @@ class DrawSVG {
 			const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			const token = this.rand().substring(0, 4);
 			line.id = `line-${token}`;
+			line.setAttribute('xlink:href', line.id);
 			line.dataset.id = token;
 			this.svg.appendChild(line);
 			this.currentLineRef = line.id;
@@ -904,7 +905,10 @@ class DrawSVG {
 		// Questa situazione si verifica quando si aggiorna la relazione tra la dimensione TIME e la Fact
 		if (!this.svg.querySelector(`use.time#${this.currentTable.id}`)) {
 			const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-			use.setAttribute('href', this.currentTable.id);
+			// use.setAttribute('href', this.currentTable.id);
+			use.setAttribute('xlink:href', this.currentTable.id);
+			// debugger;
+			// use.dataset.id = this.currentTable.id;
 			use.id = this.currentTable.id;
 			use.classList.add('table', 'time');
 			use.dataset.type = 'time';
