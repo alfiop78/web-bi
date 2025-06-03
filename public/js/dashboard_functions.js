@@ -43,7 +43,7 @@ function dashboardDraw() {
 			chartWrapper.setOptions(wrapper.options);
 			if (wrapper.chartType === 'Table') {
 				chartWrapper.setOption('height', 'auto');
-				chartWrapper.setOption('pageSize', 15);
+				chartWrapper.setOption('pageSize', 30);
 			}
 			/* // effettuo il raggruppamento deciso in fase di creazione report e creo la DataViewGroup
 			Resource.group = wrapper.group;
