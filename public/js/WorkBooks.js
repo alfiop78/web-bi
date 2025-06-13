@@ -558,16 +558,20 @@ class WorkBooks {
 			});
 			this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
 		});
-		// Recupero dei filtri del WorkBook dallaa proprietà worksheet
+		// Recupero dei filtri del WorkBook dalla proprietà worksheet
 		if (this.workSheet.filters) {
 			for (const object of Object.values(this.workSheet.filters)) {
 				this.filters = object;
 			}
-
+		}
+		if (this.workSheet.composite) {
+			for (const object of Object.values(this.workSheet.composite)) {
+				this.elements = object;
+			}
 		}
 		// aggiungo, al WorkBook, le metriche composte relative al WorkBook
 		// Storages.getCompositeMetricsByWorkbookId(this.workBook.token).forEach(metric => this.elements = metric);
-		Storages.getObjectsByWorkbookId(this.workBook.token, 'metric', 'composite').forEach(metric => this.elements = metric);
+		// Storages.getObjectsByWorkbookId(this.workBook.token, 'metric', 'composite').forEach(metric => this.elements = metric);
 		console.info("workbookMap : ", this.#workbookMap);
 		// debugger;
 	}
@@ -625,7 +629,7 @@ class WorkBooks {
 		}
 
 		// joins
-		for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.joins)) {
+		for (const values of Object.values(WorkBookStorage.workBook.joins)) {
 			// per ogni tabella
 			for (const [token, join] of Object.entries(values)) {
 				this.join = { token, value: join };

@@ -1113,8 +1113,9 @@ function advancedMetricSave(e) {
 function compositeMetricSave(e) {
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
 	const alias = document.getElementById('composite-metric-name').value;
-	const date = new Date().toLocaleDateString('it-IT', options);
-	let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: new Set(), metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
+	// const date = new Date().toLocaleDateString('it-IT', options);
+	// let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: new Set(), metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
+	let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: new Set(), metric_type: 'composite', workbook_ref: WorkBook.workBook.token };
 	// regex : ottengo i bounduary delle word (\b) e anche quelli dei caratteri non-word (\W)
 	object.formula = textarea__composite_metric.firstChild.textContent.split(/\b|(?=[\W])/g);
 	console.log(object.formula);
@@ -1151,18 +1152,22 @@ function compositeMetricSave(e) {
 	});
 	debugger;
 	// aggiornamento/creazione della metrica imposta created_at
-	// object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
-	object.created_at = (e.target.dataset.token) ? WorkBook.elements.get(e.target.dataset.token).created_at : date;
+	// object.created_at = (e.target.dataset.token) ? WorkBook.elements.get(e.target.dataset.token).created_at : date;
 	// converto l'oggetto Set in array altrimenti, in localStorage, non viene salvato come array
 	object.metrics = [...object.metrics];
 	console.log('Metrica composta : ', object);
 	debugger;
 	// WorkBook.metrics = object;
 	WorkBook.elements = object;
-	window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
+	(WorkBook.workSheet.hasOwnProperty('composite')) ?
+		WorkBook.workSheet.composite[token] = object :
+		WorkBook.workSheet.composite = { [token]: object };
+	debugger;
+	WorkBook.update();
+	// window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
 	if (!e.target.dataset.token) {
 		appendCompositeMetric(token);
-		App.showConsole(`Metrica <b>${alias}</b> aggiunta al WorkBook`, 'done', 1500);
+		// App.showConsole(`Metrica <b>${alias}</b> aggiunta al WorkBook`, 'done', 1500);
 	} else {
 		// la metrica già esiste, aggiorno il nome
 		// NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
@@ -1172,7 +1177,7 @@ function compositeMetricSave(e) {
 		li.dataset.label = alias;
 		dragIcon.dataset.label = alias;
 		span.textContent = alias;
-		App.showConsole(`Metrica '${alias}' modificata`, 'done', 2000);
+		// App.showConsole(`Metrica '${alias}' modificata`, 'done', 2000);
 	}
 	dlg__composite_metric.close();
 }
