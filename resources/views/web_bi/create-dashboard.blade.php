@@ -223,7 +223,7 @@
 							</section>
 							<section class="dlg-buttons">
 								<button name="cancel" value="chiudi">Chiudi</button>
-								<button id="btn-chart-save">Salva</button>
+								<!-- <button id="btn-chart-save">Salva</button> -->
 							</section>
 						</section>
 					</dialog>

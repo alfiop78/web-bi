@@ -500,15 +500,16 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 
 	// Fn invocata dal tasto + che viene creato dinamicamente dal layout-template
 	// apertura dialog per l'aggiunta dell'oggeteto google chart
-	app.addResource = (e) => {
+	app.addResource = async (e) => {
 		if (e.currentTarget.classList.contains('defined')) return false;
 		// il ref corrente, appena aggiunto
 		Resource.ref = document.getElementById(e.currentTarget.id);
-		// 17-04-2025 Recupero gli WorkBook dal localStorage in base al db connesso
-		ul__workbooks.querySelectorAll('li').forEach(item => item.remove());
+		/*
+		  17-04-2025 Recupero gli WorkBook dal localStorage in base al db connesso
+		// ul__workbooks.querySelectorAll('li').forEach(item => item.remove());
 		// utilizzo il Metodo statico per recuperare l'elenco degli workbook appartenenti al
 		// databaseId corrente
-		Storages.getWorkbookByDatabaseId(ref__connectionId.dataset.databaseId).forEach(workbook => {
+		 Storages.getWorkbookByDatabaseId(ref__connectionId.dataset.databaseId).forEach(workbook => {
 			const content = template__li.content.cloneNode(true);
 			const li = content.querySelector('li[data-li]');
 			const span = li.querySelector('span');
@@ -518,7 +519,34 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			li.dataset.elementSearch = 'workbooks';
 			span.innerText = workbook.name;
 			ul__workbooks.appendChild(li);
-		});
+		}); */
+		// 16.06.2025 Recuperare elenco WorkBook dal DB
+		await fetch(`/fetch_api/workbooksByConnectionId`)
+			.then((response) => {
+				if (!response.ok) { throw Error(response.statusText); }
+				return response;
+			})
+			.then((response) => response.json())
+			.then(data => {
+				console.log(data);
+				if (data) {
+					data.forEach(workbook => {
+						const content = template__li.content.cloneNode(true);
+						const li = content.querySelector('li[data-li]');
+						const span = li.querySelector('span');
+						li.dataset.token = workbook.token;
+						li.dataset.label = workbook.name;
+						li.addEventListener('click', workbookSelected);
+						li.dataset.elementSearch = 'workbooks';
+						span.innerText = workbook.name;
+						ul__workbooks.appendChild(li);
+					});
+				}
+			})
+			.catch(err => {
+				App.showConsole(err, 'error');
+				console.error(err);
+			});
 		dlg__chartSection.showModal();
 	}
 

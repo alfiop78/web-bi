@@ -261,8 +261,7 @@ function workbookSelected(e) {
 	// recupero l'elenco degli sheets del workbook selezionato
 	const sheets = Storages.getSheetsByWorkbookId(e.currentTarget.dataset.token);
 	console.log(sheets);
-	ul__sheets.querySelectorAll('li').forEach(item => item.remove());
-	Storages.getSheetsByWorkbookId(e.currentTarget.dataset.token).forEach(sheet => {
+	/* Storages.getSheetsByWorkbookId(e.currentTarget.dataset.token).forEach(sheet => {
 		const content = template__li.content.cloneNode(true);
 		const li = content.querySelector('li[data-li]');
 		const span = li.querySelector('span');
@@ -275,39 +274,36 @@ function workbookSelected(e) {
 		li.dataset.elementSearch = 'sheets';
 		span.innerText = sheet.name;
 		ul__sheets.appendChild(li);
-	});
+	}); */
 
 
 	// recupero gli Sheet appartenenti al workbook
-	/* fetch(`/fetch_api/workbook_token/${e.currentTarget.dataset.token}/sheet_indexByWorkbook`)
-	   .then((response) => {
-		   if (!response.ok) { throw Error(response.statusText); }
-		   return response;
-	   })
-	   .then((response) => response.json())
-	   .then(data => {
-		   // console.log(data);
-		   const ul = document.getElementById('ul-sheets');
-		   ul.querySelectorAll('li').forEach(el => el.remove());
-		   data.forEach(sheet => {
-			   const content = template__li.content.cloneNode(true);
-			   const li = content.querySelector('li[data-li]');
-			   const span = li.querySelector('span');
-			   li.dataset.token = sheet.token;
-			   li.dataset.datamartId = sheet.datamartId;
-			   li.dataset.userId = sheet.userId;
-			   li.dataset.label = sheet.name;
-			   li.dataset.workbookId = sheet.workbookId;
-			   li.addEventListener('click', app.sheetSelected);
-			   li.dataset.elementSearch = 'sheets';
-			   span.innerText = sheet.name;
-			   ul.appendChild(li);
-		   });
-	   })
-	   .catch(err => {
-		   App.showConsole(err, 'error');
-		   console.error(err);
-	   }); */
+	fetch(`/fetch_api/workbook_token/${e.currentTarget.dataset.token}/sheetsByWorkbookId`)
+		.then((response) => {
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		})
+		.then((response) => response.json())
+		.then(data => {
+			data.forEach(sheet => {
+				const content = template__li.content.cloneNode(true);
+				const li = content.querySelector('li[data-li]');
+				const span = li.querySelector('span');
+				li.dataset.token = sheet.token;
+				li.dataset.datamartId = sheet.datamartId;
+				li.dataset.userId = sheet.userId;
+				li.dataset.label = sheet.name;
+				li.dataset.workbookId = sheet.workbookId;
+				li.addEventListener('click', sheetSelected);
+				li.dataset.elementSearch = 'sheets';
+				span.innerText = sheet.name;
+				ul__sheets.appendChild(li);
+			});
+		})
+		.catch(err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
 }
 
 // Selezione del report che alimenta il chart_div

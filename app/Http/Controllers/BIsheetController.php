@@ -55,11 +55,10 @@ class BIsheetController extends Controller
 		return response()->json($sheet->json_specs); */
 	}
 
-	public function indexByWorkbook($workbookToken)
+	public function indexByWorkbookId($workbookToken)
 	{
 		// dd($workbookToken);
-		$sheets = BIsheet::where('workbookId', $workbookToken)
-			->get(['name', 'token', 'workbookId', 'userId', 'datamartId']);
+		$sheets = BIsheet::where('workbookId', $workbookToken)->get(['name', 'token', 'workbookId', 'userId', 'datamartId']);
 		// return response()->json(['sheet' => $sheets]);
 		return response()->json($sheets);
 	}

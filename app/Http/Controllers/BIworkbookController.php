@@ -37,10 +37,12 @@ class BIworkbookController extends Controller
 	 * (Viene invocata da create-dashboard)
 	 * @return \Illuminate\Http\Response
 	 */
-	public function indexByDashboardCreate()
+	public function indexByConnectionId()
 	{
 		$workbooks = BIworkbook::where('connectionId', session('db_id'))->get(['token', 'name']);
-		return view('web_bi.create-dashboard')->with('workbooks', $workbooks);
+		return  response()->json($workbooks);
+		// return  response()->json(['workbooks' => $workbooks]);
+		// return view('web_bi.create-dashboard')->with('workbooks', $workbooks);
 	}
 
 	/**
