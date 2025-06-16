@@ -951,8 +951,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			// process.datamartId = Sheet.sheet.datamartId;
 			// process.userId = Sheet.userId;
 			if (document.querySelectorAll('*[data-adding], *[data-removed], *[data-modified]').length !== 0) {
-				// debugger;
-				// Sheet.update();
 				process.datamartId = Sheet.sheet.datamartId;
 				process.userId = Sheet.userId;
 			} else {
@@ -964,6 +962,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			process.userId = Sheet.userId;
 		}
 		process.datamartId = Sheet.sheet.datamartId;
+		process.token = Sheet.sheet.token;
 		Resource.specs.token = Sheet.sheet.token;
 		Resource.setSpecifications();
 
@@ -974,6 +973,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		// App.showConsole('Elaborazione in corso...', 'info');
 		// lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
 		App.loaderStart();
+		debugger;
 		App.showConsole('Elaborazione in corso...', null, null);
 		if (Resource.tableRef) Resource.tableRef.clearChart();
 		const url = "/fetch_api/cube/sheet_create";

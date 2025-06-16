@@ -277,7 +277,8 @@ function workbookSelected(e) {
 	}); */
 
 
-	// recupero gli Sheet appartenenti al workbook
+	// recupero Sheet appartenenti al workbookId selezionato
+	App.showConsole("Recupero elenco Sheet...", 'info', null);
 	fetch(`/fetch_api/workbook_token/${e.currentTarget.dataset.token}/sheetsByWorkbookId`)
 		.then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
@@ -299,6 +300,7 @@ function workbookSelected(e) {
 				span.innerText = sheet.name;
 				ul__sheets.appendChild(li);
 			});
+			App.closeConsole();
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');

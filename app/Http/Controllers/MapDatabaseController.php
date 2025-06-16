@@ -966,19 +966,28 @@ class MapDatabaseController extends Controller
 		}
 	}
 
-	public function sheetCreate(Request $request)
+	public function createSheet(Request $request)
 	{
 		try {
 			$process = json_decode(json_encode($request->all())); // object
+			// 16.06.2025 Verifico se questo Sheet è presente in bi_sheets. Se è presente, devo nominare
+			// il datamart WEB_BI_LOCAL_DATAMART_USERID altrimenti vado a sovrascrivere il datamart presente in bi_sheets (e anche eventuali
+			// sheet presenti sulle Dashboard)
 			$this->query = new Cube($process);
+			if (BIsheet::find($process->token)) {
+				$this->query->datamart_name = "WEB_BI_LOCAL_{$this->query->datamart_id}_{$this->query->user_id}";
+			} else {
+				$this->query->datamart_name = "WEB_BI_{$this->query->datamart_id}_{$this->query->user_id}";
+			}
+			// dd($this->query->datamart_name);
 			$this->query->datamartFields();
 			foreach ($this->query->facts as $fact) {
 				$this->query->fact = $fact;
 				$this->query->factId = substr($fact, -5);
-				$this->query->baseTableName = "WB_BASE_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}";
+				$this->query->baseTableName = "WB_BASE_{$this->query->datamart_name}_{$this->query->factId}";
 				$this->query->createBaseQuery();
 				// TODO: rinominare in "calcolo metriche di base"
-				$this->query->base_table_new();
+				$this->query->createBaseTable();
 				// dd($result_base_metrics);
 				// se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
 				// creo una tabella temporanea per ogni metrica filtrata
@@ -990,14 +999,14 @@ class MapDatabaseController extends Controller
 					if (property_exists($this->query->process->advancedMeasures, $fact)) {
 						$this->calcAdvancedMetrics();
 						// dd($this->query->groupMetricsByFilters);
-						$this->query->createMetricDatamarts_new();
+						$this->query->createMetricsDatamart();
 					}
 				}
 			}
 			// calcolo metriche composte
 			$this->calcCompositeMetrics();
 			// dd($this->query->compositeMeasures);
-			return $this->query->datamart_new();
+			return $this->query->createDatamart();
 		} catch (\Throwable $th) {
 			// abort(500);
 			// $msg = $th->getMessage();
@@ -1100,7 +1109,7 @@ class MapDatabaseController extends Controller
 							// dump($object);
 							switch ($object->type) {
 								case 'composite':
-									if (BImetric::find($token)) {
+									/* if (BImetric::find($token)) {
 										$json_composite_measures = json_decode(BImetric::where("token", $token)->first('json_value')->json_value);
 										$process->compositeMeasures->$token = (object)[
 											"alias" => $object->alias,
@@ -1109,6 +1118,17 @@ class MapDatabaseController extends Controller
 										];
 									} else {
 										return "Metrica (objectId : {$token}) non presente nel Database";
+									} */
+									// 16.06.2025 Le metriche composte ora sono state aggiunte alla proprietà 'worksheet'
+									if (property_exists($worksheet->composite, $token)) {
+										$process->compositeMeasures->$token = (object)[
+											"alias" => $worksheet->composite->$token->alias,
+											"SQL" => $worksheet->composite->$token->SQL,
+											"metrics" => $worksheet->composite->$token->metrics
+										];
+										// dd($process->compositeMeasures);
+									} else {
+										return "Metrica composta (objectId : {$token}) non presente nel Database";
 									}
 									break;
 								case 'advanced':
@@ -1188,8 +1208,8 @@ class MapDatabaseController extends Controller
 			$this->query->createBaseQuery();
 			// dump(($this->query->process->baseMeasures));
 			// dump(!empty((array) $this->query->process->baseMeasures));
-			// se sono presenti metrica di base calcolo base_table_new()
-			if (!empty((array) $this->query->process->baseMeasures)) $this->query->base_table_new();
+			// se sono presenti metrica di base calcolo createBaseTable()
+			if (!empty((array) $this->query->process->baseMeasures)) $this->query->createBaseTable();
 			// dd($res === true ||$res === NULL);
 			// se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
 			// creo una tabella temporanea per ogni metrica filtrata
@@ -1200,7 +1220,7 @@ class MapDatabaseController extends Controller
 				// sono presenti metriche avanzate
 				if (property_exists($this->query->process->advancedMeasures, $fact)) {
 					$this->calcAdvancedMetrics();
-					$this->query->createMetricDatamarts_new();
+					$this->query->createMetricsDatamart();
 				}
 			}
 		}
@@ -1208,7 +1228,17 @@ class MapDatabaseController extends Controller
 		$this->calcCompositeMetrics();
 
 		try {
-			if ($this->query->datamart_new()) return "OK\n";
+
+			// if ($this->query->createDatamart()) return "OK\n";
+			if ($this->query->createDatamart()) {
+				// TODO: 16.06.2025 Se è presente una tabella nominata WEB_BI_{$this->datamart_id} significa che lo sheet è stato
+				// pubblicato su una Dashboard, eseguo il copy_table() per aggiornare anche i dati dello sheet visibile sulla dashboard
+				if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->query->datamart_id}")) {
+					if ($this->copy_table($this->query->datamart_name, $this->query->datamart_id)) return "OK\n";
+				} else {
+					return "OK\n";
+				}
+			}
 		} catch (\Throwable $th) {
 			$msg = $th->getMessage();
 			return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
@@ -1237,7 +1267,7 @@ class MapDatabaseController extends Controller
 			$this->query->factId = substr($fact, -5);
 			$this->query->baseTableName = "WB_BASE_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}";
 			$this->query->createBaseQuery();
-			$resultSQL['base'][] = $this->query->base_table_new();
+			$resultSQL['base'][] = $this->query->createBaseTable();
 			// return $resultSQL;
 			// dd($res === true ||$res === NULL);
 			// creo una tabella temporanea per ogni metrica filtrata
@@ -1246,12 +1276,12 @@ class MapDatabaseController extends Controller
 				if (property_exists($this->query->process->{"advancedMeasures"}, $fact)) {
 					$this->calcAdvancedMetrics();
 					$this->query->json_info_advanced = [];
-					$resultSQL['advanced'] = $this->query->createMetricDatamarts_new();
+					$resultSQL['advanced'] = $this->query->createMetricsDatamart();
 				}
 			}
 		}
 		ob_clean();
-		$resultSQL['datamart'] = $this->query->datamart_new();
+		$resultSQL['datamart'] = $this->query->createDatamart();
 		return $resultSQL;
 	}
 }

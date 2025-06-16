@@ -46,9 +46,8 @@ class Cube
 		$this->process = $process;
 		$this->user_id = $this->process->{"userId"};
 		$this->facts = $this->process->{"facts"};
-		// TODO: da modificare in userId
 		$this->datamart_id = $this->process->{"datamartId"};
-		$this->datamart_name = "WEB_BI_{$this->datamart_id}_{$this->user_id}";
+		// $this->datamart_name = "WEB_BI_{$this->datamart_id}_{$this->user_id}";
 		// il report deve necessariamente contenere almeno un livello dimensionale
 		// ...quindi $this->process->{fields} sarà sempre presente
 		$this->fields = $this->process->{"fields"};
@@ -94,7 +93,7 @@ class Cube
 		// dd($this->datamart_fields);
 	}
 
-	public function select_new()
+	public function selectClause()
 	{
 		// dump($this->fields);
 		// per ogni tabella
@@ -187,7 +186,7 @@ class Cube
 				aliasTable => "automotive_bi_data.DocVenditaDettaglio AS DocVenditaDettaglio_560"
 			]
 	*/
-	public function from_new()
+	public function fromClause()
 	{
 		// dd($from);
 		$this->from_clause = []; // azzero la FROM che può variare in base alla Fact in ciclo
@@ -212,7 +211,7 @@ class Cube
 		* AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
 		* AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda
 	*/
-	public function where_new()
+	public function whereClause()
 	{
 		// dd($joins);
 		// dd($this->process->{"joins"}->{$this->fact});
@@ -314,7 +313,7 @@ class Cube
 		// dd($this->sql_info);
 	}
 
-	public function groupBy_new()
+	public function groupByClause()
 	{
 		$this->groupby_clause = [];
 		foreach ($this->fields as $token => $column) {
@@ -349,16 +348,16 @@ class Cube
 		// questa struttura viene utilizzata sia per le metriche di base che avanzate
 		// TODO: rinominare in report_select, report_from, ecc... per indicare che è la query
 		// "di base"
-		$this->select_new();
-		$this->from_new();
-		$this->where_new();
+		$this->selectClause();
+		$this->fromClause();
+		$this->whereClause();
 		$this->createFilters();
-		$this->groupBy_new();
+		$this->groupByClause();
 	}
 
-	public function base_table_new()
+	public function createBaseTable()
 	{
-		// $this->select_new();
+		// $this->selectClause();
 		// dd(!empty($this->process->baseMeasures));
 		$sql = NULL;
 		// dump("calcolo metriche di base");
@@ -617,7 +616,7 @@ class Cube
 	}
 
 	/* creo i datamart necessari per le metriche filtrate */
-	public function createMetricDatamarts_new()
+	public function createMetricsDatamart()
 	{
 		// dd($this->groupMetricsByFilters);
 		$sqlFilteredMetrics = [];
@@ -874,7 +873,7 @@ class Cube
 	/* creazione datamart finale:
 		* Viene creata una query che unisce .....TODO: completare i commenti
 	* */
-	public function datamart_new()
+	public function createDatamart()
 	{
 		$this->distinct_fields();
 		$comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamart_name}\n*/\n";

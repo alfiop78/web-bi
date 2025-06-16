@@ -520,7 +520,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			span.innerText = workbook.name;
 			ul__workbooks.appendChild(li);
 		}); */
-		// 16.06.2025 Recuperare elenco WorkBook dal DB
+		// 16.06.2025 Recupero elenco WorkBook dal DB
+		App.showConsole("Recupero elenco WorkBook...", 'info', null);
 		await fetch(`/fetch_api/workbooksByConnectionId`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
@@ -529,19 +530,18 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			.then((response) => response.json())
 			.then(data => {
 				console.log(data);
-				if (data) {
-					data.forEach(workbook => {
-						const content = template__li.content.cloneNode(true);
-						const li = content.querySelector('li[data-li]');
-						const span = li.querySelector('span');
-						li.dataset.token = workbook.token;
-						li.dataset.label = workbook.name;
-						li.addEventListener('click', workbookSelected);
-						li.dataset.elementSearch = 'workbooks';
-						span.innerText = workbook.name;
-						ul__workbooks.appendChild(li);
-					});
-				}
+				data.forEach(workbook => {
+					const content = template__li.content.cloneNode(true);
+					const li = content.querySelector('li[data-li]');
+					const span = li.querySelector('span');
+					li.dataset.token = workbook.token;
+					li.dataset.label = workbook.name;
+					li.addEventListener('click', workbookSelected);
+					li.dataset.elementSearch = 'workbooks';
+					span.innerText = workbook.name;
+					ul__workbooks.appendChild(li);
+				});
+				App.closeConsole();
 			})
 			.catch(err => {
 				App.showConsole(err, 'error');
