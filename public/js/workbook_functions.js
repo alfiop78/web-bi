@@ -49,7 +49,9 @@ async function workbookSelected(e) {
 	await checkTablesStorage();
 	// Gli elementi del canvas sono stati disegnati, creo il workbookMap
 	WorkBook.workbookMap = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
-	workBookInformations();
+	debugger;
+	WorkBook.getInformations();
+	// workBookInformations();
 	// modifico il nome del WorkBook in #input__workbook_title
 	input__workbook_title.innerText = WorkBook.name;
 	input__workbook_title.dataset.value = WorkBook.name;
@@ -85,6 +87,7 @@ async function checkTablesStorage() {
 }
 
 function workBookInformations() {
+	debugger;
 	document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
 	if (WorkBook) {
 		document.querySelector('#info.informations').classList.remove('none');

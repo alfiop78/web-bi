@@ -453,7 +453,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			if (document.querySelectorAll('*[data-adding], *[data-removed], *[data-modified]').length !== 0) {
 				Sheet.update();
 				// elimino il datamart perchè è stato modificato il report e le colonne nel datamart e nel report potrebbero non corrispondere più
-				debugger;
 				const result = await Sheet.delete();
 				// console.log('datamart eliminato : ', result);
 				// il report è stato modificato per cui il datamart deve essere eliminato
@@ -633,7 +632,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		translateRef.dataset.step = 1;
 		app.body.dataset.step = 1;
 		// carico le proprietà del Workbook nel boxInfo
-		workBookInformations()
+		// workBookInformations()
+		debugger;
+		WorkBook.getInformations();
 	}
 
 	/* tasto "Sheet" :
@@ -682,7 +683,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				Resource = new Resources('preview-datamart');
 			}
 			// carico le proprietà dello Sheet nel boxInfo
-			sheetInformations()
+			debugger;
+			// sheetInformations()
 		}
 	}
 
@@ -990,7 +992,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				console.log(response);
 				// elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
 				// precedente del report
-				debugger;
 				document.querySelectorAll('*[data-adding]').forEach(el => {
 					el.dataset.added = 'true;'
 					delete el.dataset.adding;
@@ -1002,7 +1003,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				// per poterla ricreare
 				Sheet.edit = true;
 				App.closeConsole();
-				preview();
+				preview(response);
 				App.loaderStop();
 			})
 			.catch(err => {

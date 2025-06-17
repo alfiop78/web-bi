@@ -28,14 +28,19 @@ async function sheetSelected(e) {
 	Resource = new Resources('preview-datamart');
 	// verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
 	// In caso positivo lo apro in preview-datamart.
-	if (await Sheet.exist()) {
+	Sheet.datamart = await Sheet.exist();
+	App.closeConsole();
+	(Sheet.datamart) ? preview(Sheet.datamart) : App.showConsole("Nessun Datamart presente!", 'warning', 2000);
+	/* if (await Sheet.exist()) {
 		App.closeConsole();
 		preview();
-	}
+	} */
 	// Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
 	Sheet.edit = true;
 	document.querySelector('#btn-sheet-save').disabled = false;
 	document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
+	// debugger;
+	Sheet.getInformations();
 }
 
 /*
@@ -68,7 +73,7 @@ function selectWrapper(e) {
 	popover__chartWrappers.hidePopover();
 }
 
-async function preview() {
+async function preview(datamart_name) {
 	// NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
 	// TODO: Passo in param un object con le colonne da estrarre (tutte)
 	/* const params = JSON.stringify({ sheet_id: sheet.id });
@@ -103,7 +108,8 @@ async function preview() {
 	const progressTotal = document.getElementById('progress-total');
 	const progressLabel = document.querySelector("label[for='progress-bar']");
 	App.showConsole('Recupero dati in corso...', 'info', null);
-	await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.sheet.userId}/preview`)
+	await fetch(`/fetch_api/${datamart_name}/preview`)
+		// await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.sheet.userId}/preview`)
 		.then((response) => {
 			// console.log(response);
 			if (!response.ok) { throw Error(response.statusText); }
@@ -144,7 +150,7 @@ async function preview() {
 							// App.closeConsole();
 							App.loaderStop();
 							google.charts.setOnLoadCallback(draw());
-							sheetInformations();
+							// sheetInformations();
 						}
 					}).catch((err) => {
 						App.showConsole(err, 'error');
@@ -161,7 +167,7 @@ async function preview() {
 					// App.closeConsole();
 					App.loaderStop();
 					google.charts.setOnLoadCallback(draw());
-					sheetInformations();
+					// sheetInformations();
 				}
 			} else {
 				App.closeConsole();
@@ -209,9 +215,11 @@ async function preview() {
 
 function sheetInformations() {
 	document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
+	debugger;
 	if (Sheet) {
 		// sono presenti info, elimino la classe css 'none'
 		document.querySelector('#info.informations').classList.remove('none');
+		debugger;
 		for (const [key, value] of Object.entries(Sheet.getInformations())) {
 			const ref = document.getElementById(key);
 			if (ref) {

@@ -206,7 +206,7 @@ class MapDatabaseController extends Controller
 		// return response()->json($info);
 	}
 
-	public function checkDatamart($id)
+	public function checkDatamart($id, $token, $updated_at)
 	{
 		// dump($id);
 		BIConnectionsController::getDB();
@@ -220,12 +220,88 @@ class MapDatabaseController extends Controller
 		// dd(Schema::connection(session('db_client_name'))->hasTable("decisyon_cache.WEB_BI_$id"));
 		// dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id"));
 		// dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id"));
-		return Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id");
+
+		// return Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id");
+		$datamart_name = NULL;
+		// dump($updated_at);
+		switch (true) {
+			case Schema::connection(session('db_client_name'))->hasTable("WEB_BI_LOCAL_{$id}"):
+				// return "WEB_BI_LOCAL_{$id}";
+				$datamart_name = "WEB_BI_LOCAL_{$id}";
+				break;
+			case Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$id}"):
+				// 17.06.2025 Posso aprire questo datamart SOLO se il report in locale non è stato modificato
+				// Se il report in locale è stato modificato ma non elaborato, l'esecuzione arriva qui.
+				// Però qui devo controllare 'updated_at', se il report in locale è stato modificato non
+				// posso aprire WEB_BI_DATAMART_USERID, altrimenti lo posso aprire
+				// return "WEB_BI_{$id}";
+				$sheet = BIsheet::where("token", $token)->first('sheet_updated_at');
+				// converto la updated_at proveniente dallo sheet in localStorage per confrontarla con $sheet_updated_at
+				// ...proveniente dal DB
+				$local_updated_at = new DateTimeImmutable($updated_at);
+				// dd($sheet->sheet_updated_at, $local_updated_at->format('Y-m-d H:i:s.v'));
+				// dd(($local_updated_at->format('Y-m-d H:i:s.v') === $sheet->sheet_updated_at));
+				if ($local_updated_at->format('Y-m-d H:i:s.v') === $sheet->sheet_updated_at) {
+					// dd("Sheet DB e locale sono identici");
+					$datamart_name = "WEB_BI_{$id}";
+				} else {
+					// dd("sheet in localstorage e sheet su DB sono differenti");
+					$datamart_name = FALSE;
+				}
+				break;
+			default:
+				// return FALSE;
+				$datamart_name = FALSE;
+		}
+		return $datamart_name;
 	}
 
-	public function deleteDatamart($id)
+	private function delete($datamart_name)
 	{
-		if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$id}")) {
+		if (Schema::connection(session('db_client_name'))->hasTable($datamart_name)) {
+			try {
+				switch (session('db_driver')) {
+					case 'odbc':
+						// TEST: 17.06.2025 Verificare se, senza specificare lo schema, viene effettuato correttamente il drop table
+						Schema::connection(session('db_client_name'))->drop("decisyon_cache.{$datamart_name}");
+						break;
+					case 'mysql':
+						Schema::connection(session('db_client_name'))->drop($datamart_name);
+						break;
+					default:
+						Schema::connection(session('db_client_name'))->drop($datamart_name);
+						break;
+				}
+				return TRUE;
+			} catch (\Throwable $th) {
+				throw $th;
+			}
+		} else {
+			return FALSE;
+		}
+	}
+
+	public function deleteDatamart($id, $token)
+	{
+		$sheet = BIsheet::find($token);
+		switch (true) {
+			case Schema::connection(session('db_client_name'))->hasTable("WEB_BI_LOCAL_{$id}"):
+				return $this->delete("WEB_BI_LOCAL_{$id}");
+				break;
+			case Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$id}"):
+				// Se lo sheet è pubblico, non posso eliminare WEB_BI_DATAMART_USERID.
+				// Posso eliminare WEB_BI_LOCAL_DATAMART_USERID se è presente (quindi se è stato elaborato almeno una volta)
+				// ---
+				// Se lo sheet non è pubblico, posso eliminare WEB_BI_DATAMART_USERID.
+				// In questo caso, quando non è stato pubblicato, l'elaborazione in locale ha creato WEB_BI_DATAMART_USERID
+				// e non WEB_BI_LOCAL_DATAMART_USERID
+				return ($sheet) ? $this->delete("WEB_BI_LOCAL_{$id}") : $this->delete("WEB_BI_{$id}");
+				break;
+			default:
+				return FALSE;
+				break;
+		}
+		/* if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$id}")) {
 			try {
 				switch (session('db_driver')) {
 					case 'odbc':
@@ -245,7 +321,7 @@ class MapDatabaseController extends Controller
 			// return Schema::connection(session('db_client_name'))->drop("WEB_BI_{$id}");
 			// return Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_$id");
 			// return Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.WEB_BI_$id");
-		}
+		} */
 	}
 
 	// 26.08.2024 Non ancora implementata da JS
@@ -713,9 +789,9 @@ class MapDatabaseController extends Controller
 		return $copy;
 	}
 
-	public function preview($id)
+	public function preview($datamart_name)
 	{
-		// dd($id);
+		// dd($datamart_name);
 		// $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
 		// $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
 		// $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
@@ -743,8 +819,8 @@ class MapDatabaseController extends Controller
 		}
 
 		$columnsData = $queryColumns->where('TABLE_SCHEMA', "decisyon_cache")
-			->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
-		$query = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}");
+			->where('TABLE_NAME', $datamart_name)->orderBy('ordinal_position')->get();
+		$query = DB::connection(session('db_client_name'))->table("decisyon_cache.{$datamart_name}");
 		foreach ($columnsData as $columns) {
 			foreach ($columns as $column) {
 				$query->orderBy($column);
@@ -974,19 +1050,25 @@ class MapDatabaseController extends Controller
 			// il datamart WEB_BI_LOCAL_DATAMART_USERID altrimenti vado a sovrascrivere il datamart presente in bi_sheets (e anche eventuali
 			// sheet presenti sulle Dashboard)
 			$this->query = new Cube($process);
-			if (BIsheet::find($process->token)) {
-				$this->query->datamart_name = "WEB_BI_LOCAL_{$this->query->datamart_id}_{$this->query->user_id}";
-			} else {
-				$this->query->datamart_name = "WEB_BI_{$this->query->datamart_id}_{$this->query->user_id}";
-			}
+			// $sheet = BIsheet::find($process->token);
+			$this->query->sheet = BIsheet::find($process->token);
+			// elaborazione in locale, verifico se è presente lo sheet "pubblicato".
+			// Se presente creo WEB_BI_LOCAL_... per non sovrascrivere quello pubblicato
+			// Se non è presente una versione pubblicata posso utilizzare WEB_BI_...
+			$this->query->datamart_name = ($this->query->sheet) ?
+				"WEB_BI_LOCAL_{$this->query->datamart_id}_{$this->query->user_id}" :
+				"WEB_BI_{$this->query->datamart_id}_{$this->query->user_id}";
 			// dd($this->query->datamart_name);
 			$this->query->datamartFields();
 			foreach ($this->query->facts as $fact) {
 				$this->query->fact = $fact;
 				$this->query->factId = substr($fact, -5);
-				$this->query->baseTableName = "WB_BASE_{$this->query->datamart_name}_{$this->query->factId}";
+				// $this->query->baseTableName = "WB_BASE_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}";
+				$this->query->baseTableName = ($this->query->sheet) ?
+					"WB_BASE_LOCAL_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}" :
+					"WB_BASE_{$this->query->datamart_id}_{$this->query->user_id}_{$this->query->factId}";
 				$this->query->createBaseQuery();
-				// TODO: rinominare in "calcolo metriche di base"
+				// WARN: 17.06.2025 in fase schedulazione curlprocess() qui c'è un controllo sulle metriche di base, prima di invocare createBaseTable()
 				$this->query->createBaseTable();
 				// dd($result_base_metrics);
 				// se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
@@ -998,8 +1080,7 @@ class MapDatabaseController extends Controller
 					// dd($this->query->process->advancedMeasures);
 					if (property_exists($this->query->process->advancedMeasures, $fact)) {
 						$this->calcAdvancedMetrics();
-						// dd($this->query->groupMetricsByFilters);
-						$this->query->createMetricsDatamart();
+						$this->query->createAdvancedMeasuresDatamart();
 					}
 				}
 			}
@@ -1200,6 +1281,8 @@ class MapDatabaseController extends Controller
 		// ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
 		// dd($process);
 		$this->query = new Cube($process);
+		$this->query->datamart_name = "WEB_BI_{$this->query->datamart_id}_{$this->query->user_id}";
+		// dd($this->query->datamart_name);
 		$this->query->datamartFields();
 		foreach ($this->query->facts as $fact) {
 			$this->query->fact = $fact;
@@ -1220,7 +1303,7 @@ class MapDatabaseController extends Controller
 				// sono presenti metriche avanzate
 				if (property_exists($this->query->process->advancedMeasures, $fact)) {
 					$this->calcAdvancedMetrics();
-					$this->query->createMetricsDatamart();
+					$this->query->createAdvancedMeasuresDatamart();
 				}
 			}
 		}
@@ -1228,10 +1311,10 @@ class MapDatabaseController extends Controller
 		$this->calcCompositeMetrics();
 
 		try {
-
 			// if ($this->query->createDatamart()) return "OK\n";
 			if ($this->query->createDatamart()) {
-				// TODO: 16.06.2025 Se è presente una tabella nominata WEB_BI_{$this->datamart_id} significa che lo sheet è stato
+				// dd("DATAMART CREATO");
+				// 16.06.2025 Se è presente una tabella nominata WEB_BI_{$this->datamart_id} significa che lo sheet è stato
 				// pubblicato su una Dashboard, eseguo il copy_table() per aggiornare anche i dati dello sheet visibile sulla dashboard
 				if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->query->datamart_id}")) {
 					if ($this->copy_table($this->query->datamart_name, $this->query->datamart_id)) return "OK\n";
@@ -1252,6 +1335,7 @@ class MapDatabaseController extends Controller
 		// per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
 		$process = json_decode(json_encode($request->all())); // object
 		$this->query = new Cube($process);
+		$this->query->datamart_name = "WEB_BI_{$this->query->datamart_id}_{$this->query->user_id}";
 		$this->query->datamartFields();
 		foreach ($this->query->facts as $fact) {
 			$this->query->sql_info = (object)[
@@ -1276,7 +1360,7 @@ class MapDatabaseController extends Controller
 				if (property_exists($this->query->process->{"advancedMeasures"}, $fact)) {
 					$this->calcAdvancedMetrics();
 					$this->query->json_info_advanced = [];
-					$resultSQL['advanced'] = $this->query->createMetricsDatamart();
+					$resultSQL['advanced'] = $this->query->createAdvancedMeasuresDatamart();
 				}
 			}
 		}

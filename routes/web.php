@@ -103,11 +103,13 @@ Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'dimensi
 // visualizzazione anteprima datamart con paginate()
 Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
 // preview del datamart
-Route::get('/fetch_api/{id}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
+// Route::get('/fetch_api/{id}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
+Route::get('/fetch_api/{datamart_name}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
 
-Route::get('/fetch_api/{id}/check_datamart', [MapDatabaseController::class, 'checkDatamart'])->name('web_bi.fetch_api.check_datamart');
+// Route::get('/fetch_api/{id}/check_datamart', [MapDatabaseController::class, 'checkDatamart'])->name('web_bi.fetch_api.check_datamart');
+Route::get('/fetch_api/datamart_id/{id}/token/{token}/updated_at/{updated_at}/check_datamart', [MapDatabaseController::class, 'checkDatamart'])->name('web_bi.fetch_api.check_datamart');
 
-Route::get('/fetch_api/{id}/delete_datamart', [MapDatabaseController::class, 'deleteDatamart'])->name('web_bi.fetch_api.delete_datamart');
+Route::get('/fetch_api/datamart_id/{id}/token/{token}/delete_datamart', [MapDatabaseController::class, 'deleteDatamart'])->name('web_bi.fetch_api.delete_datamart');
 
 // Metodo POST commentato, possibile utilizzo futuro, vedere commenti in MapDatabaseController
 Route::post('/fetch_api/datamartpost', [MapDatabaseController::class, 'datamartPost'])->name('web_bi.fetch_api.datamartPost');

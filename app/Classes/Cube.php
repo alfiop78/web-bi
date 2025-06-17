@@ -136,7 +136,7 @@ class Cube
 						// quando viene trovato un operatore. nell'array che sto costruendo ($sql) gli operatori dovrebbero
 						// essere tutti di 3 crt
 						if (in_array(" / ", $sql)) {
-						// if (in_array("/", $sql) || in_array(" / ", $sql)) {
+							// if (in_array("/", $sql) || in_array(" / ", $sql)) {
 							// la formula contiene l'operatore di divisione, imposto il CASE...WHEN
 							// OPTIMIZE: 15.05.2025 Molto probabilmente il codice non raggiunge mai l'else di questo operatore ternario, qui
 							// perchè il matches cerca i nomi colonna, dopo il punto, quindi è sicuramente una metrica. Anche nell'else (sotto)
@@ -346,8 +346,6 @@ class Cube
 	public function createBaseQuery()
 	{
 		// questa struttura viene utilizzata sia per le metriche di base che avanzate
-		// TODO: rinominare in report_select, report_from, ecc... per indicare che è la query
-		// "di base"
 		$this->selectClause();
 		$this->fromClause();
 		$this->whereClause();
@@ -420,20 +418,20 @@ class Cube
 	}
 
 	// Aggiunta di tabelle "provenienti" dalle metriche avanzate
-	private function setFromClause_advancedMeasure($from, $tableName)
+	private function setFromClause_advancedMeasure($from)
 	{
 		foreach ($from as $alias => $prop) {
 			$this->FROM_metricTable[$this->factId][$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
 
 			// TODO: da testare con una metrica filtrata contenente la prop 'from'
 			if (property_exists($this, 'sql_info')) {
-				$this->json_info_advanced[$tableName]->FROM->$alias = "{$prop->schema}.{$prop->table} AS {$alias}";
+				$this->json_info_advanced[$this->datamart_name_advanced_measures]->FROM->$alias = "{$prop->schema}.{$prop->table} AS {$alias}";
 			}
 		}
 	}
 
 	// Imposto la WHERE in base alle metriche filtrate
-	private function setWhereClause_advancedMeasure($joins, $tableName)
+	private function setWhereClause_advancedMeasure($joins)
 	{
 		// dd($joins);
 		foreach ($joins as $token => $join) {
@@ -441,16 +439,16 @@ class Cube
 			if ($join->alias === 'time') {
 				dd("test");
 				// FIX: l'esecuzione non dovrebbe mai raggiungere questo if perchè, in un filtro
-				// con funzioni temporali, queste vengono impostate in setFiltersMetricTable_new()
+				// con funzioni temporali, queste vengono impostate in setFiltersAdvancedMeasures()
 				$this->WHERE_metricTable[$token] = implode(" = ", $join->SQL);
 
 				if (property_exists($this, 'sql_info')) {
-					$this->json_info_advanced[$tableName]->{'WHERE'}->{$token} = implode(" = ", $join->SQL);
+					$this->json_info_advanced[$this->datamart_name_advanced_measures]->{'WHERE'}->{$token} = implode(" = ", $join->SQL);
 				}
 			} else {
 				$this->WHERE_metricTable[$this->factId][$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
 				if (property_exists($this, 'sql_info')) {
-					$this->json_info_advanced[$tableName]->WHERE->$token = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+					$this->json_info_advanced[$this->datamart_name_advanced_measures]->WHERE->$token = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
 				}
 			}
 		}
@@ -533,10 +531,10 @@ class Cube
 	}
 
 	/*
-		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.
+		aggiungo a $this->filters_metricTable i filtri presenti su una metrica avanzata.
 		Stessa logica del Metodo filters()
 	*/
-	private function setFiltersMetricTable_new($filters, $tableName)
+	private function setFiltersAdvancedMeasures($filters)
 	{
 		$this->filters_metricTable = [];
 		// dd($filters);
@@ -590,12 +588,12 @@ class Cube
 				}
 				/* WARN: 02.12.2024 non completato (da verificare) dd($this->WHERE_timingFn);
         if (property_exists($this, 'sql_info')) {
-          $this->json_info_advanced[$tableName]->AND->{$token} = $filter->SQL;
-          // $this->json_info_advanced[$tableName]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
+          $this->json_info_advanced[$this->datamart_name_advanced_measures]->AND->{$token} = $filter->SQL;
+          // $this->json_info_advanced[$this->datamart_name_advanced_measures]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
           // elimino la prop 'WHERE-TIME' da json_info_advanced perchè la metrica filtrata
           // contiene una funzione temporale, quindi non può coesistere insieme ad un altra relazione
           // con la WEB_BI_TIME
-          unset($this->json_info_advanced[$tableName]->{'WHERE-TIME'});
+          unset($this->json_info_advanced[$this->datamart_name_advanced_measures]->{'WHERE-TIME'});
         } */
 				// $this->WHERE_timingFn[$token] = implode(" = ", $filter->SQL);
 				// dd($this->WHERE_timingFn);
@@ -606,7 +604,7 @@ class Cube
 				$this->filters_metricTable[$this->factId][$filter->name] = $filter->SQL;
 
 				if (property_exists($this, 'sql_info')) {
-					$this->json_info_advanced[$tableName]->AND->{$filter->name} = $filter->SQL;
+					$this->json_info_advanced[$this->datamart_name_advanced_measures]->AND->{$filter->name} = $filter->SQL;
 				}
 			}
 		}
@@ -615,16 +613,29 @@ class Cube
 		// dd($this->json_info_advanced);
 	}
 
-	/* creo i datamart necessari per le metriche filtrate */
-	public function createMetricsDatamart()
+	/* creo i datamart necessari per le metriche avanzate */
+	public function createAdvancedMeasuresDatamart()
 	{
 		// dd($this->groupMetricsByFilters);
 		$sqlFilteredMetrics = [];
 		foreach ($this->groupMetricsByFilters as $groupToken => $advancedMetric) {
 			$groupAdvancedMeasures = [];
-			$tableName = "WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
+			// $tableName = "WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
+			// $tableName = ($this->sheet) ?
+			// 	"WB_METRIC_LOCAL_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}" :
+			// 	"WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
+			if (property_exists($this, 'sheet')) {
+				// elaborazione in locale, verifico se è presente lo sheet "pubblicato".
+				// Se presente creo WB_METRIC_LOCAL_... per non sovrascrivere quello pubblicato
+				// Se non è presente una versione pubblicata posso utilizzare WB_METRIC_...
+				$this->datamart_name_advanced_measures = ($this->sheet) ?
+					"WB_METRIC_LOCAL_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}" :
+					"WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
+			} else {
+				$this->datamart_name_advanced_measures = "WB_METRIC_{$this->datamart_id}_{$this->user_id}_{$this->factId}_{$groupToken}";
+			}
 			if (property_exists($this, 'sql_info')) {
-				$this->json_info_advanced[$tableName] = (object) [
+				$this->json_info_advanced[$this->datamart_name_advanced_measures] = (object) [
 					"SELECT" => $this->sql_info->{'SELECT'},
 					"METRICS" => (object)[],
 					"FROM" => clone $this->sql_info->{'FROM'},
@@ -678,38 +689,38 @@ class Cube
 					$groupAdvancedMeasures[$this->factId][$value->token] = $metric;
 				}
 				if (property_exists($this, 'sql_info')) {
-					// $this->json_info_advanced[$tableName]->METRICS->{"$metric->token"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS {$metric->token}";
-					$this->json_info_advanced[$tableName]->METRICS->{"$value->token"} = $metric;
+					// $this->json_info_advanced[$this->datamart_name_advanced_measures]->METRICS->{"$metric->token"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS {$metric->token}";
+					$this->json_info_advanced[$this->datamart_name_advanced_measures]->METRICS->{"$value->token"} = $metric;
 					// dd($this->json_info_advanced);
 				}
 				// dump($groupAdvancedMeasures);
 				// _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
 				// TODO: probabilmente posso creare questo array nello stesso modo di datamart_baseMeasures
-				// (quindi senza le keys $tablename e $metric->alias)
-				// $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
-				// $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
+				// (quindi senza le keys $this->datamart_name_advanced_measures e $metric->alias)
+				// $this->datamart_advancedMeasures[$this->datamart_name_advanced_measures][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
+				// $this->datamart_advancedMeasures[] = "{$this->datamart_name_advanced_measures}.{$metric->alias} AS {$metric->alias}";
 
 				// metrica che verrà inserita nella creazione del datamart finale
 				$this->datamart_advancedMeasures[] = "{$this->ifNullOperator}({$value->token}, 0) AS \"{$value->alias}\"";
 				// aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
-				$this->setFiltersMetricTable_new($value->filters, $tableName);
+				$this->setFiltersAdvancedMeasures($value->filters, $this->datamart_name_advanced_measures);
 				// dd($this->json_info_advanced);
 				// per ogni filtro presente nella metrica avanzata...
 				foreach ($value->filters as $filter) {
-					// if (property_exists($filter, 'from')) $this->setFromMetricTable($filter->from, $tableName);
+					// if (property_exists($filter, 'from')) $this->setFromMetricTable($filter->from, $this->datamart_name_advanced_measures);
 					// dd($filter);
 					// le funzioni temporali non contengono la clausola FROM
 					if (property_exists($filter, 'from')) {
-						if (property_exists($filter->from, $this->fact)) $this->setFromClause_advancedMeasure($filter->from->{$this->fact}, $tableName);
+						if (property_exists($filter->from, $this->fact)) $this->setFromClause_advancedMeasure($filter->from->{$this->fact}, $this->datamart_name_advanced_measures);
 					}
 					// dd($this->filters_metricTable);
 					// dd($this->json_info_advanced);
 					// aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
 					// se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
 					// dd($filter->joins);
-					// (property_exists($filter, 'joins')) ? $this->setWhereMetricTable($filter->joins, $tableName) : $this->WHERE_metricTable = array();
+					// (property_exists($filter, 'joins')) ? $this->setWhereMetricTable($filter->joins, $this->datamart_name_advanced_measures) : $this->WHERE_metricTable = array();
 					if (property_exists($filter, 'joins')) {
-						(property_exists($filter->joins, $this->fact)) ? $this->setWhereClause_advancedMeasure($filter->joins->{$this->fact}, $tableName) : $this->WHERE_metricTable = array();
+						(property_exists($filter->joins, $this->fact)) ? $this->setWhereClause_advancedMeasure($filter->joins->{$this->fact}, $this->datamart_name_advanced_measures) : $this->WHERE_metricTable = array();
 					}
 				}
 				// dd($this->report_filters, $this->filters_metricTable, $this->WHERE_timingFn);
@@ -718,17 +729,20 @@ class Cube
 			// dd($this->datamart_advancedMeasures);
 			// creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
 			if (property_exists($this, 'sql_info')) {
-				$sqlFilteredMetrics[] = $this->createMetricTable_new($tableName, $groupAdvancedMeasures);
-				unset($this->json_info_advanced[$tableName]);
+				$sqlFilteredMetrics[] = $this->createDatamartAdvancedMeasures($this->datamart_name_advanced_measures, $groupAdvancedMeasures);
+				unset($this->json_info_advanced[$this->datamart_name_advanced_measures]);
 			} else {
 				// dd($groupAdvancedMeasures);
-				$this->createMetricTable_new($tableName, $groupAdvancedMeasures, false);
+				$this->createDatamartAdvancedMeasures($this->datamart_name_advanced_measures, $groupAdvancedMeasures, false);
 			}
 		}
 		if (property_exists($this, 'sql_info')) return $sqlFilteredMetrics;
 	}
 
-	private function createMetricTable_new($tableName, $advancedMetrics)
+	/*
+	 * Creazione datamart per le metriche avanzate
+	 * */
+	private function createDatamartAdvancedMeasures($advancedMetrics)
 	{
 		// dd($advancedMetrics);
 		$this->fromFilteredMetric = NULL;
@@ -790,10 +804,10 @@ class Cube
 		$comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics[$this->factId])) . "\n*/\n";
 		switch (session('db_driver')) {
 			case 'odbc':
-				$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
+				$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$this->datamart_name_advanced_measures ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
 				break;
 			case 'mysql':
-				$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName AS \n($this->sqlAdvancedMeasures);";
+				$createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$this->datamart_name_advanced_measures AS \n($this->sqlAdvancedMeasures);";
 				break;
 			default:
 				break;
@@ -802,7 +816,7 @@ class Cube
 		// TODO: eliminare la tabella temporanea come fatto per baseTable
 		$result = null;
 		if (property_exists($this, 'sql_info')) {
-			$this->queries[$tableName] = $this->datamart_fields;
+			$this->queries[$this->datamart_name_advanced_measures] = $this->datamart_fields;
 			return ["raw_sql" => nl2br($createStmt), "format_sql" => $this->json_info_advanced];
 		} else {
 			// dd($this->queries);
@@ -810,7 +824,7 @@ class Cube
 			// TODO: 27.09.2024 rivedere la gestione degli errori con Laravel
 			try {
 				$result = DB::connection(session('db_client_name'))->statement($createStmt);
-				$this->queries[$tableName] = $this->datamart_fields;
+				$this->queries[$this->datamart_name_advanced_measures] = $this->datamart_fields;
 			} catch (\Throwable $th) {
 				foreach (array_keys($this->queries) as $table) {
 					Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
@@ -840,12 +854,18 @@ class Cube
 			$union[$table] = $sql;
 		}
 		$union_sql = implode("UNION\n", $union);
+		if (property_exists($this, 'sheet')) {
+			// elaborazione in locale, verifico se è presente lo sheet "pubblicato".
+			$this->union_table_name = ($this->sheet) ? "union_local_{$this->datamart_id}_{$this->user_id}" : "union_{$this->datamart_id}_{$this->user_id}";
+		} else {
+			$this->union_table_name = "union_{$this->datamart_id}_{$this->user_id}";
+		}
 		switch (session('db_driver')) {
 			case 'odbc':
-				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->datamart_id}_{$this->user_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n$union_sql;";
+				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.{$this->union_table_name} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n$union_sql;";
 				break;
 			case 'mysql':
-				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->datamart_id}_{$this->user_id} AS\n$union_sql;";
+				$this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.{$this->union_table_name} AS\n$union_sql;";
 				break;
 			default:
 				break;
@@ -891,7 +911,8 @@ class Cube
 		$fields = [];
 		foreach ($this->datamart_fields as $token => $alias) {
 			// dd($token, $field);
-			$fields[] = "union_{$this->datamart_id}_{$this->user_id}.{$token} AS \"{$alias}\"";
+			// $fields[] = "union_{$this->datamart_id}_{$this->user_id}.{$token} AS \"{$alias}\"";
+			$fields[] = "{$this->union_table_name}.{$token} AS \"{$alias}\"";
 		}
 		// dd($fields);
 		// unisco i seguenti campi :
@@ -900,13 +921,15 @@ class Cube
 		$mergeElements = array_merge($fields, $this->datamart_baseMeasures, $this->datamart_advancedMeasures, $this->compositeMeasures);
 		$createStmt .= implode(",\n", $mergeElements);
 		// dd($createStmt);
-		$createStmt .= self::FROM . "decisyon_cache.union_{$this->datamart_id}_{$this->user_id}";
+		// $createStmt .= self::FROM . "decisyon_cache.union_{$this->datamart_id}_{$this->user_id}";
+		$createStmt .= self::FROM . "decisyon_cache.{$this->union_table_name}";
 		$joinLEFT = "";
 		$ONClause = [];
 		foreach ($this->queries as $table => $fields) {
 			$joinLEFT .= "\nLEFT JOIN decisyon_cache.{$table}\n\tON ";
 			foreach ($fields as $token => $field) {
-				$ONClause[] = "decisyon_cache.union_{$this->datamart_id}_{$this->user_id}.$token = $table.$token";
+				// $ONClause[] = "decisyon_cache.union_{$this->datamart_id}_{$this->user_id}.$token = $table.$token";
+				$ONClause[] = "decisyon_cache.{$this->union_table_name}.$token = $table.$token";
 			}
 			$joinLEFT .= implode("\nAND ", $ONClause);
 			unset($ONClause);
@@ -922,29 +945,32 @@ class Cube
 		} else {
 			try {
 				// elimino prima il datamart già esistente
-				if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->datamart_id}_{$this->user_id}")) {
+				// if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->datamart_id}_{$this->user_id}")) {
+				if (Schema::connection(session('db_client_name'))->hasTable($this->datamart_name)) {
 					// TEST: 27.09.2024 verifica, in laravel viene restituito un NOTICE quando si utilizza dropIfExists() e una tabella non è presente
-					Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->datamart_id}_{$this->user_id}");
+					// Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->datamart_id}_{$this->user_id}");
+					Schema::connection(session('db_client_name'))->drop("decisyon_cache.{$this->datamart_name}");
 				}
 				// creazione del datamart
 				// dd($createStmt);
 				DB::connection(session('db_client_name'))->statement($createStmt);
 				// elimino la tabella union....
-				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->datamart_id}_{$this->user_id}");
+				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.{$this->union_table_name}");
 				// elimino tutte le tabelle temporanee utilizzate per creare il datamart
 				foreach (array_keys($this->queries) as $table) {
 					Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
 				}
 			} catch (\Throwable $th) {
 				// elimino la tabella union....
-				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->datamart_id}_{$this->user_id}");
+				Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.{$this->union_table_name}");
 				// elimino tutte le tabelle temporanee utilizzate per creare il datamart
 				foreach (array_keys($this->queries) as $table) {
 					Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
 				}
 				throw $th;
 			}
-			return $this->datamart_id;
+			// return $this->datamart_id;
+			return $this->datamart_name;
 		}
 	}
-} // End Class
+}

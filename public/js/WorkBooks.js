@@ -170,15 +170,19 @@ class Sheets {
 
 	async exist() {
 		App.showConsole('Verifica in corso...', null, null);
-		return await fetch(`/fetch_api/${this.sheet.datamartId}_${this.userId}/check_datamart`)
+		// TODO: 17.06.2025 verifico quale datamart aprire. La priorità viene data al datamart WEB_BI_LOCAL...
+		// se questo non è presente viene aperto WEB_BI_DATAMART_USERID, se non presente nemmeno questo allora lo Sheet
+		// non è stato mai elaborato
+		return await fetch(`/fetch_api/datamart_id/${this.sheet.datamartId}_${this.userId}/token/${this.sheet.token}/updated_at/${this.sheet.updated_at}/check_datamart`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;
 			})
 			.then((response) => response.text())
 			.then(response => {
+				console.log(response);
 				App.closeConsole();
-				if (!response) App.showConsole('Datamart non presente', 'warning', 1500);
+				// if (!response) App.showConsole('Datamart non presente', 'warning', 1500);
 				return response;
 			})
 			.catch(err => {
@@ -186,8 +190,8 @@ class Sheets {
 			});
 	}
 
-	delete() {
-		return fetch(`/fetch_api/${this.sheet.datamartId}_${this.userId}/delete_datamart`)
+	async delete() {
+		return fetch(`/fetch_api/datamart_id/${this.sheet.datamartId}_${this.userId}/token/${this.sheet.token}/delete_datamart`)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;
@@ -230,16 +234,26 @@ class Sheets {
 	}
 
 	getInformations() {
+		document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
+		document.querySelector('#info.informations').classList.remove('none');
 		// popolo le informazioni per poter essere inserite nel BoxInfo
 		// il nome delle key deve corrispondere al nome del div nel DOM
-		let info = {
+		const info = {
 			info__token: this.sheet.token,
 			info__name: this.name,
+			info__datamart_id: this.datamart,
+			// TODO: 17.06.2025 da formattare (utilizzare le funzioni presenti in versioning.js)
 			info__created_at: this.sheet.created_at,
 			info__updated_at: this.sheet.updated_at
 		}
-		if (this.sheet.datamartId) info.info__datamart_id = `decisyon_cache.WEB_BI_${this.sheet.datamartId}_${this.userId}`;
-		return info;
+		for (const [key, value] of Object.entries(info)) {
+			const ref = document.getElementById(key);
+			if (ref) {
+				ref.hidden = false;
+				const refContent = document.getElementById(`${key}_content`);
+				refContent.textContent = value;
+			}
+		}
 	}
 
 }
@@ -650,14 +664,25 @@ class WorkBooks {
 		return false;
 	}
 
+	// popolo le informazioni per poter essere inserite nel BoxInfo
+	// il nome delle key deve corrispondere al nome del div nel DOM, in modo da poter essere ciclati
 	getInformations() {
-		// popolo le informazioni per poter essere inserite nel BoxInfo
-		// il nome delle key deve corrispondere al nome del div nel DOM, in modo da poter essere ciclati
-		return {
+		document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
+		const info = {
 			info__token: this.workBook.token,
 			info__name: this.name,
 			info__created_at: this.workBook.created_at,
 			info__updated_at: this.workBook.updated_at
+		}
+		document.querySelector('#info.informations').classList.remove('none');
+		// WARN: 17.06.2025 Codice ripetuto in Sheet.getInformations()
+		for (const [key, value] of Object.entries(info)) {
+			const ref = document.getElementById(key);
+			if (ref) {
+				ref.hidden = false;
+				const refContent = document.getElementById(`${key}_content`);
+				refContent.textContent = value;
+			}
 		}
 	}
 
