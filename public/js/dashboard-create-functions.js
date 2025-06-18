@@ -35,6 +35,7 @@ function getDataView() {
 }
 
 function drawDashboard() {
+	debugger;
 	Resource.multiData.forEach(datamart => {
 		Resource.data = datamart.data;
 		Resource.dashboardWrappers = datamart.specs.wrappers;
@@ -52,7 +53,7 @@ function drawDashboard() {
 			chartWrapper.setChartType(wrapper.chartType);
 			chartWrapper.setContainerId(Resource.ref.id);
 			chartWrapper.setOptions(wrapper.options);
-			if (wrapper.chartType === 'Table') {
+			if (wrapper.chartType === 'default') {
 				chartWrapper.setOption('height', 'auto');
 				chartWrapper.setOption('pageSize', 15);
 			}
@@ -103,7 +104,6 @@ function dashboardReady() {
 // invocata da sheetSelected, apertura di un singolo report in fase di creazione dashboard
 function draw() {
 	console.log('TIMER START', new Date());
-	debugger;
 	const start_time_execution = new Date();
 	// Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
 	// è consentità con la DataView perchè questa è read-only
@@ -170,7 +170,7 @@ function onReady() {
 	Resource.chartWrapperView = new google.visualization.ChartWrapper();
 	Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
 	Resource.chartWrapperView.setContainerId(Resource.ref.id);
-	if (Resource.wrapper === 'Table') {
+	if (Resource.wrapper === 'default') {
 		Resource.chartWrapperView.setOption('height', 'auto');
 		Resource.chartWrapperView.setOption('allowHtml', true);
 		Resource.chartWrapperView.setOption('page', 'enabled');
@@ -190,7 +190,6 @@ function onReady() {
 		Resource.chartWrapperView.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
 	}
 	// formatter
-	debugger;
 	Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
 		let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
 		formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.token));
@@ -261,22 +260,6 @@ function workbookSelected(e) {
 	// recupero l'elenco degli sheets del workbook selezionato
 	const sheets = Storages.getSheetsByWorkbookId(e.currentTarget.dataset.token);
 	console.log(sheets);
-	/* Storages.getSheetsByWorkbookId(e.currentTarget.dataset.token).forEach(sheet => {
-		const content = template__li.content.cloneNode(true);
-		const li = content.querySelector('li[data-li]');
-		const span = li.querySelector('span');
-		li.dataset.token = sheet.token;
-		li.dataset.datamartId = sheet.datamartId;
-		li.dataset.userId = sheet.userId;
-		li.dataset.label = sheet.name;
-		li.dataset.workbookId = sheet.workbook_ref;
-		li.addEventListener('click', sheetSelected);
-		li.dataset.elementSearch = 'sheets';
-		span.innerText = sheet.name;
-		ul__sheets.appendChild(li);
-	}); */
-
-
 	// recupero Sheet appartenenti al workbookId selezionato
 	App.showConsole("Recupero elenco Sheet...", 'info', null);
 	fetch(`/fetch_api/workbook_token/${e.currentTarget.dataset.token}/sheetsByWorkbookId`)
@@ -309,7 +292,7 @@ function workbookSelected(e) {
 }
 
 // Selezione del report che alimenta il chart_div
-function sheetSelected(e) {
+async function sheetSelected(e) {
 	// recupero le specifiche per questo report (resource)
 	// successivamente recupero i dati del datamart
 	Resource.token = e.currentTarget.dataset.token;
@@ -320,18 +303,31 @@ function sheetSelected(e) {
 	// NOTE: 10.12.2024 imposto di default 'Table' ma potrei impostare il default
 	// direttamente nelle specs.wrapper dello sheet, ad esempio se salvo lo sheet come barChart
 	// potrei impostare una proprietà 'default : true' nel wrapper barChart
-	Resource.ref.dataset.wrapper = 'Table';
+	Resource.ref.dataset.wrapper = 'default';
+	Resource.ref.dataset.chartType = 'Table';
 	// WARN: 11-04-2025 le specifiche le devo recuperare dal DB e non dal localStorage perchè la versione su DB potrebbe essere
 	// diversa tra quella su DB (fatta da un altro utente) e quella in locale
-	/* await fetch(`/fetch_api/sheet_get_specs/${Resource.token}/get_sheet_specs`)
+	console.log('START fetch sheet_get_specs');
+	await fetch(`/fetch_api/sheet_get_specs/${Resource.token}/get_sheet_specs`)
 		.then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;
 		})
 		.then((response) => response.json())
 		.then(data => {
+			console.log('RESOLVE sheet_get_specs');
 			Resource.specs = JSON.parse(data.json_specs);
 			// imposto, sul tasto btn__chartWrapper il token di questo Sheet
+			const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
+			btn__chartWrapper.dataset.id = Resource.ref.id;
+			btn__chartWrapper.dataset.token = Resource.token;
+			if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
+			// eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
+			getData(`/fetch_api/WEB_BI_${Resource.ref.dataset.datamartId}_${Resource.ref.dataset.userId}/preview?page=1`);
+			dlg__chartSection.close();
+			// aggiungo la class 'defined' nel div che contiene il grafico/tabella
+			Resource.ref.classList.add('defined');
+			/* // imposto, sul tasto btn__chartWrapper il token di questo Sheet
 			const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
 			btn__chartWrapper.dataset.id = Resource.ref.id;
 			btn__chartWrapper.dataset.token = Resource.token;
@@ -341,25 +337,15 @@ function sheetSelected(e) {
 			app.getData(`/fetch_api/${Resource.ref.dataset.datamartId}_${Resource.ref.dataset.userId}/preview?page=1`);
 			dlg__chartSection.close();
 			// aggiungo la class 'defined' nel div che contiene il grafico/tabella
-			Resource.ref.classList.add('defined');
+			Resource.ref.classList.add('defined'); */
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');
 			console.error(err);
-		}); */
+		});
+	console.log('STOP fetch sheet_get_specs');
 
-	// Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
-	Resource.specs = SheetStorages.getSheetSpecifications(e.currentTarget.dataset.token);
-	// imposto, sul tasto btn__chartWrapper il token di questo Sheet
-	const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
-	btn__chartWrapper.dataset.id = Resource.ref.id;
-	btn__chartWrapper.dataset.token = e.currentTarget.dataset.token;
-	if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
-	// eseguo una singola promise perchè qui viene caricata una risorsa, quindi un solo report che viene aggiunto alla Dashboard
-	getData(`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`);
-	dlg__chartSection.close();
-	// aggiungo la class 'defined' nel div che contiene il grafico/tabella
-	Resource.ref.classList.add('defined');
+	// Resource.specs = SheetStorages.getSheetSpecifications(e.currentTarget.dataset.token);
 }
 
 // recupero il datamrt
@@ -420,4 +406,9 @@ function handleOptionRefresh(e) {
 	// console.log(e.target.checked);
 	input__script_file_name.hidden = !e.target.checked
 	input__script_file_name.focus();
+}
+
+function getResources() {
+	// TODO: 18.06.2025 creo la urls per recuperare (e salvare in sessionStorage) tutto il JSON dello Sheet che verrà
+	// visualizzato sulla Dashboard
 }

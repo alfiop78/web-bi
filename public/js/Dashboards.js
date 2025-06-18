@@ -195,49 +195,48 @@ class Resources extends Dashboards {
 			columns: {},
 		},
 		filters: [],
-		bind: [],
-		// il wrapper di default è una Table
-		wrapper: {
-			Table: {
-				group: { key: [], columns: [] },
-				chartType: 'Table',
-				options: {
-					showRowNumber: false,
-					allowHtml: true,
-					frozenColumns: 0,
-					page: 'enable',
-					pageSize: 100,
-					// scrollLeftStartPosition: 300,
-					alternatingRowStyle: true,
-					sort: 'event',
-					width: '100%',
-					height: '100%',
-					cssClassNames: {
-						headerRow: "g-table-header",
-						tableRow: "g-table-row",
-						oddTableRow: null,
-						// oddTableRow: "g-oddRow",
-						// selectedTableRow: "g-selectedRow",
-						// hoverTableRow: "g-hoverRow",
-						selectedTableRow: null,
-						hoverTableRow: null,
-						headerCell: "g-header-cell",
-						tableCell: "g-table-cell",
-						// rowNumberCell: "g-rowNumberCell"
-						rowNumberCell: null
-					}
-				}
+		bind: []
+	}
+	#wrapper = {
+		group: { key: [], columns: [] },
+		chartType: 'Table',
+		options: {
+			showRowNumber: false,
+			allowHtml: true,
+			frozenColumns: 0,
+			page: 'enable',
+			pageSize: 100,
+			// scrollLeftStartPosition: 300,
+			alternatingRowStyle: true,
+			sort: 'event',
+			width: '100%',
+			height: '100%',
+			cssClassNames: {
+				headerRow: "g-table-header",
+				tableRow: "g-table-row",
+				oddTableRow: null,
+				// oddTableRow: "g-oddRow",
+				// selectedTableRow: "g-selectedRow",
+				// hoverTableRow: "g-hoverRow",
+				selectedTableRow: null,
+				hoverTableRow: null,
+				headerCell: "g-header-cell",
+				tableCell: "g-table-cell",
+				// rowNumberCell: "g-rowNumberCell"
+				rowNumberCell: null
 			}
 		}
-	}
+	};
 
 	constructor(ref) {
 		// WARN: 23.05.2025 Verificare in quale istanza della classe Resources viene passato l'argomento al Costruttore.
 		// Nella visualizzazione della dashboard non viene passato nessun argomento
 		super();
 		this.ref = document.getElementById(ref);
-		// chartWrapper default è una Table. indica il wrapper corrente
-		this.wrapper = 'Table';
+		// this.wrapper = 'Table';
+		this.wrapper = 'default';
+		// this.wrapper = `_${Math.random(0).toString(36).substring((2)).substring(0, 5)}`;
+		this.#specs.wrapper = { [this.wrapper]: this.#wrapper }
 		// utilizzo this.group per ogni wrapper, utilizzato nei Metodi utili alla costruzione del DataGroup e della DataViewGrouped
 		this.group = [];
 	}
@@ -260,6 +259,7 @@ class Resources extends Dashboards {
 
 	set specs(value) {
 		this.#specs = value;
+		debugger;
 	}
 
 	get specs() { return this.#specs; }

@@ -441,12 +441,12 @@ const body = document.getElementById('body');
 	}
 
 	app.saveSheet = async () => {
-		debugger;
 		Sheet.name = input__sheetName.dataset.value;
 		Sheet.userId = userId;
 		// verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
 		// Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
 		// se il report è in edit ed è stata fatta una modifica eseguo update()
+		debugger;
 		if (Sheet.edit === true) {
 			// il report è già presente in local ed è stato aperto
 			// se ci sono state delle modifiche eseguo update
@@ -473,6 +473,7 @@ const body = document.getElementById('body');
 		Sheet.edit = true;
 		// ricreo sempre le specifiche
 		Resource.specs.token = Sheet.sheet.token;
+		debugger;
 		Resource.setSpecifications();
 	}
 
@@ -962,7 +963,6 @@ const body = document.getElementById('body');
 		// App.showConsole('Elaborazione in corso...', 'info');
 		// lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
 		App.loaderStart();
-		debugger;
 		App.showConsole('Elaborazione in corso...', null, null);
 		if (Resource.tableRef) Resource.tableRef.clearChart();
 		const url = "/fetch_api/cube/sheet_create";
@@ -994,6 +994,7 @@ const body = document.getElementById('body');
 				Sheet.edit = true;
 				App.closeConsole();
 				preview();
+				Sheet.getInformations();
 				App.loaderStop();
 			})
 			.catch(err => {

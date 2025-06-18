@@ -31,10 +31,6 @@ async function sheetSelected(e) {
 	Sheet.datamart = await Sheet.exist();
 	App.closeConsole();
 	(Sheet.datamart) ? preview() : App.showConsole("Nessun Datamart presente!", 'warning', 2000);
-	/* if (await Sheet.exist()) {
-		App.closeConsole();
-		preview();
-	} */
 	// Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
 	Sheet.edit = true;
 	document.querySelector('#btn-sheet-save').disabled = false;
@@ -98,7 +94,9 @@ async function preview() {
 	  }); */
 	// end chiamta in POST
 
+	console.log(Resource.specs);
 	Resource.specs = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
+	debugger;
 	// se esistono più di un chartWrapper li visualizzo in questa popover
 	if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
 

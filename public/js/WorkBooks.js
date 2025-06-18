@@ -90,6 +90,7 @@ class Sheets {
 		debugger;
 		this.save();
 		console.info('sheet:', this.sheet);
+		debugger;
 		SheetStorage.save(this.sheet);
 	}
 
@@ -241,12 +242,24 @@ class Sheets {
 		};
 		// popolo le informazioni per poter essere inserite nel BoxInfo
 		// il nome delle key deve corrispondere al nome del div nel DOM
+
+		// conversione date in Universal Time
+		// const created_at = (this.sheet.created_at) ? new Date(this.sheet.created_at) : null;
+		let created_at, updated_at;
+		if (this.sheet.created_at) {
+			created_at = new Date(this.sheet.created_at);
+			created_at.setHours(created_at.getUTCHours());
+		}
+		if (this.sheet.updated_at) {
+			updated_at = new Date(this.sheet.updated_at);
+			updated_at.setHours(updated_at.getUTCHours());
+		}
 		const info = {
 			info__token: this.sheet.token,
 			info__name: this.name,
 			info__datamart_id: this.datamart,
-			info__created_at: (this.sheet.created_at) ? new Intl.DateTimeFormat("it-IT", options).format(new Date(this.sheet.created_at)) : null,
-			info__updated_at: (this.sheet.updated_at) ? new Intl.DateTimeFormat("it-IT", options).format(new Date(this.sheet.updated_at)) : null
+			info__created_at: (this.sheet.created_at) ? new Intl.DateTimeFormat("it-IT", options).format(created_at) : null,
+			info__updated_at: (this.sheet.updated_at) ? new Intl.DateTimeFormat("it-IT", options).format(updated_at) : null
 		}
 		for (const [key, value] of Object.entries(info)) {
 			const ref = document.getElementById(key);
@@ -675,11 +688,21 @@ class WorkBooks {
 		const options = {
 			weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric", fractionalSecondDigits: 3
 		};
+		let created_at, updated_at;
+		if (this.workBook.created_at) {
+			created_at = new Date(this.workBook.created_at);
+			// console.log(created_at.getUTCHours());
+			created_at.setHours(created_at.getUTCHours());
+		}
+		if (this.workBook.updated_at) {
+			updated_at = new Date(this.workBook.updated_at);
+			updated_at.setHours(updated_at.getUTCHours());
+		}
 		const info = {
 			info__token: this.workBook.token,
 			info__name: this.name,
-			info__created_at: new Intl.DateTimeFormat("it-IT", options).format(new Date(this.workBook.created_at)),
-			info__updated_at: new Intl.DateTimeFormat("it-IT", options).format(new Date(this.workBook.updated_at))
+			info__created_at: (this.workBook.created_at) ? new Intl.DateTimeFormat("it-IT", options).format(created_at) : null,
+			info__updated_at: (this.workBook.updated_at) ? new Intl.DateTimeFormat("it-IT", options).format(updated_at) : null
 		}
 		document.querySelector('#info.informations').classList.remove('none');
 		// WARN: 17.06.2025 Codice ripetuto in Sheet.getInformations()

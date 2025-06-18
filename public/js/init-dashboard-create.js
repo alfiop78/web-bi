@@ -178,6 +178,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 
 				Resource.json = JSON.parse(data.json_value);
 				console.log(Resource.json);
+				debugger;
 				// refresh time, se presente
 				if (Resource.json.options) {
 					input__refresh_time.value = Resource.json.options.refresh_time;
@@ -205,6 +206,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				// abilito il tasto Genera Url
 				btn__create_url.dataset.token = data.token;
 				btn__create_url.disabled = false;
+				debugger;
+				getResources();
 				app.getResources();
 			})
 			.catch(err => {
@@ -244,6 +247,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		// ciclo le resources
 		for (const [token, resource] of Object.entries(Resource.json.resources)) {
 			Resource.resources = resource;
+			// WARN: 18.06.2025 lo UserId deve essere quello recuperato dalla resources memorizzata nella dashboard
 			const userId = JSON.parse(window.localStorage.getItem(token)).userId;
 			Resource.arrResources.push(token);
 			// specifiche del chartWrapper
@@ -253,7 +257,8 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				Resource.ref = document.getElementById(ref);
 				Resource.refs.push(ref);
 				// aggiungo un token per identificare, in publish(), il report (datamart_id)
-				Resource.ref.dataset.wrapper = wrapper.chartType;
+				Resource.ref.dataset.wrapper = wrapper.name;
+				Resource.ref.dataset.chartType = wrapper.chartType;
 				Resource.ref.dataset.token = token;
 				Resource.ref.dataset.datamartId = resource.datamartId;
 				Resource.ref.dataset.userId = userId;
@@ -265,9 +270,10 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				btn__chartWrapper.dataset.token = token;
 				if (Object.keys(resource.wrappers).length >= 2) btn__chartWrapper.removeAttribute('disabled');
 			}
+			// TODO: 18.06.2025 Se la dashboard è pubblicata devo aprire WEB_BI_DATAMART altrimenti WEB_BI_DATAMART_USERID
 			// urls.push(`/fetch_api/${resource.datamartId}/preview?page=1`)
 			// urls.push(`/fetch_api/${resource.datamartId}_${resource.userId}/preview?page=1`)
-			urls.push(`/fetch_api/${resource.datamartId}_${userId}/preview?page=1`)
+			urls.push(`/fetch_api/WEB_BI_${resource.datamartId}_${userId}/preview?page=1`)
 		}
 		app.getAllData(urls);
 		// console.log(Resource.multiData);
@@ -353,20 +359,26 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		// 10.12.2024 Recupero le risorse aggiunte alla dashboard
 		document.querySelectorAll('.chartContent[data-resource]>.chart-elements').forEach(sheet => {
 			const token = sheet.dataset.token;
-			const specs = JSON.parse(window.localStorage.getItem(token)).specs;
+			// const specs = JSON.parse(window.localStorage.getItem(token)).specs;
 			// console.log(specs);
 			// verifico se questa risorsa è già stata inserita in un altro container
-			specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
+			// specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
 			Resource.resources = {
 				token,
 				userId: +sheet.dataset.userId,
 				datamartId: +sheet.dataset.datamartId,
-				data: specs.data,
-				bind: specs.bind,
-				filters: specs.filters,
-				wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
+				wrappers: { [sheet.id]: { name: sheet.dataset.wrapper, containerId: sheet.id, chartType: sheet.dataset.chartType } }
+
+
+				// data: specs.data,
+				// bind: specs.bind,
+				// filters: specs.filters,
+				// TODO: 18.06.2025 Và inserito sheet.id (chart__1) e il token del Wrapper che sarà messo in questa posizione
+				// all'interno della Dashboard
+				// wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
 			};
 		});
+		debugger;
 		// verifica di validità
 		if (Resource.resources.size === 0) {
 			App.showConsole('Nessun oggetto aggiunto alla Dashboard', 'error', 2000);
@@ -586,6 +598,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 										ref: Resource.refs[index],
 										specs: Resource.wrapperSpecs[index]
 									};
+									debugger;
 									google.charts.setOnLoadCallback(drawDashboard());
 								}
 							}).catch((err) => {
@@ -604,6 +617,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 							ref: Resource.refs[index],
 							specs: Resource.wrapperSpecs[index]
 						};
+						debugger;
 						google.charts.setOnLoadCallback(drawDashboard());
 					}
 				});

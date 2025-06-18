@@ -230,10 +230,11 @@ class MapDatabaseController extends Controller
 				$datamart_name = "WEB_BI_LOCAL_{$id}";
 				break;
 			case Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$id}"):
-				// 17.06.2025 Posso aprire questo datamart SOLO se il report in locale non è stato modificato
 				// Se il report in locale è stato modificato ma non elaborato, l'esecuzione arriva qui.
-				// Però qui devo controllare 'updated_at', se il report in locale è stato modificato non
-				// posso aprire WEB_BI_DATAMART_USERID, altrimenti lo posso aprire
+				// 17.06.2025 Posso aprire questo datamart SOLO se il report in locale non è stato modificato.
+				// Però qui devo controllare 'updated_at'.
+				// Se il report locale è stato modificato non posso aprire
+				// WEB_BI_DATAMART_USERID, se non è stato modificato apro WEB_BI_DATAMART_USERID
 				// return "WEB_BI_{$id}";
 				$sheet = BIsheet::where("token", $token)->first('sheet_updated_at');
 				// converto la updated_at proveniente dallo sheet in localStorage per confrontarla con $sheet_updated_at
@@ -241,13 +242,32 @@ class MapDatabaseController extends Controller
 				$local_updated_at = new DateTimeImmutable($updated_at);
 				// dd($sheet->sheet_updated_at, $local_updated_at->format('Y-m-d H:i:s.v'));
 				// dd(($local_updated_at->format('Y-m-d H:i:s.v') === $sheet->sheet_updated_at));
-				if ($local_updated_at->format('Y-m-d H:i:s.v') === $sheet->sheet_updated_at) {
+				if ($sheet) {
+					// Questo Sheet è "pubblicato", verifico se non ci sono state modifiche in locale e apro
+					// WEB_BI_DATAMART_USERID
+					if ($local_updated_at->format('Y-m-d H:i:s.v') === $sheet->sheet_updated_at) {
+						// dd("Sheet DB e locale sono identici");
+						$datamart_name = "WEB_BI_{$id}";
+					} else {
+						// dd("sheet in localstorage e sheet su DB sono differenti");
+						// Lo Sheet in locale è stato modificato ma non è stato elaborato, per questo l'esecuzione
+						// arriva qui (altrimenti verrebbe intercettato dal primo case:)
+						$datamart_name = FALSE;
+					}
+				} else {
+					// Il report in locale è stato eseguito come WEB_BI_DATAMART_USERID e non come
+					// WEB_BI_LOCAL_DATAMART_USERID, questo perchè, al momento dell'elaborazione, non era
+					// presente una versione "pubblicata"
+					// In questo caso apro WEB_BI_DATAMART_USERID
+					$datamart_name = "WEB_BI_{$id}";
+				}
+				/* if ($local_updated_at->format('Y-m-d H:i:s.v') === $sheet->sheet_updated_at) {
 					// dd("Sheet DB e locale sono identici");
 					$datamart_name = "WEB_BI_{$id}";
 				} else {
 					// dd("sheet in localstorage e sheet su DB sono differenti");
 					$datamart_name = FALSE;
-				}
+				} */
 				break;
 			default:
 				// return FALSE;
