@@ -30,7 +30,7 @@ async function sheetSelected(e) {
 	// In caso positivo lo apro in preview-datamart.
 	Sheet.datamart = await Sheet.exist();
 	App.closeConsole();
-	(Sheet.datamart) ? preview(Sheet.datamart) : App.showConsole("Nessun Datamart presente!", 'warning', 2000);
+	(Sheet.datamart) ? preview() : App.showConsole("Nessun Datamart presente!", 'warning', 2000);
 	/* if (await Sheet.exist()) {
 		App.closeConsole();
 		preview();
@@ -39,7 +39,6 @@ async function sheetSelected(e) {
 	Sheet.edit = true;
 	document.querySelector('#btn-sheet-save').disabled = false;
 	document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
-	// debugger;
 	Sheet.getInformations();
 }
 
@@ -73,7 +72,7 @@ function selectWrapper(e) {
 	popover__chartWrappers.hidePopover();
 }
 
-async function preview(datamart_name) {
+async function preview() {
 	// NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
 	// TODO: Passo in param un object con le colonne da estrarre (tutte)
 	/* const params = JSON.stringify({ sheet_id: sheet.id });
@@ -108,7 +107,7 @@ async function preview(datamart_name) {
 	const progressTotal = document.getElementById('progress-total');
 	const progressLabel = document.querySelector("label[for='progress-bar']");
 	App.showConsole('Recupero dati in corso...', 'info', null);
-	await fetch(`/fetch_api/${datamart_name}/preview`)
+	await fetch(`/fetch_api/${Sheet.datamart}/preview`)
 		// await fetch(`/fetch_api/${Sheet.sheet.datamartId}_${Sheet.sheet.userId}/preview`)
 		.then((response) => {
 			// console.log(response);
@@ -150,7 +149,6 @@ async function preview(datamart_name) {
 							// App.closeConsole();
 							App.loaderStop();
 							google.charts.setOnLoadCallback(draw());
-							// sheetInformations();
 						}
 					}).catch((err) => {
 						App.showConsole(err, 'error');
@@ -167,7 +165,6 @@ async function preview(datamart_name) {
 					// App.closeConsole();
 					App.loaderStop();
 					google.charts.setOnLoadCallback(draw());
-					// sheetInformations();
 				}
 			} else {
 				App.closeConsole();
@@ -200,7 +197,6 @@ async function preview(datamart_name) {
 				google.charts.setOnLoadCallback(draw());
 				App.loaderStop();
 				App.closeConsole();
-				sheetInformations();
 			} else {
 				App.loaderStop();
 				App.closeConsole();
@@ -212,21 +208,3 @@ async function preview(datamart_name) {
 			console.error(err);
 		});
 } */
-
-function sheetInformations() {
-	document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
-	debugger;
-	if (Sheet) {
-		// sono presenti info, elimino la classe css 'none'
-		document.querySelector('#info.informations').classList.remove('none');
-		debugger;
-		for (const [key, value] of Object.entries(Sheet.getInformations())) {
-			const ref = document.getElementById(key);
-			if (ref) {
-				ref.hidden = false;
-				const refContent = document.getElementById(`${key}_content`);
-				refContent.textContent = value;
-			}
-		}
-	}
-}

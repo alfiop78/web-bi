@@ -6,10 +6,21 @@ const dlg__workbookOpen = document.getElementById('dlg__workbook_open');
 const btn__workbookNew = document.getElementById('btn__workbook_new');
 const btn__workbookCreate = document.getElementById('btn__workbook_create');
 const btn__workbookOpenDialog = document.getElementById('btn__workbook_openDialog');
+const btn__workbook = document.getElementById('btn__workbook');
 // inputs
 const input__workbook_name = document.getElementById('input__workbook_name');
 // titolo contenuto nella barra del menù
 const input__workbook_title = document.getElementById('input__workbook_title');
+
+function workbook() {
+	const translateRef = document.getElementById('stepTranslate');
+	const steps = document.getElementById('steps');
+	steps.dataset.step = 1;
+	translateRef.dataset.step = 1;
+	body.dataset.step = 1;
+	// carico le proprietà del Workbook nel boxInfo
+	WorkBook.getInformations();
+}
 
 // Creazione di un nuovo WorkBook, creazione oggetto della Classe WorkBook
 function workbookCreate() {
@@ -49,9 +60,7 @@ async function workbookSelected(e) {
 	await checkTablesStorage();
 	// Gli elementi del canvas sono stati disegnati, creo il workbookMap
 	WorkBook.workbookMap = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
-	debugger;
 	WorkBook.getInformations();
-	// workBookInformations();
 	// modifico il nome del WorkBook in #input__workbook_title
 	input__workbook_title.innerText = WorkBook.name;
 	input__workbook_title.dataset.value = WorkBook.name;
@@ -83,22 +92,6 @@ async function checkTablesStorage() {
 		WorkBookStorage.saveTables(await getTables(urls));
 		console.log('Tabelle salvate in sessionStorage');
 		App.closeConsole();
-	}
-}
-
-function workBookInformations() {
-	debugger;
-	document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
-	if (WorkBook) {
-		document.querySelector('#info.informations').classList.remove('none');
-		for (const [key, value] of Object.entries(WorkBook.getInformations())) {
-			const ref = document.getElementById(key);
-			if (ref) {
-				ref.hidden = false;
-				const refContent = document.getElementById(`${key}_content`);
-				refContent.textContent = value;
-			}
-		}
 	}
 }
 

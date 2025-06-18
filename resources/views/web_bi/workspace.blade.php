@@ -1125,7 +1125,7 @@
 								</section>
 							</div>
 							<section class="actions">
-								<button id="workbook" class="btn-buttons">Workbook</button>
+								<button id="btn__workbook" class="btn-buttons">Workbook</button>
 								<div>
 									<button id="sheet" class="btn-buttons">Sheet</button>
 									<button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL">SQL</button>
@@ -1157,13 +1157,12 @@
 		<button type="button" id="btnShowInfo" class="material-symbols-rounded">multiple_stop</button>
 		<div id="info" class="informations none">
 			<div id="info__name" class="info" hidden>
-				<!-- <button id="btnCopyText__name" type="button" class="material-symbols-rounded">content_copy</button> -->
 				<span>Nome</span>
 				<p id="info__name_content"></p>
 			</div>
 			<div id="info__token" class="info" hidden>
 				<!-- <button id="btnCopyText__token" type="button" class="material-symbols-rounded">content_copy</button> -->
-				<span>ObjectID</span>
+				<span>Token</span>
 				<p id="info__token_content"></p>
 			</div>
 			<div id="info__datamart_id" class="info" hidden>
@@ -1172,12 +1171,10 @@
 				<p id="info__datamart_id_content"></p>
 			</div>
 			<div id="info__created_at" class="info" hidden>
-				<!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
 				<span>Data creazione</span>
 				<p id="info__created_at_content"></p>
 			</div>
 			<div id="info__updated_at" class="info" hidden>
-				<!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
 				<span>Data aggiornamento</span>
 				<p id="info__updated_at_content"></p>
 			</div>

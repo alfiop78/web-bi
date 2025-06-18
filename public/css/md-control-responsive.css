@@ -316,7 +316,7 @@ input:read-write::placeholder {
   justify-content: flex-end;
 }
 
-#steps[data-step="1"] #workbook {
+#steps[data-step="1"] #btn__workbook {
   display: none;
 }
 

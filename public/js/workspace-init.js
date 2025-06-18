@@ -53,6 +53,7 @@ const rowsDropzone = document.getElementById('dropzone-rows');
 const columnsDropzone = document.getElementById('dropzone-columns');
 
 const export__datatable_xls = document.getElementById('export__datatable_xls');
+const body = document.getElementById('body');
 
 (() => {
 	var app = {
@@ -66,7 +67,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 		dialogSchema: document.getElementById('dlg-schema'),
 		dialogNewSheet: document.getElementById('dialog-new-sheet'),
 		btnAdvancedMetricSave: document.getElementById("btn-metric-save"),
-		btnWorkBook: document.getElementById('workbook'),
+		// btnWorkBook: document.getElementById('workbook'),
 		btnSheet: document.getElementById('sheet'),
 		btnShowInfo: document.getElementById('btnShowInfo'),
 		btnCopyText: document.getElementById('btnCopyText'),
@@ -624,19 +625,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
 	input__sheetName.oninput = (e) => App.checkTitle(e.target);
 
-	// tasto "Workbook" per ritornare allo step 1
-	app.btnWorkBook.onclick = (e) => {
-		const translateRef = document.getElementById('stepTranslate');
-		const steps = document.getElementById('steps');
-		steps.dataset.step = 1;
-		translateRef.dataset.step = 1;
-		app.body.dataset.step = 1;
-		// carico le proprietà del Workbook nel boxInfo
-		// workBookInformations()
-		debugger;
-		WorkBook.getInformations();
-	}
-
 	/* tasto "Sheet" :
 		* Passp allo step 2 (Sheet)
 		*	- Salvataggio del WorkBook
@@ -683,8 +671,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				Resource = new Resources('preview-datamart');
 			}
 			// carico le proprietà dello Sheet nel boxInfo
-			debugger;
-			// sheetInformations()
+			Sheet.getInformations();
 		}
 	}
 
@@ -989,7 +976,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 			})
 			.then((response) => response.text())
 			.then(response => {
+				// response contiene il nome del datamart appena elaborato. Lo memorizzo in Sheet.datamart
+				// perchè questo verrà utilizzato nel box info.
 				console.log(response);
+				Sheet.datamart = response;
 				// elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
 				// precedente del report
 				document.querySelectorAll('*[data-adding]').forEach(el => {
@@ -1003,7 +993,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 				// per poterla ricreare
 				Sheet.edit = true;
 				App.closeConsole();
-				preview(response);
+				preview();
 				App.loaderStop();
 			})
 			.catch(err => {

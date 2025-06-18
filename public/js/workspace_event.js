@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	btn__workbookCreate.addEventListener('click', workbookCreate);
 	// Apertura dialog con elenco workbook
 	btn__workbookOpenDialog.addEventListener('click', workbookOpenDialog);
+	// Tasto btn__workbook per tornare allo step 1 dalla sezione Sheet
+	btn__workbook.addEventListener('click', workbook);
 	// Titolo del WorkBook
 	input__workbook_title.addEventListener('blur', editWorkbookTitle);
 	// TODO: 04.10.2024 qui potrei nascondere il loader della pagina

@@ -236,19 +236,21 @@ class Sheets {
 	getInformations() {
 		document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
 		document.querySelector('#info.informations').classList.remove('none');
+		const options = {
+			weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric", fractionalSecondDigits: 3
+		};
 		// popolo le informazioni per poter essere inserite nel BoxInfo
 		// il nome delle key deve corrispondere al nome del div nel DOM
 		const info = {
 			info__token: this.sheet.token,
 			info__name: this.name,
 			info__datamart_id: this.datamart,
-			// TODO: 17.06.2025 da formattare (utilizzare le funzioni presenti in versioning.js)
-			info__created_at: this.sheet.created_at,
-			info__updated_at: this.sheet.updated_at
+			info__created_at: (this.sheet.created_at) ? new Intl.DateTimeFormat("it-IT", options).format(new Date(this.sheet.created_at)) : null,
+			info__updated_at: (this.sheet.updated_at) ? new Intl.DateTimeFormat("it-IT", options).format(new Date(this.sheet.updated_at)) : null
 		}
 		for (const [key, value] of Object.entries(info)) {
 			const ref = document.getElementById(key);
-			if (ref) {
+			if (ref && value) {
 				ref.hidden = false;
 				const refContent = document.getElementById(`${key}_content`);
 				refContent.textContent = value;
@@ -666,13 +668,18 @@ class WorkBooks {
 
 	// popolo le informazioni per poter essere inserite nel BoxInfo
 	// il nome delle key deve corrispondere al nome del div nel DOM, in modo da poter essere ciclati
+	// OPTIMIZE: 18.06.2025 Sia questo Metodo che quello presente in Sheets, può essere ottimizzato
+	// utilizzando i template html
 	getInformations() {
 		document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
+		const options = {
+			weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric", fractionalSecondDigits: 3
+		};
 		const info = {
 			info__token: this.workBook.token,
 			info__name: this.name,
-			info__created_at: this.workBook.created_at,
-			info__updated_at: this.workBook.updated_at
+			info__created_at: new Intl.DateTimeFormat("it-IT", options).format(new Date(this.workBook.created_at)),
+			info__updated_at: new Intl.DateTimeFormat("it-IT", options).format(new Date(this.workBook.updated_at))
 		}
 		document.querySelector('#info.informations').classList.remove('none');
 		// WARN: 17.06.2025 Codice ripetuto in Sheet.getInformations()
