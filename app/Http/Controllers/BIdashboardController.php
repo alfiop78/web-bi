@@ -16,7 +16,7 @@ class BIdashboardController extends Controller
 	public function index()
 	{
 		// $dashboards = BIdashboard::get(['name', 'token']);
-		$dashboards = BIdashboard::where('connectionId', session('db_id'))->get(['name', 'published', 'token']);
+		$dashboards = BIdashboard::where(['connectionId' => session('db_id'), 'published' => true])->get(['name', 'published', 'token']);
 		// dd($dashboards);
 		return view('web_bi.dashboards')->with('dashboards', $dashboards);
 		// return response()->json(['dashboard' => $dashboards]);

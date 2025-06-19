@@ -809,6 +809,46 @@ class MapDatabaseController extends Controller
 		return $copy;
 	}
 
+	public function publish($token)
+	{
+		// dd($fromId, $toId);
+		// TODO: se la tabella di destinazione già esiste la elimino
+		BIConnectionsController::getDB();
+		$sheet = BIsheet::find($token);
+		if ($sheet) {
+			// sheet presente e versionato
+		} else {
+			// sheet non presente in bi_sheets
+		}
+		// dump(config("database.connections.client_mysql.database"));
+		// dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}"));
+
+		if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}")) {
+			// se il datamart "finale" (senza userId) già esiste, devo eliminarlo prima di ricrearlo
+			// echo ("tabella $toId esiste");
+			Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$toId}");
+			// Schema::connection(session('db_client_name'))->drop("WEB_BI_{$toId}");
+		}
+		switch (session('db_driver')) {
+			case 'odbc':
+				$sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
+				$copy = DB::connection(session('db_client_name'))->statement($sql);
+				break;
+			case 'mysql':
+				$createTable = DB::connection(session('db_client_name'))
+					->statement("CREATE TABLE decisyon_cache.WEB_BI_{$toId} LIKE decisyon_cache.WEB_BI_{$fromId};");
+				if ($createTable) {
+					$copy = DB::connection(session('db_client_name'))
+						->statement("INSERT INTO decisyon_cache.WEB_BI_{$toId} SELECT * FROM decisyon_cache.WEB_BI_{$fromId};");
+				}
+				break;
+			default:
+				break;
+		}
+		// Per mysql và utilizzato CREATE TABLE ... LIKE (vedere documentazione)
+		return $copy;
+	}
+
 	public function preview($datamart_name)
 	{
 		// dd($datamart_name);

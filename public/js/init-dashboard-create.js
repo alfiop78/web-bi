@@ -204,7 +204,6 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				// abilito il tasto Genera Url
 				btn__create_url.dataset.token = data.token;
 				btn__create_url.disabled = false;
-				// promise.all per recuperare tutti gli oggetti della dashboard
 				// 19.06.2025 Creo la url per il recupero dei dati dai datamart
 				// app.createUrlsDatamart();
 				createUrlsDatamart(data.resources);
@@ -248,8 +247,11 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		console.log(Resource.dashboard);
 
 		let urls = [];
+		debugger;
 		for (const wrapper of Resource.resources.values()) {
-			urls.push(`/fetch_api/copy_from/${wrapper.datamartId}_${wrapper.userId}/copy_to/${wrapper.datamartId}/copy_table`);
+			debugger;
+			// urls.push(`/fetch_api/copy_from/${wrapper.datamartId}_${wrapper.userId}/copy_to/${wrapper.datamartId}/copy_table`);
+			urls.push(`/fetch_api/publish/token/${wrapper.token}`);
 		}
 		console.log(urls);
 		await Promise.all(urls.map(url => fetch(url)))
@@ -318,30 +320,25 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		// 10.12.2024 Recupero le risorse aggiunte alla dashboard
 		document.querySelectorAll('.chartContent[data-resource]>.chart-elements').forEach(sheet => {
 			const token = sheet.dataset.token;
-			// const specs = JSON.parse(window.localStorage.getItem(token)).specs;
-			// console.log(specs);
-			// verifico se questa risorsa è già stata inserita in un altro container
-			// specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
+			// TODO: 19.06.2025 verifico se questa risorsa è già stata inserita in un altro container
 			Resource.resources = {
 				token,
-				userId: +sheet.dataset.userId,
+				// userId: +sheet.dataset.userId,
 				datamartId: +sheet.dataset.datamartId,
 				wrappers: {
 					[sheet.id]: {
 						name: sheet.dataset.wrapper,
 						containerId: sheet.id,
 						chartType: sheet.dataset.chartType,
+						// WARN: 19.06.2025 Al momento, in options, non salvo nulla, le options
+						// verranno prese dallo Sheet (bi_sheet) però, in futuro, dovrò implementare
+						// una dialog per poter configurare le opzioni del grafico (o della DataTable)
+						// In questo modo, le opzioni dello sheet impostate sulla dashboard, possono
+						// anche essere diverse da quelle impostate sul report. Ad esempio, potrei avere
+						// lo stesso report, configurato con colori diversi, per ogni dashboard
 						options: {}
 					}
 				}
-
-
-				// data: specs.data,
-				// bind: specs.bind,
-				// filters: specs.filters,
-				// TODO: 18.06.2025 Và inserito sheet.id (chart__1) e il token del Wrapper che sarà messo in questa posizione
-				// all'interno della Dashboard
-				// wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
 			};
 		});
 		debugger;
@@ -482,22 +479,6 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		if (e.currentTarget.classList.contains('defined')) return false;
 		// il ref corrente, appena aggiunto
 		Resource.ref = document.getElementById(e.currentTarget.id);
-		/*
-		  17-04-2025 Recupero gli WorkBook dal localStorage in base al db connesso
-		// ul__workbooks.querySelectorAll('li').forEach(item => item.remove());
-		// utilizzo il Metodo statico per recuperare l'elenco degli workbook appartenenti al
-		// databaseId corrente
-		 Storages.getWorkbookByDatabaseId(ref__connectionId.dataset.databaseId).forEach(workbook => {
-			const content = template__li.content.cloneNode(true);
-			const li = content.querySelector('li[data-li]');
-			const span = li.querySelector('span');
-			li.dataset.token = workbook.token;
-			li.dataset.label = workbook.name;
-			li.addEventListener('click', workbookSelected);
-			li.dataset.elementSearch = 'workbooks';
-			span.innerText = workbook.name;
-			ul__workbooks.appendChild(li);
-		}); */
 		// 16.06.2025 Recupero elenco WorkBook dal DB
 		App.showConsole("Recupero elenco WorkBook...", 'info', null);
 		await fetch(`/fetch_api/workbooksByConnectionId`)
