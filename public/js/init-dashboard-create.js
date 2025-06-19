@@ -326,7 +326,14 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				token,
 				userId: +sheet.dataset.userId,
 				datamartId: +sheet.dataset.datamartId,
-				wrappers: { [sheet.id]: { name: sheet.dataset.wrapper, containerId: sheet.id, chartType: sheet.dataset.chartType } }
+				wrappers: {
+					[sheet.id]: {
+						name: sheet.dataset.wrapper,
+						containerId: sheet.id,
+						chartType: sheet.dataset.chartType,
+						options: {}
+					}
+				}
 
 
 				// data: specs.data,
