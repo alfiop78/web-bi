@@ -81,7 +81,7 @@ class BIdashboardController extends Controller
 		// dump($dashboard);
 		// dump($dashboard->json_value);
 		// dd(json_decode($dashboard->json_value));
-		/* $dashboard_resources = json_decode($dashboard->json_value);
+		$dashboard_resources = json_decode($dashboard->json_value);
 		// dump($dashboard_resources->resources);
 		$resources = (object)[];
 		// dd($dashboard_resources);
@@ -89,8 +89,10 @@ class BIdashboardController extends Controller
 			$resources->$resource_token = BIsheet::findOrFail($value->token);
 			// dd($resources);
 		}
-		return response()->json(['dashboard' => $dashboard, 'resources' => $resources]); */
-		return response()->json($dashboard);
+		// TODO: 19.09.2025 Non sono necessari tutte le colonne del record in bi_sheets, valutare le colonne da
+		// recuperare insieme alla Dashboard
+		return response()->json(['dashboard' => $dashboard, 'resources' => $resources]);
+		// return response()->json($dashboard);
 	}
 
 	/**

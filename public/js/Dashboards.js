@@ -259,7 +259,6 @@ class Resources extends Dashboards {
 
 	set specs(value) {
 		this.#specs = value;
-		debugger;
 	}
 
 	get specs() { return this.#specs; }

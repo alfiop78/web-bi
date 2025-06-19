@@ -170,15 +170,14 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 			.then((response) => response.json())
 			.then(data => {
 				// imposto il titolo della dashboard
-				app.dashboardName.textContent = data.name;
-				app.dashboardName.dataset.value = data.name;
-				app.dashboardName.dataset.tempValue = data.name;
+				app.dashboardName.textContent = data.dashboard.name;
+				app.dashboardName.dataset.value = data.dashboard.name;
+				app.dashboardName.dataset.tempValue = data.dashboard.name;
 				// imposto il token sul tasto "Salva" per poter aggiornare la dashboard e non inserirla nel DB
-				app.btnSave.dataset.token = data.token;
+				app.btnSave.dataset.token = data.dashboard.token;
 
-				Resource.json = JSON.parse(data.json_value);
+				Resource.json = JSON.parse(data.dashboard.json_value);
 				console.log(Resource.json);
-				debugger;
 				// refresh time, se presente
 				if (Resource.json.options) {
 					input__refresh_time.value = Resource.json.options.refresh_time;
@@ -199,16 +198,16 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				// salvo la dashboard nel session storage, in questo modo posso tenere conto delle modifiche fatte e
 				// abilitare/disabilitare di conseguenza il tasto btnSave in base al MutationObserver
 				window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
+				// TODO: 19.06.2025 Valutare se scaricare, in sessionStorage, anche le 'resources'
 				App.closeConsole();
-				// promise.all per recuperare tutti gli oggetti della dashboard
-				// TODO: provare la promise.race per poter recuperare i dati
 				app.dlgDashboard.close();
 				// abilito il tasto Genera Url
 				btn__create_url.dataset.token = data.token;
 				btn__create_url.disabled = false;
-				debugger;
-				getResources();
-				app.getResources();
+				// promise.all per recuperare tutti gli oggetti della dashboard
+				// 19.06.2025 Creo la url per il recupero dei dati dai datamart
+				// app.createUrlsDatamart();
+				createUrlsDatamart(data.resources);
 			})
 			.catch(err => {
 				App.showConsole(err, 'error');
@@ -237,46 +236,6 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		popover.showPopover();
 		popover.style.top = `${top - popover.offsetHeight}px`;
 		popover.style.left = `${right}px`;
-	}
-
-	app.getResources = async () => {
-		let urls = [];
-		Resource.arrResources = [];
-		Resource.wrapperSpecs = [];
-		Resource.refs = [];
-		// ciclo le resources
-		for (const [token, resource] of Object.entries(Resource.json.resources)) {
-			Resource.resources = resource;
-			// WARN: 18.06.2025 lo UserId deve essere quello recuperato dalla resources memorizzata nella dashboard
-			const userId = JSON.parse(window.localStorage.getItem(token)).userId;
-			Resource.arrResources.push(token);
-			// specifiche del chartWrapper
-			Resource.wrapperSpecs.push(resource);
-			// ciclo sui wrappers per popolare tutti gli elementi della dashboard
-			for (const [ref, wrapper] of Object.entries(resource.wrappers)) {
-				Resource.ref = document.getElementById(ref);
-				Resource.refs.push(ref);
-				// aggiungo un token per identificare, in publish(), il report (datamart_id)
-				Resource.ref.dataset.wrapper = wrapper.name;
-				Resource.ref.dataset.chartType = wrapper.chartType;
-				Resource.ref.dataset.token = token;
-				Resource.ref.dataset.datamartId = resource.datamartId;
-				Resource.ref.dataset.userId = userId;
-				// Resource.ref.dataset.userId = resource.userId;
-				// aggiungo la class 'defined' nel div che contiene il grafico/tabella
-				Resource.ref.classList.add('defined');
-				const btn__chartWrapper = Resource.ref.parentElement.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
-				btn__chartWrapper.dataset.id = Resource.ref.id;
-				btn__chartWrapper.dataset.token = token;
-				if (Object.keys(resource.wrappers).length >= 2) btn__chartWrapper.removeAttribute('disabled');
-			}
-			// TODO: 18.06.2025 Se la dashboard è pubblicata devo aprire WEB_BI_DATAMART altrimenti WEB_BI_DATAMART_USERID
-			// urls.push(`/fetch_api/${resource.datamartId}/preview?page=1`)
-			// urls.push(`/fetch_api/${resource.datamartId}_${resource.userId}/preview?page=1`)
-			urls.push(`/fetch_api/WEB_BI_${resource.datamartId}_${userId}/preview?page=1`)
-		}
-		app.getAllData(urls);
-		// console.log(Resource.multiData);
 	}
 
 	app.publish = async (e) => {
@@ -560,72 +519,6 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				console.error(err);
 			});
 		dlg__chartSection.showModal();
-	}
-
-	app.getAllData = async (urls) => {
-		Resource.multiData = [];
-		let partialData = [];
-		await Promise.all(urls.map(url => fetch(url)))
-			.then(responses => {
-				return Promise.all(responses.map(response => {
-					if (!response.ok) { throw Error(response.statusText); }
-					return response.json();
-				}))
-			})
-			.then(async (paginateData) => {
-				paginateData.forEach((pagData, index) => {
-					// index: indica il numero delle promise, in questo caso, per ogni datamart recuperato incremento l'indice
-					// console.log(pagData.data);
-					// console.log(index);
-					let recursivePaginate = async (url, index) => {
-						// console.log(url);
-						await fetch(url).then((response) => {
-							// console.log(response);
-							if (!response.ok) { throw Error(response.statusText); }
-							return response;
-						}).then(response => response.json())
-							.then((paginate) => {
-								partialData[index] = partialData[index].concat(paginate.data);
-								if (paginate.next_page_url && paginate.current_page !== 5) {
-									recursivePaginate(paginate.next_page_url, index);
-									console.log(partialData[index]);
-								} else {
-									// Non sono presenti altre pagine, visualizzo la dashboard
-									console.log('tutte le paginate completate :', partialData[index]);
-									Resource.multiData[index] = {
-										data: partialData[index],
-										token: Resource.arrResources[index],
-										ref: Resource.refs[index],
-										specs: Resource.wrapperSpecs[index]
-									};
-									debugger;
-									google.charts.setOnLoadCallback(drawDashboard());
-								}
-							}).catch((err) => {
-								App.showConsole(err, 'error');
-								console.error(err);
-							});
-					}
-					partialData[index] = pagData.data;
-					if (pagData.next_page_url) {
-						recursivePaginate(pagData.next_page_url, index);
-					} else {
-						// Non sono presenti altre pagine, visualizzo la dashboard
-						Resource.multiData[index] = {
-							data: partialData[index],
-							token: Resource.arrResources[index],
-							ref: Resource.refs[index],
-							specs: Resource.wrapperSpecs[index]
-						};
-						debugger;
-						google.charts.setOnLoadCallback(drawDashboard());
-					}
-				});
-			})
-			.catch(err => {
-				App.showConsole(err, 'error');
-				console.error(err);
-			});
 	}
 
 	// Ridisegno il report in base alle specifiche recuperate dal report
