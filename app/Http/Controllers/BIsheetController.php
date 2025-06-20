@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use DateTimeImmutable;
 
+// aggiunta per richiamare i Metodi di MapDatabaseController
+use App\Http\Controllers\MapDatabaseController;
+
 class BIsheetController extends Controller
 {
 	/**
@@ -147,6 +150,45 @@ class BIsheetController extends Controller
 		$sheet->sheet_updated_at = $sheet_updated_at->format('Y-m-d H:i:s.v');
 		// $date = new DateTimeImmutable($sheet->sheet_updated_at);
 		// dd($date->format('Y-m-d H:i:s.v'));
+		// TODO: 20.06.2025 Se è presente un WEB_BI_LOCAL_ (con le ultime modifiche) devo
+		// ricopiare WEB_BI_LOCAL.... -> WEB_BI_datamartId_userId e, se è presente una versione
+		// pubblicata di questo sheet (sulle dashboard) devo fare il copy_table anche da :
+		// WEB_BI_LOCAL_... -> WEB_BI_datamartId
+		// TODO: 20.06.2025 Verifico se è presente la WEB_BI_LOCAL_.... per eliminarla
+		$datamart_name_local = "WEB_BI_LOCAL_{$request->collect()->get('datamartId')}_{$request->collect()->get('userId')}";
+		$datamart_name_user = "WEB_BI_{$request->collect()->get('datamartId')}_{$request->collect()->get('userId')}";
+		$datamart_name = "WEB_BI_{$request->collect()->get('datamartId')}";
+		if (Schema::connection(session('db_client_name'))->hasTable($datamart_name_local)) {
+			// La tabella WEB_BI_LOCAL_ è presente, quindi il report è stato rielaborato
+			// in questo caso la tabella $datamart_name_user è sempre presente
+			Schema::connection(session('db_client_name'))->drop("decisyon_cache.{$datamart_name_user}");
+			MapDatabaseController::copy_table($datamart_name_local, $datamart_name_user);
+			// Elimino la tabella WEB_BI_LOCAL_
+			try {
+				switch (session('db_driver')) {
+					case 'odbc':
+						Schema::connection(session('db_client_name'))->drop("decisyon_cache.{$datamart_name_local}");
+						// Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_LOCAL_{$datamartId}");
+						break;
+					case 'mysql':
+						Schema::connection(session('db_client_name'))->drop($datamart_name_local);
+						break;
+					default:
+						Schema::connection(session('db_client_name'))->drop($datamart_name_local);
+						break;
+				}
+				// return TRUE;
+			} catch (\Throwable $th) {
+				throw $th;
+			}
+		}
+
+		if (Schema::connection(session('db_client_name'))->hasTable($datamart_name)) {
+			// il datamart è stato pubblicato su una dashboard, quindi esiste WEB_BI_datamartId
+			Schema::connection(session('db_client_name'))->drop("decisyon_cache.{$datamart_name}");
+			MapDatabaseController::copy_table($datamart_name_user, $datamart_name);
+		}
+
 		return $sheet->save();
 	}
 

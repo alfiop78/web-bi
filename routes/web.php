@@ -94,7 +94,6 @@ Route::get('/500', function () {
 });
 
 // copy_table (utilizzata per la Pubblicazione della Dashboard)
-Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapDatabaseController::class, 'copy_table'])->name('web_bi.fetch_api.copy_table');
 Route::get('/fetch_api/token/{token}/publish', [MapDatabaseController::class, 'publish'])->name('web_bi.fetch_api.publish');
 
 // creazione dimensione time
@@ -158,7 +157,7 @@ Route::prefix('/fetch_api/json/')->group(function () {
 	Route::post('/workbook_update', [BIworkbookController::class, 'update']);
 	Route::post('/sheet_update', [BIsheetController::class, 'update']);
 	Route::post('/metric_update', [BImetricController::class, 'update']);
-	Route::post('/filter_update', [BIfilterController::class, 'update']);
+	// Route::post('/filter_update', [BIfilterController::class, 'update']);
 	Route::post('/dashboard_update', [BIdashboardController::class, 'update']);
 });
 
