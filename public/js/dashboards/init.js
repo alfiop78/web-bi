@@ -92,7 +92,6 @@ let dashboardToken, intervalId, messageIntervalId;
 			// intervalId = setInterval(getResources, Resource.refreshTime, Resource.dashboard);
 			intervalId = setInterval(scheduleResource, Resource.refreshTime, Resource.dashboard);
 		}
-
 	}
 
 	init();

@@ -147,7 +147,7 @@ async function getLayout() {
 		});
 }
 
-function createUrlsDatamart(resources) {
+function createUrlsDatamart() {
 	// resources : sono i dati proveniente da bi_sheets
 	let urls = [];
 	Resource.arrResources = [];
@@ -164,12 +164,12 @@ function createUrlsDatamart(resources) {
 		// In questo modo, se lo sheet viene "pubblicato" da un'altro utente, la dashboard
 		// leggerà sempre questo aggiornato e non quello memorizzato nel JSON della Dashboard
 		// In base a questa modifica, potrebbe non essere più necessario memorizzare userId nel JSON della Dashboard.
-		const userId = resources[token].userId;
+		const userId = Resource.dashboardResources[token].userId;
 		Resource.arrResources.push(token);
 		// specifiche del chartWrapper
 		// 20.06.2025 Creo le specifiche custom, prendendo i dati sia da 'specs' in bi_Sheets
 		// che dalle proprietà impostate nel json della dashboard
-		const json_specs = JSON.parse(resources[token].json_specs);
+		const json_specs = JSON.parse(Resource.dashboardResources[token].json_specs);
 		debugger;
 		const specifications = {
 			data: json_specs.data,
@@ -250,13 +250,8 @@ function copy(from, to) {
 
 async function scheduleResource() {
 	let urls = [];
-	let copy_from, copy_to;
 	// ciclo le resources
-	for (const [token, resource] of Object.entries(Resource.json.resources)) {
-		urls.push(`/curl/process/${token}/schedule`);
-		copy_from = `${resource.datamartId}_${resource.userId}`;
-		copy_to = `${resource.datamartId}`;
-	}
+	Object.keys(Resource.json.resources).forEach(token => urls.push(`/curl/process/${token}/schedule`));
 
 	App.showConsole("Aggiornamento dati...", null, null);
 	// FIX: 23.05.2025 Per ora utilizzo solo una risorsa, quindi dashboard con più risorse non può funzionare l'aggiornamento
@@ -268,9 +263,17 @@ async function scheduleResource() {
 		})
 		// .then((response) => response.json())
 		.then((response) => response.text())
-		.then(async data => {
+		.then(data => {
+			// Schedul
+			if (data === "OK\n") {
+				// Schedulazione completata correttamente. Questa schedulazione proviene da
+				// un aggiornamento dei dati dalla dashboard, quindi esiste sicuramente il datamart
+				// WEB_BI_datamartid. Al termine della schedulazione viene effettuato il copy_table
+				// cche ricrea WEB_BI_datamartId con i dati aggiornati.
+				createUrlsDatamart()
+			}
 			// console.log(data);
-			if (data === "OK\n") copy(copy_from, copy_to);
+			// if (data === "OK\n") copy(copy_from, copy_to);
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');
@@ -461,7 +464,7 @@ async function updateDashboard() {
 		.then(data => {
 			// Resource = new Resources();
 			// console.log(data);
-			Resource.json = JSON.parse(data.json_value);
+			Resource.json = JSON.parse(data.dashboard.json_value);
 			// configuro le opzioni selezionate in fase di creazione dashboard
 			(Resource.json.options) ?
 				Resource.refreshTime = Resource.json.options.refresh :
@@ -488,14 +491,13 @@ async function executeDashboard() {
 			// Resource = new Resources();
 			// console.log(data);
 			Resource.json = JSON.parse(data.dashboard.json_value);
+			Resource.dashboardResources = data.resources;
 			// configuro le opzioni selezionate in fase di creazione dashboard
 			(Resource.json.options) ?
 				Resource.refreshTime = Resource.json.options.refresh :
 				Resource.refreshTime = 0;
-			console.log('getLayout');
 			await getLayout();
-			console.log('getResource');
-			createUrlsDatamart(data.resources);
+			createUrlsDatamart();
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');
