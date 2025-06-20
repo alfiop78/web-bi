@@ -27,6 +27,8 @@ use App\Http\Controllers\traitTest;
 
 use Illuminate\Support\Facades\Config;
 
+use function PHPUnit\Framework\isNull;
+
 class MapDatabaseController extends Controller
 {
 	private $query = NULL;
@@ -812,40 +814,40 @@ class MapDatabaseController extends Controller
 	public function publish($token)
 	{
 		// dd($fromId, $toId);
-		// TODO: se la tabella di destinazione già esiste la elimino
+		// 20.06.2025 Lo sheet, in bi_sheets, è sempre presente altrimenti non avrei potuto
+		// aprire (o creare) la dashboard
 		BIConnectionsController::getDB();
-		$sheet = BIsheet::find($token);
-		if ($sheet) {
-			// sheet presente e versionato
-		} else {
-			// sheet non presente in bi_sheets
-		}
+		$sheet = BIsheet::where('token', $token)->first(['datamartId', 'userId']);
+		// dd($sheet->datamartId);
+		// dd($sheet->datamartId . $sheet->userId);
 		// dump(config("database.connections.client_mysql.database"));
 		// dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}"));
 
-		if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}")) {
+		// se la tabella di destinazione già esiste la elimino
+		if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$sheet->datamartId}")) {
 			// se il datamart "finale" (senza userId) già esiste, devo eliminarlo prima di ricrearlo
 			// echo ("tabella $toId esiste");
-			Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$toId}");
+			Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$sheet->datamartId}");
 			// Schema::connection(session('db_client_name'))->drop("WEB_BI_{$toId}");
 		}
 		switch (session('db_driver')) {
 			case 'odbc':
-				$sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
+				$sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$sheet->datamartId}_{$sheet->userId}','decisyon_cache.WEB_BI_{$sheet->datamartId}');";
 				$copy = DB::connection(session('db_client_name'))->statement($sql);
 				break;
 			case 'mysql':
 				$createTable = DB::connection(session('db_client_name'))
-					->statement("CREATE TABLE decisyon_cache.WEB_BI_{$toId} LIKE decisyon_cache.WEB_BI_{$fromId};");
+					->statement("CREATE TABLE decisyon_cache.WEB_BI_{$sheet->datamartId} LIKE decisyon_cache.WEB_BI_{$sheet->datamartId}_{$sheet->userId};");
 				if ($createTable) {
 					$copy = DB::connection(session('db_client_name'))
-						->statement("INSERT INTO decisyon_cache.WEB_BI_{$toId} SELECT * FROM decisyon_cache.WEB_BI_{$fromId};");
+						->statement("INSERT INTO decisyon_cache.WEB_BI_{$sheet->datamartId} SELECT * FROM decisyon_cache.WEB_BI_{$sheet->datamartId}_{$sheet->userId};");
 				}
 				break;
 			default:
 				break;
 		}
 		// Per mysql và utilizzato CREATE TABLE ... LIKE (vedere documentazione)
+		// dd($copy)
 		return $copy;
 	}
 
@@ -1197,6 +1199,7 @@ class MapDatabaseController extends Controller
 				// creo l'object 'process' che verrà processato da this->sheetCurlProcess()
 				$process = (object)[
 					'datamartId' => $sheet->datamartId,
+					'token' => $token,
 					'userId' => $sheet->userId,
 					'facts' => $facts,
 					'from' => $json_sheet->from,
@@ -1377,7 +1380,12 @@ class MapDatabaseController extends Controller
 				// 16.06.2025 Se è presente una tabella nominata WEB_BI_{$this->datamart_id} significa che lo sheet è stato
 				// pubblicato su una Dashboard, eseguo il copy_table() per aggiornare anche i dati dello sheet visibile sulla dashboard
 				if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->query->datamart_id}")) {
-					if ($this->copy_table($this->query->datamart_name, $this->query->datamart_id)) return "OK\n";
+					// if ($this->copy_table($this->query->datamart_name, $this->query->datamart_id)) return "OK\n";
+					// TEST: 20.06.2025
+					// dd($process->token);
+					// if ($this->publish($process->token)) return "OK\n";
+					// return ($this->publish($process->token)) ? "OK\n" : "NON COMPLETATO\n";
+					return (isNull($this->publish($process->token))) ? "OK\n" : "NON COMPLETATO\n";
 				} else {
 					return "OK\n";
 				}

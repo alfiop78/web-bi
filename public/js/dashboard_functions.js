@@ -27,7 +27,7 @@ function dashboardDraw() {
 	Resource.multiData.forEach(datamart => {
 		Resource.data = datamart.data;
 		Resource.specs = datamart.specs;
-		// console.log(Resource.specs);
+		debugger;
 		Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
 		Resource.ref = document.getElementById(datamart.ref);
 		let gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
@@ -123,7 +123,7 @@ function ready() {
 
 // Recupero il Layout impostato per la dashboard selezionata
 async function getLayout() {
-	console.log('getLayout');
+	// console.log('getLayout');
 	// debugger;
 	await fetch(`/js/json-templates/${Resource.json.layout}.json`)
 		.then((response) => {
@@ -134,14 +134,12 @@ async function getLayout() {
 		.then((response) => response.json())
 		.then(data => {
 			if (!data) return;
-			console.log(data);
+			// console.log(data);
 			Template.data = data;
 			Template.id = data.id;
 			// creo il template nel DOM
 			Template.create();
 			document.querySelector('h1.title').innerHTML = Resource.json.title;
-			// carico le risorse (sheet) necessarie alla dashboard
-			getResources();
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');
@@ -149,7 +147,8 @@ async function getLayout() {
 		});
 }
 
-async function getResources() {
+function createUrlsDatamart(resources) {
+	// resources : sono i dati proveniente da bi_sheets
 	let urls = [];
 	Resource.arrResources = [];
 	Resource.wrapperSpecs = [];
@@ -158,33 +157,77 @@ async function getResources() {
 	const querystring = Template.parent.dataset.querystring;
 	// ciclo le resources
 	for (const [token, resource] of Object.entries(Resource.json.resources)) {
+		// resource : è la risorsa memorizzata nel JSON della Dashboard
+		// resources : è lo sheet, proveniente da bi_sheets
 		Resource.resources = resource;
-		// Resource.token = token;
+		// 20.06.2025 lo UserId deve essere quello recuperato da bi_sheets.
+		// In questo modo, se lo sheet viene "pubblicato" da un'altro utente, la dashboard
+		// leggerà sempre questo aggiornato e non quello memorizzato nel JSON della Dashboard
+		// In base a questa modifica, potrebbe non essere più necessario memorizzare userId nel JSON della Dashboard.
+		const userId = resources[token].userId;
 		Resource.arrResources.push(token);
-		Resource.wrapperSpecs.push(resource);
-		// il ref corrente, appena aggiunto
-		// Resource.dataColumns.push(specsColumns);
-		Object.keys(resource.wrappers).forEach(ref => {
-			// ref : id nel DOM (chart__1)
+		// specifiche del chartWrapper
+		// 20.06.2025 Creo le specifiche custom, prendendo i dati sia da 'specs' in bi_Sheets
+		// che dalle proprietà impostate nel json della dashboard
+		const json_specs = JSON.parse(resources[token].json_specs);
+		debugger;
+		const specifications = {
+			data: json_specs.data,
+			bind: json_specs.bind,
+			filters: json_specs.filters,
+			// il wrappers deve essere diverso da quello memorizzato nello sheet (deve contenere il ref nel DOM)
+			wrappers: {}
+		};
+		for (const [ref, wrapper] of Object.entries(resource.wrappers)) {
+			// ref: riferimento al div dove sarà posizionata la 'resource'
+			// wrapper :
+			/*
+			 * {
+				"chart__1": {
+					"name": "default",
+					"containerId": "chart__1",
+					"chartType": "Table"
+				}
+			}
+			*/
+			debugger;
+			specifications.wrappers[ref] = {
+				containerId: ref,
+				chartType: json_specs.wrapper[wrapper.name].chartType,
+				// TODO: 19.06.2025 forse le options dovrebbero essere memorizzate sulla Dashboard e non
+				// recuperarle da bi_sheets. Questo perchè l'utente potrebbe voler cambiare
+				// alcune opzioni (es. i colori) su una dashboard. In questo modo l'utente
+				// potrebbe configurare opzioni diverse su una specifica dashboard. Al contrario, opzioni
+				// di uno sheet, verrebbero replicate su tutte le dashboard.
+				options: json_specs.wrapper[wrapper.name].options,
+				group: json_specs.wrapper[wrapper.name].group
+			};
+			debugger;
 			Resource.ref = document.getElementById(ref);
 			Resource.refs.push(ref);
 			// aggiungo un token per identificare, in publish(), il report (datamart_id)
+			Resource.ref.dataset.wrapper = wrapper.name;
+			Resource.ref.dataset.chartType = wrapper.chartType;
 			Resource.ref.dataset.token = token;
 			Resource.ref.dataset.datamartId = resource.datamartId;
-			Resource.ref.dataset.userId = resource.userId;
+			Resource.ref.dataset.userId = userId;
+			// Resource.ref.dataset.userId = resource.userId;
 			// aggiungo la class 'defined' nel div che contiene il grafico/tabella
 			Resource.ref.classList.add('defined');
-		});
-		// urls.push(`/fetch_api/${resource.datamartId}/datamart?page=1`)
+		}
+		Resource.wrapperSpecs.push(specifications);
 		(querystring === undefined) ?
 			// urls.push(`/fetch_api/${resource.datamartId}/datamart?page=1`) :
 			urls.push(`/fetch_api/${resource.datamartId}/datamart`) :
 			urls.push(`/fetch_api/${resource.datamartId}/datamart?${querystring}`)
 	}
-	await getAllData(urls);
+	// await getAllData(urls);
+	getAllData(urls);
 }
 
 function copy(from, to) {
+	debugger;
+	// FIX: 20.06.2025 Da modificare
 	const url = `/fetch_api/copy_from/${from}/copy_to/${to}/copy_table`;
 	fetch(url)
 		.then((response) => {
@@ -441,15 +484,18 @@ async function executeDashboard() {
 			return response;
 		})
 		.then((response) => response.json())
-		.then(data => {
+		.then(async data => {
 			// Resource = new Resources();
 			// console.log(data);
-			Resource.json = JSON.parse(data.json_value);
+			Resource.json = JSON.parse(data.dashboard.json_value);
 			// configuro le opzioni selezionate in fase di creazione dashboard
 			(Resource.json.options) ?
 				Resource.refreshTime = Resource.json.options.refresh :
 				Resource.refreshTime = 0;
-			getLayout();
+			console.log('getLayout');
+			await getLayout();
+			console.log('getResource');
+			createUrlsDatamart(data.resources);
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');

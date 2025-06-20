@@ -247,13 +247,12 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 		console.log(Resource.dashboard);
 
 		let urls = [];
-		debugger;
 		for (const wrapper of Resource.resources.values()) {
-			debugger;
 			// urls.push(`/fetch_api/copy_from/${wrapper.datamartId}_${wrapper.userId}/copy_to/${wrapper.datamartId}/copy_table`);
-			urls.push(`/fetch_api/publish/token/${wrapper.token}`);
+			urls.push(`/fetch_api/token/${wrapper.token}/publish`);
 		}
 		console.log(urls);
+		debugger;
 		await Promise.all(urls.map(url => fetch(url)))
 			.then(responses => {
 				return Promise.all(responses.map(response => {
