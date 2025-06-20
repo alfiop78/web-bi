@@ -225,29 +225,9 @@ function createUrlsDatamart() {
 	getAllData(urls);
 }
 
-function copy(from, to) {
-	debugger;
-	// FIX: 20.06.2025 Da modificare
-	const url = `/fetch_api/copy_from/${from}/copy_to/${to}/copy_table`;
-	fetch(url)
-		.then((response) => {
-			// console.log(response);
-			if (!response.ok) { throw Error(response.statusText); }
-			return response;
-		})
-		.then((response) => response.json())
-		// .then((response) => response.text())
-		.then((data) => {
-			console.log(data);
-			App.closeConsole();
-			getResources();
-		})
-		.catch(err => {
-			App.showConsole(err, 'error');
-			console.error(err);
-		});
-}
-
+/*
+ * Aggiornamento dashboard ogni x hh:mm
+ */
 async function scheduleResource() {
 	let urls = [];
 	// ciclo le resources
@@ -264,13 +244,12 @@ async function scheduleResource() {
 		// .then((response) => response.json())
 		.then((response) => response.text())
 		.then(data => {
-			// Schedul
 			if (data === "OK\n") {
 				// Schedulazione completata correttamente. Questa schedulazione proviene da
 				// un aggiornamento dei dati dalla dashboard, quindi esiste sicuramente il datamart
 				// WEB_BI_datamartid. Al termine della schedulazione viene effettuato il copy_table
 				// cche ricrea WEB_BI_datamartId con i dati aggiornati.
-				createUrlsDatamart()
+				createUrlsDatamart();
 			}
 			// console.log(data);
 			// if (data === "OK\n") copy(copy_from, copy_to);
@@ -421,6 +400,9 @@ function export_datatable_XLS() {
 	App.showConsole('Esportazione completata', 'done', 1500);
 }
 
+/*
+	* Tasto Aggiorna sulla Dashboard
+*/
 async function dashboardRefresh(e) {
 	const script_name = e.target.dataset.scriptName;
 	// debugger;
@@ -440,36 +422,8 @@ async function dashboardRefresh(e) {
 			// 23.05.2025 Rieseguo la query sul datamart per ottenere i dati aggiornati
 			App.closeConsole();
 			console.log('start schedule');
-			await scheduleResource();
+			scheduleResource();
 			console.log('end schedule');
-			// executeDashboard();
-			updateDashboard();
-		})
-		.catch(err => {
-			App.showConsole(err, 'error');
-			console.error(err);
-		});
-}
-
-async function updateDashboard() {
-	// scarico il json dal DB, lo salvo in sessionStorage
-	console.info('EXECUTE DASHBOARD : ', Resource.dashboard);
-	await fetch(`/fetch_api/name/${Resource.dashboard}/dashboard_show`)
-		.then((response) => {
-			// console.log(response);
-			if (!response.ok) { throw Error(response.statusText); }
-			return response;
-		})
-		.then((response) => response.json())
-		.then(data => {
-			// Resource = new Resources();
-			// console.log(data);
-			Resource.json = JSON.parse(data.dashboard.json_value);
-			// configuro le opzioni selezionate in fase di creazione dashboard
-			(Resource.json.options) ?
-				Resource.refreshTime = Resource.json.options.refresh :
-				Resource.refreshTime = 0;
-			document.querySelector('h1.title').innerHTML = Resource.json.title;
 		})
 		.catch(err => {
 			App.showConsole(err, 'error');
