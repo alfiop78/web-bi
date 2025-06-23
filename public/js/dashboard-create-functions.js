@@ -205,9 +205,10 @@ function openGenerateUrl(e) {
 	// recupero la proprietà 'resources[token].data.columns[nome_colonna]' di tutti gli sheets presenti nella dashboard
 	const url_params = document.getElementById('url_params');
 	if (url_params.childElementCount === 0) {
-		for (const value of Resource.resources.values()) {
-			console.log(value.data.columns);
-			for (const column of Object.values(value.data.columns)) {
+		// console.log(Resource.specs);
+		for (const columns of Object.values(Resource.specs.data)) {
+			// console.log(value.data.columns);
+			for (const column of Object.values(columns)) {
 				// escludo le metriche
 				if (column.p.data === 'column') {
 					const template = tmpl__url_params.content.cloneNode(true);

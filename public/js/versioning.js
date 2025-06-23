@@ -99,9 +99,7 @@ var Storage = new SheetStorages();
 		// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
 		const urls = [
 			'/fetch_api/versioning/workbooks',
-			'/fetch_api/versioning/sheets',
-			'/fetch_api/versioning/metrics',
-			// '/fetch_api/versioning/filters',
+			'/fetch_api/versioning/sheets'
 		];
 		// ottengo tutte le risposte in un array
 		await Promise.all(urls.map(url => fetch(url)))

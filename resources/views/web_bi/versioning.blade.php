@@ -141,63 +141,6 @@
 								<button type="button" class="btn-link link" data-unselect-all data-type="sheet">Unselect All</button>
 							</div>
 						</div>
-						<!-- Metriche -->
-						<div class="card grid">
-							<div class="row">
-								<section class="col col-5-span">
-									<h1>Metriche</h1>
-								</section>
-								<section class="col col-7-span">
-									<menu class="allButtons" data-id="metric" hidden>
-										<button data-fn="uploadAll" data-type="metric" data-upload class="button-icons material-symbols-rounded">upload</button>
-										<button data-fn="downloadAll" data-type="metric" data-download class="button-icons material-symbols-rounded">download</button>
-										<button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-symbols-rounded danger">upgrade</button>
-										<button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-symbols-rounded danger">delete</button>
-									</menu>
-								</section>
-							</div>
-							<div class="visual">
-								<section class="list-search">
-									<input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
-									<div class="relative-ul" data-id="metric" data-type="metric">
-										<ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
-									</div>
-								</section>
-							</div>
-							<div class="buttons align-center">
-								<button type="button" class="btn-link link" data-select-all data-type="metric">Select All</button>
-								<button type="button" class="btn-link link" data-unselect-all data-type="metric">Unselect All</button>
-							</div>
-						</div>
-						<!-- Filtri -->
-						<!-- <div class="card grid">
-							<div class="row">
-								<section class="col col-5-span">
-									<h1>Filtri</h1>
-								</section>
-								<section class="col col-7-span">
-									<menu class="allButtons" data-id="filter" hidden>
-										<button data-fn="uploadAll" data-type="filter" data-upload class="button-icons material-symbols-rounded">upload</button>
-										<button data-fn="downloadAll" data-type="filter" data-download class="button-icons material-symbols-rounded">download</button>
-										<button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-symbols-rounded danger">upgrade</button>
-										<button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-symbols-rounded danger">delete</button>
-									</menu>
-								</section>
-							</div>
-							<div class="visual">
-								<section class="list-search">
-									<input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
-									<div class="relative-ul" data-id="filter" data-type="filter">
-										<ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
-									</div>
-								</section>
-							</div>
-							<div class="buttons align-center">
-								<button type="button" class="btn-link link" data-select-all data-type="filter">Select All</button>
-								<button type="button" class="btn-link link" data-unselect-all data-type="filter">Unselect All</button>
-							</div>
-
-						</div> -->
 					</div>
 					<div class="row">
 						<section class="col col-12">

@@ -202,7 +202,7 @@ const ul__dashboards = document.getElementById('ul__dashboards');
 				App.closeConsole();
 				app.dlgDashboard.close();
 				// abilito il tasto Genera Url
-				btn__create_url.dataset.token = data.token;
+				btn__create_url.dataset.token = data.dashboard.token;
 				btn__create_url.disabled = false;
 				// 19.06.2025 Creo la url per il recupero dei dati dai datamart
 				// app.createUrlsDatamart();

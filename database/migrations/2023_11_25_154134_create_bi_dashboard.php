@@ -16,6 +16,7 @@ class CreateBiDashboard extends Migration
     Schema::create('bi_dashboards', function (Blueprint $table) {
       $table->string('token')->primary();
       $table->string('name');
+      $table->boolean('published')->default(false);
       $table->longText('json_value');
       $table->foreignId('connectionId')->constrained('bi_db_connections'); // FK -> bi_db_connections
       $table->timestamps();

@@ -118,8 +118,6 @@ Route::get('fetch_api/{id}/show', [BIConnectionsController::class, 'show']);
 
 // show
 Route::prefix('/fetch_api/name/')->group(function () {
-	Route::get('{token}/metric_show', [BImetricController::class, 'show']);
-	Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
 	Route::get('{token}/workbook_show', [BIworkbookController::class, 'show']);
 	Route::get('{token}/sheet_show', [BIsheetController::class, 'show']);
 	Route::get('{token}/dashboard_show', [BIdashboardController::class, 'show']);
@@ -129,15 +127,11 @@ Route::prefix('/fetch_api/name/')->group(function () {
 Route::prefix('/fetch_api/name/')->group(function () {
 	Route::get('{token}/workbook_destroy', [BIworkbookController::class, 'destroy']);
 	Route::get('{token}/sheet_destroy', [BIsheetController::class, 'destroy']);
-	Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
-	Route::get('{token}/filter_destroy', [BIfilterController::class, 'destroy']);
 });
 // index
 Route::prefix('/fetch_api/versioning/')->group(function () {
 	Route::get('workbooks', [BIworkbookController::class, 'index']);
 	Route::get('sheets', [BIsheetController::class, 'index']);
-	Route::get('metrics', [BImetricController::class, 'index']);
-	Route::get('filters', [BIfilterController::class, 'index']);
 	Route::get('dashboards', [BIdashboardController::class, 'index']);
 });
 
@@ -147,8 +141,6 @@ Route::post('/fetch_api/connections/store', [BIConnectionsController::class, 'st
 Route::prefix('/fetch_api/json/')->group(function () {
 	Route::post('/workbook_store', [BIworkbookController::class, 'store']);
 	Route::post('/sheet_store', [BIsheetController::class, 'store']);
-	Route::post('/metric_store', [BImetricController::class, 'store']);
-	Route::post('/filter_store', [BIfilterController::class, 'store']);
 	Route::post('/dashboard_store', [BIdashboardController::class, 'store']);
 });
 
@@ -156,8 +148,6 @@ Route::prefix('/fetch_api/json/')->group(function () {
 Route::prefix('/fetch_api/json/')->group(function () {
 	Route::post('/workbook_update', [BIworkbookController::class, 'update']);
 	Route::post('/sheet_update', [BIsheetController::class, 'update']);
-	Route::post('/metric_update', [BImetricController::class, 'update']);
-	// Route::post('/filter_update', [BIfilterController::class, 'update']);
 	Route::post('/dashboard_update', [BIdashboardController::class, 'update']);
 });
 

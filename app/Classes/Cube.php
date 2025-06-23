@@ -729,11 +729,11 @@ class Cube
 			// dd($this->datamart_advancedMeasures);
 			// creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
 			if (property_exists($this, 'sql_info')) {
-				$sqlFilteredMetrics[] = $this->createDatamartAdvancedMeasures($this->datamart_name_advanced_measures, $groupAdvancedMeasures);
+				$sqlFilteredMetrics[] = $this->createDatamartAdvancedMeasures($groupAdvancedMeasures);
 				unset($this->json_info_advanced[$this->datamart_name_advanced_measures]);
 			} else {
 				// dd($groupAdvancedMeasures);
-				$this->createDatamartAdvancedMeasures($this->datamart_name_advanced_measures, $groupAdvancedMeasures, false);
+				$this->createDatamartAdvancedMeasures($groupAdvancedMeasures, false);
 			}
 		}
 		if (property_exists($this, 'sql_info')) return $sqlFilteredMetrics;

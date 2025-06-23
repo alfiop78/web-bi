@@ -158,11 +158,16 @@ class BIsheetController extends Controller
 		$datamart_name_local = "WEB_BI_LOCAL_{$request->collect()->get('datamartId')}_{$request->collect()->get('userId')}";
 		$datamart_name_user = "WEB_BI_{$request->collect()->get('datamartId')}_{$request->collect()->get('userId')}";
 		$datamart_name = "WEB_BI_{$request->collect()->get('datamartId')}";
+		BIConnectionsController::getDB();
+		// dd(Schema::connection(session('db_client_name')));
+		// dd($datamart_name_local);
 		if (Schema::connection(session('db_client_name'))->hasTable($datamart_name_local)) {
+			// dd(session('db_client_name'));
 			// La tabella WEB_BI_LOCAL_ è presente, quindi il report è stato rielaborato
 			// in questo caso la tabella $datamart_name_user è sempre presente
 			Schema::connection(session('db_client_name'))->drop("decisyon_cache.{$datamart_name_user}");
 			MapDatabaseController::copy_table($datamart_name_local, $datamart_name_user);
+			// dd($datamart_name_user);
 			// Elimino la tabella WEB_BI_LOCAL_
 			try {
 				switch (session('db_driver')) {
