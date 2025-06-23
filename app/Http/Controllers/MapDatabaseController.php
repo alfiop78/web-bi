@@ -21,13 +21,12 @@ use App\Http\Controllers\BIConnectionsController;
 // uso i Model BIsheet, BIworkbook, BImetric e BIfilter che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
-use App\Models\BImetric;
 use PhpParser\Node\Stmt\TryCatch;
 use App\Http\Controllers\traitTest;
 
 use Illuminate\Support\Facades\Config;
 
-use function PHPUnit\Framework\isNull;
+// use function PHPUnit\Framework\isNull;
 
 class MapDatabaseController extends Controller
 {
@@ -1375,7 +1374,8 @@ class MapDatabaseController extends Controller
 					// dd($process->token);
 					// if ($this->publish($process->token)) return "OK\n";
 					// return ($this->publish($process->token)) ? "OK\n" : "NON COMPLETATO\n";
-					return (isNull($this->publish($process->token))) ? "OK\n" : "NON COMPLETATO\n";
+					// dd(($this->publish($process->token)) ? "OK\n" : "NON COMPLETATO\n");
+					return ($this->publish($process->token)) ? "OK\n" : "NON COMPLETATO\n";
 				} else {
 					return "OK\n";
 				}
