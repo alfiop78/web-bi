@@ -141,10 +141,12 @@ var Storage = new SheetStorages();
 			// const workbookName = document.querySelector(`#ul-workbook > li[id='${object.workbook_ref}']`);
 			// workBookRef.innerText = workbookName.dataset.label;
 		}
-		switch (object.type) {
+		li.dataset.label = object.name;
+		span.dataset.value = object.name;
+		span.innerText = object.name;
+		/* switch (object.type) {
 			case 'sheet':
 			case 'workbook':
-				// case 'filter':
 				li.dataset.label = object.name;
 				span.dataset.value = object.name;
 				span.innerText = object.name;
@@ -154,7 +156,7 @@ var Storage = new SheetStorages();
 				span.dataset.value = object.alias;
 				span.innerText = object.alias;
 				break;
-		}
+		} */
 		document.querySelector(`#ul-${object.type}`).appendChild(li);
 	}
 
@@ -443,20 +445,21 @@ var Storage = new SheetStorages();
 	}
 
 	app.showResource = (e) => {
+		// Mappatura dei campi da visualizzare
 		const refs = {
-			"created_at": document.querySelector('#created_at > span[data-value]'),
-			"updated_at": document.querySelector('#updated_at > span[data-value]'),
-			"note": document.querySelector('#note > span[data-value]')
+			token: document.querySelector('#token > span[data-value]'),
+			created_at: document.querySelector('#created_at > span[data-value]'),
+			updated_at: document.querySelector('#updated_at > span[data-value]'),
+			note: document.querySelector('#note > span[data-value]')
 		};
-		if (e.currentTarget.dataset.type === 'workbook') {
-			// è stato selezionato un workbook, rivisualizzo eventuali elementi nascosti da precedenti
-			// selezioni (un altro workbook) per nascondere
-			// reset elementi precedendemente selezionati
-			document.querySelectorAll(`#ul-workbook li:not([id='${e.currentTarget.dataset.token}']) > div[data-selected]`).forEach(element => delete element.dataset.selected);
-		} else {
-			// reset elementi precedendemente selezionati
+		const options = {
+			weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric", fractionalSecondDigits: 3
+		};
+		// verifico se è stato selezionato un WorkBook, in questo caso devo visualizzare/nascondere gli Sheets
+		(e.currentTarget.dataset.type === 'workbook') ?
+			document.querySelectorAll(`#ul-workbook li:not([id='${e.currentTarget.dataset.token}']) > div[data-selected]`).forEach(element => delete element.dataset.selected) :
 			document.querySelectorAll(`li[data-workbook-ref]:not([id='${e.currentTarget.dataset.token}']) > div[data-selected]`).forEach(element => delete element.dataset.selected);
-		}
+
 		e.currentTarget.toggleAttribute('data-selected');
 		if (e.currentTarget.hasAttribute('data-selected')) {
 			// visualizzo alcune informazione sull'elemento selezionato
@@ -468,14 +471,21 @@ var Storage = new SheetStorages();
 				// se l'elemento ha dataset.storage='DB' vuol dire che NON è presente in locale, quindi per
 				// visualizzare le sue proprietà dovrò fare una FETCH verso il DB, altrimenti lo recupero dallo storage
 				for (const [key, value] of Object.entries(refs)) {
-					value.innerText = (json[key]) ? json[key] : null;
+					if (key === 'created_at' || key === 'updated_at') {
+						const date = new Date(json[key]);
+						date.setHours(date.getUTCHours());
+						value.innerHTML = new Intl.DateTimeFormat("it-IT", options).format(date);
+					} else {
+						value.innerText = (json[key]) ? json[key] : null;
+					}
 				}
 			} else {
 				// DB
+				debugger;
 			}
 		} else {
 			// ripulisco i riferimenti del refs
-			refs.created_at.innerText = '';
+			Object.values(refs).forEach(span => span.innerText = '');
 		}
 		if (e.currentTarget.dataset.type === 'workbook') {
 			[...document.querySelectorAll('li[data-workbook-ref]')].filter(element => {

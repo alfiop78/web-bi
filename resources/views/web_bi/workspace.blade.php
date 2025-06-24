@@ -1180,12 +1180,12 @@
 			</div>
 		</div>
 	</div>
-	<footer>
+	<!-- <footer>
 		<section class="footerContent">
 			<img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="48" width="48" />
 			<p>Lynx International</p>
 		</section>
-	</footer>
+	</footer> -->
 	<script type="text/javascript" src="{{ asset('/js/workspace-init.js') }}"></script>
 	<script type="text/javascript" src="{{ asset('/js/workspace_functions.js') }}" defer></script>
 	<script type="text/javascript" src="{{ asset('/js/workbook_functions.js') }}" defer></script>

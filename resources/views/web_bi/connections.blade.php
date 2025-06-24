@@ -181,12 +181,12 @@
 		</svg>
 	</div>
 	<div class="right-sidebar"></div>
-	<footer>
+	<!-- <footer>
 		<section class="footerContent">
 			<img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
 			<p>Lynx International</p>
 		</section>
-	</footer>
+	</footer> -->
 	<script type="text/javascript" src="{{ asset('/js/home_init.js') }}"></script>
 	<script type="text/javascript" src="{{ asset('/js/home_functions.js') }}" defer></script>
 	<script type="text/javascript" src="{{ asset('/js/home_events.js') }}" defer></script>

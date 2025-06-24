@@ -85,7 +85,6 @@
 				</menu>
 				<div class="wrapper">
 					<div class="row autofit">
-
 						<div class="card grid">
 							<div class="row">
 								<section class="col col-4-span">
@@ -147,6 +146,10 @@
 							<div class="details">
 								<section id="info-resource" class="placeholder" data-attr="Dettaglio risorsa">
 									<section id="info">
+										<div id="token" class="item-resources">
+											<span>Token</span>
+											<span data-value></span>
+										</div>
 										<div id="created_at" class="item-resources">
 											<span>Data Creazione</span>
 											<span data-value></span>
@@ -155,6 +158,10 @@
 											<span>Data aggiorn.</span>
 											<span data-value></span>
 										</div>
+										<!-- <div id="dataModel" class="item-resources">
+											<span>Data Model</span>
+											<span data-value></span>
+										</div> -->
 										<div id="note" class="item-resources">
 											<span>Note</span>
 											<span data-value></span>
@@ -164,13 +171,9 @@
 
 							</div>
 						</section>
-
 					</div>
-
 				</div>
-
 			</div>
-
 		</div>
 
 		<div id="console">
@@ -186,12 +189,6 @@
 		</svg>
 	</div>
 	<div class="right-sidebar"></div>
-	<footer>
-		<section class="footerContent">
-			<img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
-			<p>Lynx International</p>
-		</section>
-	</footer>
 	<script type="text/javascript" src="{{ asset('/js/versioning.js') }}" async></script>
 </body>
 

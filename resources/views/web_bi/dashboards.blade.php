@@ -119,12 +119,12 @@
 		</svg>
 	</div>
 	<div class="right-sidebar"></div>
-	<footer>
+	<!-- <footer>
 		<section class="footerContent">
 			<img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
 			<p>Lynx International</p>
 		</section>
-	</footer>
+	</footer> -->
 	<script type="text/javascript" src="{{ asset('/js/init-dashboards.js') }}"></script>
 	<script type="text/javascript" src="{{ asset('/js/dashboard_functions.js') }}" defer></script>
 </body>
