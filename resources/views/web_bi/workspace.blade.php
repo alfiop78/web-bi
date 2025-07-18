@@ -23,7 +23,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-table-preview.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/chart_editor.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/gcontrols_sheet.css') }}" />
-	<link rel="stylesheet" type="text/css" href="{{ asset('/css/grid-layout.css') }}" />
+	<!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/grid-layout.css') }}" /> -->
 	<!-- Icons -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
 	<script src="{{ asset('/js/Application.js') }}"></script>
