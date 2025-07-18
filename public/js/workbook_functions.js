@@ -9,6 +9,8 @@ const btn__workbookOpenDialog = document.getElementById('btn__workbook_openDialo
 const btn__workbook = document.getElementById('btn__workbook');
 // inputs
 const input__workbook_name = document.getElementById('input__workbook_name');
+// ul
+const ul__used_on_composite_metric = document.getElementById('ul__used_on_composite_metric');
 // titolo contenuto nella barra del menù
 const input__workbook_title = document.getElementById('input__workbook_title');
 
@@ -153,3 +155,118 @@ btn__workbookNew.onclick = () => dlg__workbookNew.showModal();
 dlg__workbookNew.addEventListener('close', () => input__workbook_name.value = '');
 
 console.info('END workbook_functions');
+
+/*
+ * Carico elenco metriche in #navMetrics
+ */
+function getMetricsList() {
+	// console.log(WorkBook.metrics);
+	const nav = document.getElementById('navMetrics');
+	const basicDetails = nav.querySelector("details[data-id='basic']");
+	const advancedDetails = nav.querySelector("details[data-id='advanced']");
+	const compositeDetails = nav.querySelector("details[data-id='composite']");
+	// reset ul
+	nav.querySelectorAll('details>li').forEach(el => el.remove());
+	// const sort = [...WorkBook.metric.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+	// INFO: ordinamento di un oggetto Map() tramite una proprietà dell'oggetto
+	// const sort = [...WorkBook.metrics.values()].sort((a, b) => a.metric_type.localeCompare(b.metric_type));
+	// console.log(sort);
+	// for (const metric of WorkBook.metrics.values()) {
+	for (const element of WorkBook.elements.values()) {
+		if (element.type === 'metric') {
+			const tmpl = template_li.content.cloneNode(true);
+			const li = tmpl.querySelector(`li.drag-list.metrics.${element.metric_type}`);
+			const span__content = li.querySelector('span');
+			const span = span__content.querySelector('span');
+			const i = li.querySelector('i');
+			li.dataset.id = element.token;
+			i.id = element.token;
+			li.dataset.type = element.metric_type;
+			li.dataset.elementSearch = 'metrics-dlg-composite';
+			if (element.factId) li.dataset.factId = element.factId;
+			li.dataset.label = element.alias;
+			i.addEventListener('dragstart', elementDragStart);
+			i.addEventListener('dragend', elementDragEnd);
+			span.innerHTML = element.alias;
+			switch (element.metric_type) {
+				case 'advanced':
+					advancedDetails.appendChild(li);
+					break;
+				case 'composite':
+					compositeDetails.appendChild(li);
+					break;
+				default:
+					// basic
+					basicDetails.appendChild(li);
+					break;
+			}
+
+		}
+	}
+}
+
+/*
+ * Verifica e restituisce l'elenco delle metriche/filtri/reports che utilizzano
+ * la metrica passata come parametro
+ */
+function checkUsage(token) {
+	let result = {};
+	const metric = WorkBook.elements.get(token);
+	// verifico prima se l'elemento è presente negli Sheet
+	result = Storages.getSheetsUsage(token);
+	// WARN: 18.07.2025 Verificare cosa contiene result se non
+	// viene restituito nessuno sheet
+	// ciclo l'Object Map WorkBook.elements dove sono contenute tutte
+	// le metriche e i filtri del WorkBook
+	for (const [key, value] of WorkBook.elements) {
+		if (value.type === 'metric') {
+			// ogni tipo di metrica può essere utilizzata solo in metriche composte e
+			// negli Sheets
+			if (value.metric_type === 'composite' && value.formula.includes(metric.alias)) {
+				// la metrica passata come argomento è utilizzata da una metrica composta
+				result[key] = { name: value.alias, type: metric.type, metric_type: metric.metric_type };
+			}
+		}
+	}
+	return result;
+}
+
+/*
+ * Creo una lista con gli elementi utilizzati da una
+ * determinata metrica o filtro
+ */
+function setUsedElementsList(token) {
+	const usedElements = checkUsage(token);
+	ul__used_on_composite_metric.querySelectorAll('li').forEach(item => item.remove());
+	if (usedElements) {
+		// TODO: 18.07.2025 popolo la lista degli elementi utilizzati
+		// Sono presenti elementi (metriche/sheets) utilizzati dall'elemento (metriche/filtri)
+		// passato come argometnto
+		for (const [elementToken, element] of Object.entries(usedElements)) {
+			const content = template_li.content.cloneNode(true);
+			const li = content.querySelector('li.default.icon');
+			const i = li.querySelector('i');
+			const span = li.querySelector('span');
+			li.dataset.token = elementToken;
+			span.innerText = element.name;
+			// imposto l'icona in base al type dell'elemento in ciclo
+			switch (element.type) {
+				case 'sheet':
+					i.innerText = 'flowsheet';
+					i.dataset.type = 'sheet';
+				break;
+				case 'metric':
+					i.innerText = 'multiline_chart';
+					i.dataset.metricType = element.metric_type;
+					break;
+				default:
+					// colonne custom
+					i.innerText = 'table_rows';
+			}
+			ul__used_on_composite_metric.appendChild(li);
+		}
+	} else {
+		// nessun elemento utilizzato da questa metrica
+	}
+}
+

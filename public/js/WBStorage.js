@@ -34,6 +34,44 @@ class Storages {
 		return sheets;
 	}
 
+	static getSheetsUsage(token) {
+		// TODO: 18.07.2025 Controllare se i filtri sono presenti in WorkBook.elements
+		const element = WorkBook.elements.get(token);
+		let sheets = {};
+		for (const [sheetToken, sheet] of Object.entries(window.localStorage)) {
+			const jsonSheet = JSON.parse(sheet);
+			if (jsonSheet.type === 'sheet' && jsonSheet.workbook_ref === element.workbook_ref) {
+				switch (element.type) {
+					case 'metric':
+						// verifico se la metrica è presente nello Sheet
+						if (jsonSheet.sheet.metrics.hasOwnProperty(token)) {
+							sheets[sheetToken] = {name : jsonSheet.name, type:jsonSheet.type};
+						} else {
+							// se non è presente come metrica nello Sheet (con dependencies:false)
+							// potrebbe essere presente in metriche composte, quindi impostata come
+							// dependencies:true. Per questo motivo ciclo le metriche
+							// presenti nello Sheet e controllo la propria 'formula'
+							for (const [tokenMetric, metric] of Object.values(jsonSheet.sheet.metrics)) {
+								// recupero la definizione della metrica perchè devo controllare
+								// la proprietà 'formula'
+								const metricDef = WorkBook.elements.get(tokenMetric);
+								// TEST: 18.07.2025 da verificare
+								if (metricDef.formula.includes(element.alias)) sheets[sheetToken] = {name : jsonSheet.name, type:jsonSheet.type};
+							}
+						}
+						break;
+					case 'filter':
+						// TODO: 18.07.2025 da implementare
+						break;
+					default:
+						// colonne custom
+						// TODO: 18.07.2025 da implementare
+				}
+			}
+		}
+		return sheets;
+	}
+
 	static getCompositeMetricsByWorkbookId(workbookId) {
 		let metrics = [];
 		for (const object of Object.values(window.localStorage)) {

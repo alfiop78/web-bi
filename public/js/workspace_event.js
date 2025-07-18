@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	textarea__composite_metric.addEventListener('input', inputCompositeMetric);
 	// apertura dialog #dlg-composite-metric
 	btnNewCompositeMeasure.onclick = () => {
-		dlgCompositeMetricCheck();
+		getMetricsList();
 		dlg__composite_metric.showModal();
 	}
 	// dropzone sheet rows

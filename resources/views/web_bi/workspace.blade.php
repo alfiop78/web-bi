@@ -23,7 +23,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-table-preview.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/chart_editor.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/gcontrols_sheet.css') }}" />
-	<!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/grid-layout.css') }}" /> -->
+	<link rel="stylesheet" type="text/css" href="{{ asset('/css/grid-layout.css') }}" />
 	<!-- Icons -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
 	<script src="{{ asset('/js/Application.js') }}"></script>
@@ -76,6 +76,11 @@
 	<template id="tmpl-li">
 		<!-- lista per la selezione di elementi -->
 		<li class="select-list" data-element-search data-label data-searchable="true">
+			<span></span>
+		</li>
+
+		<li class="default icon">
+			<i class="material-symbols-rounded md-18"></i>
 			<span></span>
 		</li>
 
@@ -653,12 +658,12 @@
 					</section>
 				</dialog>
 
-				<dialog id="dlg__composite_metric" data-x="0" data-y="0" class="mediumSize absolute moveable droppable">
+				<dialog id="dlg__composite_metric" data-x="0" data-y="0" class="large absolute moveable droppable">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Creazione Metrica Composta</h5>
 						<section class="dlg-content">
 							<section class="row">
-								<section class="col col-3-span">
+								<section class="col col-3">
 									<div class="list-search">
 										<input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
 										<div class="relative-ul">
@@ -676,7 +681,7 @@
 										</div>
 									</div>
 								</section>
-								<section class="col col-6-span">
+								<section class="col col-6">
 									<section class="textarea-formula">
 										<input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
 										<div class="textarea__container">
@@ -688,7 +693,17 @@
 										<textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
 									</section>
 								</section>
-								<section class="col col-3-span">
+								<section class="col col-3">
+									<div class="list title subtitle">
+										<h4>Utilizzo metrica</h4>
+											<div class="subtitle icon">
+												<i class="material-symbols-rounded md-24 warn">warning</i>
+												<h6>Questi elementi saranno condizionati dalla modifica della metrica</h6>
+											</div>
+											<div class="relative-ul">
+												<ul id="ul__used_on_composite_metric"></ul>
+											</div>
+									</div>
 								</section>
 							</section>
 						</section>

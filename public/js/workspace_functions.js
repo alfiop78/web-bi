@@ -1461,52 +1461,6 @@ function inputCompositeMetric(e) {
 	}
 }
 
-function dlgCompositeMetricCheck() {
-	// console.log(WorkBook.metrics);
-	const nav = document.getElementById('navMetrics');
-	const basicDetails = nav.querySelector("details[data-id='basic']");
-	const advancedDetails = nav.querySelector("details[data-id='advanced']");
-	const compositeDetails = nav.querySelector("details[data-id='composite']");
-	// reset ul
-	nav.querySelectorAll('details>li').forEach(el => el.remove());
-	// const sort = [...WorkBook.metric.entries()].sort((a, b) => a[1].localeCompare(b[1]));
-	// INFO: ordinamento di un oggetto Map() tramite una proprietà dell'oggetto
-	// const sort = [...WorkBook.metrics.values()].sort((a, b) => a.metric_type.localeCompare(b.metric_type));
-	// console.log(sort);
-	// for (const metric of WorkBook.metrics.values()) {
-	for (const element of WorkBook.elements.values()) {
-		if (element.type === 'metric') {
-			const tmpl = template_li.content.cloneNode(true);
-			const li = tmpl.querySelector(`li.drag-list.metrics.${element.metric_type}`);
-			const span__content = li.querySelector('span');
-			const span = span__content.querySelector('span');
-			const i = li.querySelector('i');
-			li.dataset.id = element.token;
-			i.id = element.token;
-			li.dataset.type = element.metric_type;
-			li.dataset.elementSearch = 'metrics-dlg-composite';
-			if (element.factId) li.dataset.factId = element.factId;
-			li.dataset.label = element.alias;
-			i.addEventListener('dragstart', elementDragStart);
-			i.addEventListener('dragend', elementDragEnd);
-			span.innerHTML = element.alias;
-			switch (element.metric_type) {
-				case 'advanced':
-					advancedDetails.appendChild(li);
-					break;
-				case 'composite':
-					compositeDetails.appendChild(li);
-					break;
-				default:
-					// basic
-					basicDetails.appendChild(li);
-					break;
-			}
-
-		}
-	}
-}
-
 // elementi droppati nella textarea
 function appendDropped(caretPosition, text) {
 	const textNode = caretPosition.offsetNode;

@@ -188,13 +188,21 @@ main {
 }
 
 @media screen and (min-width: 1280px) {
+	* {
+		font-size: .9rem;
+	}
+
 	.right-sidebar[open] {
 		width: 270px;
 	}
 }
 
 @media screen and (min-width: 1920px) {
-	.right-sidebar[open] {
+	* {
+		font-size: 0.9rem;
+	}
+
+	right-sidebar[open] {
 		width: 350px;
 	}
 }

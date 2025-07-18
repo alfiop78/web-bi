@@ -1151,7 +1151,8 @@ const body = document.getElementById('body');
 		const formula = metric.formula.map(item => (item) ? item : ' ');
 		const text = document.createTextNode(formula.join(''));
 		textarea__composite_metric.insertBefore(text, textarea__composite_metric.lastChild);
-		dlgCompositeMetricCheck();
+		getMetricsList();
+		setUsedElementsList(e.target.dataset.token);
 		dlg__composite_metric.showModal();
 	}
 
