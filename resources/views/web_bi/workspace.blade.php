@@ -23,6 +23,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-table-preview.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/chart_editor.css') }}" />
 	<link rel="stylesheet" type="text/css" href="{{ asset('/css/gcontrols_sheet.css') }}" />
+	<link rel="stylesheet" type="text/css" href="{{ asset('/css/grid-layout.css') }}" />
 	<!-- Icons -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
 	<script src="{{ asset('/js/Application.js') }}"></script>
@@ -657,7 +658,7 @@
 						<h5 class="title moveable">Creazione Metrica Composta</h5>
 						<section class="dlg-content">
 							<section class="row">
-								<section class="col col-4-span">
+								<section class="col col-3-span">
 									<div class="list-search">
 										<input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
 										<div class="relative-ul">
@@ -675,7 +676,7 @@
 										</div>
 									</div>
 								</section>
-								<section class="col col-8-span">
+								<section class="col col-6-span">
 									<section class="textarea-formula">
 										<input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
 										<div class="textarea__container">
@@ -686,6 +687,8 @@
 										</div>
 										<textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
 									</section>
+								</section>
+								<section class="col col-3-span">
 								</section>
 							</section>
 						</section>
