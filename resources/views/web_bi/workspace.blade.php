@@ -41,6 +41,26 @@
 </head>
 
 <body class="antialiased">
+	<dialog id="dlg__usage">
+		<section class="dlg-grid">
+			<h5>Elementi utilizzati dalla metrica</h5>
+			<section class="dlg-content">
+				<section class="row">
+					<section class="col col-12">
+						<div class="list title">
+							<h4>Utilizzo metrica</h4>
+							<div class="relative-ul">
+								<ul id="ul__used_elements"></ul>
+							</div>
+						</div>
+					</section>
+				</section>
+			</section>
+			<section class="dlg-buttons">
+				<button name="cancel" value="chiudi">Chiudi</button>
+			</section>
+		</section>
+	</dialog>
 	<header>
 		<div class="nav-button">
 			<a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
@@ -65,11 +85,6 @@
 			</section>
 			<hr />
 			<a href="#" title="Settings"><i class="material-symbols-rounded white">settings</i><span>Impostazioni</span></a>
-			<!-- <button>
-        <a href="#" title="test">
-          <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
-        </a>
-      </button> -->
 		</nav>
 	</div>
 
@@ -570,12 +585,12 @@
 				</dialog>
 
 				<!-- creazione metrica filtrata -->
-				<dialog id="dlg-advanced-metric" data-x="0" data-y="40" class="large moveable droppable">
+				<dialog id="dlg__advanced_metric" data-x="0" data-y="40" class="large moveable droppable">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Creazione Metrica avanzata</h5>
 						<section class="dlg-content">
 							<section class="row">
-								<section class="col col-4-span">
+								<section class="col col-4">
 									<div class="list-search">
 										<input type="search" id="id__search_filters_dlg_advanced_metric" placeholder="Ricerca" data-element-search="search__filters_dlg_advanced_metric" class="input-search" autocomplete="off" tabindex="3">
 										<div class="relative-ul">
@@ -583,7 +598,7 @@
 										</div>
 									</div>
 								</section>
-								<section class="col col-4-span">
+								<section class="col col-4">
 									<section class="input-area">
 										<input type="text" id="input-advanced-metric-name" placeholder="Nome" value="" autocomplete="off" />
 										<div id="input-metric"></div>
@@ -592,63 +607,78 @@
 											<label for="check-distinct">DISTINCT</label>
 										</div>
 										<section id="filter-area-drop">
-											<div class="relative-ul">
-												<ul id="filter-drop" class="custom-scrollbar"></ul>
+											<div class="list title">
+												<h4>Filtri aggiunti alla metrica</h4>
+												<div class="relative-ul">
+													<ul id="filter-drop"></ul>
+												</div>
 											</div>
 										</section>
 										<textarea id="advanced-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
 									</section>
 								</section>
-								<section class="col col-4-span">
-									<div class="relative-ul">
-										<dl id="dl-timing-functions" class="custom-scrollbar">
-											<dt class="btn-link">Last Period/Day</dt>
-											<dd>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</dd>
+								<section class="col col-4">
+									<div class="list title">
+										<h4>Funzioni Temporali</h4>
+										<div class="relative-ul">
+											<dl id="dl-timing-functions" class="custom-scrollbar">
+												<dt class="btn-link">Last Period/Day</dt>
+												<dd>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</dd>
 
-											<dt class="btn-link">Last Week</dt>
-											<dd>description</dd>
+												<dt class="btn-link">Last Week</dt>
+												<dd>description</dd>
 
-											<dt data-value="last-month" class="btn-link" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="previous">Last Month</dt>
-											<dd>description</dd>
+												<dt data-value="last-month" class="btn-link" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="previous">Last Month</dt>
+												<dd>description</dd>
 
-											<dt class="btn-link">Last Quarter</dt>
-											<dd>description</dd>
+												<dt class="btn-link">Last Quarter</dt>
+												<dd>description</dd>
 
-											<dt class="btn-link" data-value="last-year" data-fn="handlerTimingFunctions" data-time-field="year">Last Year</dt>
-											<dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
+												<dt class="btn-link" data-value="last-year" data-fn="handlerTimingFunctions" data-time-field="year">Last Year</dt>
+												<dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
 
-											<dt class="btn-link">MAT</dt>
-											<dd>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</dd>
+												<dt class="btn-link">MAT</dt>
+												<dd>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</dd>
 
-											<dt class="btn-link">Last Year MAT</dt>
-											<dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
+												<dt class="btn-link">Last Year MAT</dt>
+												<dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
 
-											<dt class="btn-link">Last To Date</dt>
-											<dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br />Il livello DAY deve essere presente nel report</dd>
+												<dt class="btn-link">Last To Date</dt>
+												<dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br />Il livello DAY deve essere presente nel report</dd>
 
-											<dt class="btn-link">Last Year MTD</dt>
-											<dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>
+												<dt class="btn-link">Last Year MTD</dt>
+												<dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>
 
-											<dt class="btn-link">Year To Date</dt>
-											<dd>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</dd>
+												<dt class="btn-link">Year To Date</dt>
+												<dd>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</dd>
 
-											<dt class="btn-link">Last Year YTD</dt>
-											<dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
+												<dt class="btn-link">Last Year YTD</dt>
+												<dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
 
-											<dt class="btn-link" data-value="year-to-month" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="year-to-month">Year To Month</dt>
-											<dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+												<dt class="btn-link" data-value="year-to-month" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="year-to-month">Year To Month</dt>
+												<dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
 
-											<dt class="btn-link">Last Year YTM</dt>
-											<dd>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</dd>
+												<dt class="btn-link">Last Year YTM</dt>
+												<dd>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</dd>
 
-											<dt class="btn-link">Last 2 Month</dt>
-											<dd>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+												<dt class="btn-link">Last 2 Month</dt>
+												<dd>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
 
-											<dt class="btn-link">Last 3 Month</dt>
-											<dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
-										</dl>
+												<dt class="btn-link">Last 3 Month</dt>
+												<dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+											</dl>
+										</div>
 									</div>
 								</section>
+							</section>
+							<section class="row">
+								<div class="col col-12">
+									<div id="info__usage_advanced_metric" class="info__usage" hidden>
+										<i class="material-symbols-rounded md-24 warn">warning</i>
+										<p>Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
+										<button id="btn__showAdvancedMetricsUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
+									</div>
+								</div>
 							</section>
 						</section>
 						<section class="dlg-buttons">
@@ -663,7 +693,7 @@
 						<h5 class="title moveable">Creazione Metrica Composta</h5>
 						<section class="dlg-content">
 							<section class="row">
-								<section class="col col-3">
+								<section class="col col-4">
 									<div class="list-search">
 										<input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
 										<div class="relative-ul">
@@ -681,7 +711,7 @@
 										</div>
 									</div>
 								</section>
-								<section class="col col-6">
+								<section class="col col-8">
 									<section class="textarea-formula">
 										<input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
 										<div class="textarea__container">
@@ -693,18 +723,15 @@
 										<textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
 									</section>
 								</section>
-								<section class="col col-3">
-									<div class="list title subtitle">
-										<h4>Utilizzo metrica</h4>
-											<div class="subtitle icon">
-												<i class="material-symbols-rounded md-24 warn">warning</i>
-												<h6>Questi elementi saranno condizionati dalla modifica della metrica</h6>
-											</div>
-											<div class="relative-ul">
-												<ul id="ul__used_on_composite_metric"></ul>
-											</div>
+							</section>
+							<section class="row">
+								<div class="col col-12">
+									<div id="info__usage_composite_metric" class="info__usage" hidden>
+										<i class="material-symbols-rounded md-24 warn">warning</i>
+										<p>Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
+										<button id="btn__showCompositeMetricsUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
 									</div>
-								</section>
+								</div>
 							</section>
 						</section>
 						<section class="dlg-buttons">

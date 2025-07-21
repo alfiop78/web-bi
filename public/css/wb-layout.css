@@ -24,7 +24,7 @@
 * {
 	box-sizing: border-box;
 	font-family: 'Barlow';
-	font-size: .9rem;
+	font-size: 1rem;
 }
 
 *::-webkit-scrollbar {
@@ -90,9 +90,6 @@ h4 {
 }
 
 @media screen and (min-width: 1921px) {
-	* {
-		font-size: 1rem;
-	}
 }
 
 body {
@@ -188,9 +185,6 @@ main {
 }
 
 @media screen and (min-width: 1280px) {
-	* {
-		font-size: .9rem;
-	}
 
 	.right-sidebar[open] {
 		width: 270px;
@@ -198,9 +192,6 @@ main {
 }
 
 @media screen and (min-width: 1920px) {
-	* {
-		font-size: 0.9rem;
-	}
 
 	right-sidebar[open] {
 		width: 350px;
@@ -653,7 +644,22 @@ span.markContent {
 	background-color: unset;
 }
 
+[popover].popover__modal {
+	margin: auto;
+}
+
+:popover-open.popover__modal {
+	box-shadow: 0px 0px 4px 1px gray;
+}
+
 code.code,
 .textarea.code {
 	font-family: 'Source Code Pro', monospace !important;
 }
+
+.info__usage:not([hidden]) {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+

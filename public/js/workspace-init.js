@@ -25,11 +25,13 @@ const btnOptions = document.getElementById('btnOptions');
 const btn__chartWrapper = document.getElementById('btn__chartWrapper');
 const btn__save_column = document.getElementById('btn__save_column');
 const btn__newVisualization = document.getElementById('btn__newVisualization');
+const btn__showAdvancedMetricsUsage = document.getElementById('btn__showAdvancedMetricsUsage')
+const btn__showCompositeMetricsUsage = document.getElementById('btn__showCompositeMetricsUsage')
 // Dialogs
 const dlg__filters = document.getElementById('dlg__filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
 const dlg__composite_metric = document.getElementById('dlg__composite_metric');
-const dlg__advancedMetric = document.getElementById('dlg-advanced-metric');
+const dlg__advancedMetric = document.getElementById('dlg__advanced_metric');
 const dlg__custom_columns = document.getElementById('dlg__custom_column');
 const dlg__sheet = document.getElementById('dialog-sheet-open');
 const popover__chartOptions = document.getElementById('popover__chartOptions');
@@ -46,6 +48,9 @@ const template__createElement = document.getElementById('tmpl__createElement');
 // nav
 const wbColumns = document.getElementById('wbColumns');
 const wbFilters = document.getElementById('wbFilters');
+// box
+const info__usage_advanced_metric = document.getElementById('info__usage_advanced_metric');
+const info__usage_composite_metric = document.getElementById('info__usage_composite_metric');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -1114,8 +1119,12 @@ const body = document.getElementById('body');
 		// della metrica che si sta modificando. In questo modo, in saveMetric() posso usare la logica di
 		// aggiornamento/creazione in base al data-token presente su btnSave
 		btnSave.dataset.token = e.target.dataset.token;
+		btn__showAdvancedMetricsUsage.dataset.token = e.target.dataset.token;
 		// reimposto le proprietà della metrica nella dialog
 		app.inputAdvMetricName.value = metric.alias;
+		// TODO: 21.07.2025 Verifico l'utilizzo della metrica
+		const usage = checkUsage(e.target.dataset.token);
+		info__usage_advanced_metric.hidden = (Object.keys(usage).length !== 0) ? false : true;
 		// apro prima la dialog (qui viene popolata la lista filtri #id__ul_filters)
 		// e successivamente, se sono presenti filtri su questa metrica, ne imposto la visualizzazione
 		// sul corrispondente elemento in #id__ul_filters
@@ -1145,6 +1154,7 @@ const body = document.getElementById('body');
 		const inputName = document.getElementById('composite-metric-name');
 		inputName.value = metric.alias;
 		btnCompositeMetricSave.dataset.token = e.target.dataset.token;
+		btn__showCompositeMetricsUsage.dataset.token = e.target.dataset.token;
 		console.log(metric.formula);
 		// NOTE: la memorizzazione su DB converte, (json_encode) gli spazi " " in elementi NULL nella formula e nell'SQL.
 		// Qui li riconverto per visualizzare la formula nel modo in cui è stata inserita, se è stata inserita con gli spazi.
@@ -1152,7 +1162,8 @@ const body = document.getElementById('body');
 		const text = document.createTextNode(formula.join(''));
 		textarea__composite_metric.insertBefore(text, textarea__composite_metric.lastChild);
 		getMetricsList();
-		setUsedElementsList(e.target.dataset.token);
+		const usage = checkUsage(e.target.dataset.token);
+		info__usage_composite_metric.hidden = (Object.keys(usage).length !== 0) ? false : true;
 		dlg__composite_metric.showModal();
 	}
 

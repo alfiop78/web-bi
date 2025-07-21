@@ -452,7 +452,7 @@ menu.horizontal-menu {
 	gap: 1em;
 }
 
-section#filter-area-drop {
+/* section#filter-area-drop {
 	display: grid;
 	grid-template-rows: 1fr;
 	position: relative;
@@ -460,15 +460,7 @@ section#filter-area-drop {
 	background-color: white;
 	border-radius: 2px;
 	box-shadow: 0px 1px 6px -2px gray;
-}
-
-section#filter-area-drop::before {
-	content: 'Filtri aggiunti alla metrica';
-	position: absolute;
-	top: 8px;
-	left: 8px;
-	color: darkgray;
-}
+} */
 
 #filter-drop.dropzone {
 	padding: 1em;

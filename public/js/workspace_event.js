@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	btn__workbookOpenDialog.addEventListener('click', workbookOpenDialog);
 	// Tasto btn__workbook per tornare allo step 1 dalla sezione Sheet
 	btn__workbook.addEventListener('click', workbook);
+	// Apertura dialog__usage per le metriche
+	document.querySelectorAll("button[data-id='btn__showUsage']").forEach(button => {
+		button.addEventListener('click', showUsage);
+	});
 	// Titolo del WorkBook
 	input__workbook_title.addEventListener('blur', editWorkbookTitle);
 	// TODO: 04.10.2024 qui potrei nascondere il loader della pagina

@@ -2,6 +2,8 @@ console.info('workbook_functions');
 // dialogs
 const dlg__workbookNew = document.getElementById('dlg__workbook_new');
 const dlg__workbookOpen = document.getElementById('dlg__workbook_open');
+const dlg__usage = document.getElementById('dlg__usage');
+// popover
 // buttons
 const btn__workbookNew = document.getElementById('btn__workbook_new');
 const btn__workbookCreate = document.getElementById('btn__workbook_create');
@@ -10,7 +12,7 @@ const btn__workbook = document.getElementById('btn__workbook');
 // inputs
 const input__workbook_name = document.getElementById('input__workbook_name');
 // ul
-const ul__used_on_composite_metric = document.getElementById('ul__used_on_composite_metric');
+const ul__used_elements = document.getElementById('ul__used_elements');
 // titolo contenuto nella barra del menù
 const input__workbook_title = document.getElementById('input__workbook_title');
 
@@ -224,7 +226,7 @@ function checkUsage(token) {
 			// negli Sheets
 			if (value.metric_type === 'composite' && value.formula.includes(metric.alias)) {
 				// la metrica passata come argomento è utilizzata da una metrica composta
-				result[key] = { name: value.alias, type: metric.type, metric_type: metric.metric_type };
+				result[key] = { name: value.alias, type: value.type, metric_type: value.metric_type };
 			}
 		}
 	}
@@ -237,9 +239,9 @@ function checkUsage(token) {
  */
 function setUsedElementsList(token) {
 	const usedElements = checkUsage(token);
-	ul__used_on_composite_metric.querySelectorAll('li').forEach(item => item.remove());
+	ul__used_elements.querySelectorAll('li').forEach(item => item.remove());
 	if (usedElements) {
-		// TODO: 18.07.2025 popolo la lista degli elementi utilizzati
+		// 18.07.2025 popolo la lista degli elementi utilizzati
 		// Sono presenti elementi (metriche/sheets) utilizzati dall'elemento (metriche/filtri)
 		// passato come argometnto
 		for (const [elementToken, element] of Object.entries(usedElements)) {
@@ -254,7 +256,7 @@ function setUsedElementsList(token) {
 				case 'sheet':
 					i.innerText = 'flowsheet';
 					i.dataset.type = 'sheet';
-				break;
+					break;
 				case 'metric':
 					i.innerText = 'multiline_chart';
 					i.dataset.metricType = element.metric_type;
@@ -263,10 +265,14 @@ function setUsedElementsList(token) {
 					// colonne custom
 					i.innerText = 'table_rows';
 			}
-			ul__used_on_composite_metric.appendChild(li);
+			ul__used_elements.appendChild(li);
 		}
 	} else {
-		// nessun elemento utilizzato da questa metrica
+		// TODO: 21.07.2025 da implementare. Nessun elemento utilizzato da questa metrica
 	}
 }
 
+function showUsage(e) {
+	setUsedElementsList(e.target.dataset.token);
+	dlg__usage.showModal();
+}
