@@ -71,7 +71,6 @@ function filterSave(e) {
 	// estraggo dalla formula solo le tabelle, che devono essere convertite in alias
 	// es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
 	const tablesFounded = textareaFilter.firstChild.textContent.match(/\w+.(?=\.)/g);
-	const date = new Date().toLocaleDateString('it-IT', options);
 	let object = {
 		type: 'filter',
 		name,
@@ -121,17 +120,12 @@ function filterSave(e) {
 			}
 		});
 	}
-	// Salvataggio del Filtro
-	// WorkBook.filters = { token, value: object };
-	WorkBook.filters = object;
+	WorkBook.elements = object;
 	// salvo la nuova metrica nel 'worksheet'
 	(WorkBook.workSheet.hasOwnProperty('filters')) ?
 		WorkBook.workSheet.filters[token] = object :
 		WorkBook.workSheet.filters = { [token]: object };
-	debugger;
-	// WorkBook.workSheet.filters[token] = object;
 	WorkBook.update();
-	// window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
 	// completato il salvataggio rimuovo l'attributo data-token da e.target
 	if (!e.target.dataset.token) {
 		appendFilter(token);
@@ -689,7 +683,6 @@ function appendColumn(token) {
 	const span = span__content.querySelector('span');
 	const i = span__content.querySelector('i[draggable]');
 	const value = WorkBook.elements.get(token);
-	// const filter = WorkBook.filters.get(token);
 	li.dataset.id = token;
 	i.id = token;
 	li.classList.add("columns");
@@ -724,7 +717,7 @@ function appendFilter(token) {
 	const li = tmpl.querySelector('li.toggle-list');
 	const span = li.querySelector('span');
 	const btnAdd = li.querySelector("button[data-id='filter__add']");
-	const filter = WorkBook.filters.get(token);
+	const filter = WorkBook.elements.get(token);
 	li.dataset.id = token;
 	btnAdd.id = token;
 	btnAdd.dataset.type = "filter";
@@ -741,26 +734,29 @@ function appendFilter(token) {
 }
 
 function appendFilterToDialogAdvMetrics() {
+	debugger;
+	// TEST: 21.07.2025 da testare dopo aver aggiunto i filtri in WorkBook.elements
 	const parent = document.getElementById('id__ul_filters');
 	// reset della #id__ul_filters
 	parent.querySelectorAll('li').forEach(element => element.remove());
-	for (const [token, filter] of WorkBook.filters) {
-		const tmpl = template_li.content.cloneNode(true);
-		// const li = tmpl.querySelector('li.drag-list.filters');
-		const li = tmpl.querySelector('li.toggle-list');
-		const span = li.querySelector('span');
-		const btnAdd = li.querySelector("button[data-id='filter__add']");
-		// const filter = WorkBook.filters.get(key);
-		li.dataset.id = token;
-		btnAdd.dataset.id = token;
-		btnAdd.dataset.type = "filter";
-		btnAdd.dataset.label = filter.name;
-		// li.classList.add("filters");
-		li.dataset.elementSearch = 'search__filters_dlg_advanced_metric';
-		li.dataset.label = filter.name;
-		btnAdd.addEventListener('click', addToMetric); // TODO: creare la Fn addToMetric()
-		span.innerText = filter.name;
-		parent.appendChild(li);
+	for (const [token, element] of WorkBook.elements) {
+		if (element.type === 'filter') {
+			const tmpl = template_li.content.cloneNode(true);
+			// const li = tmpl.querySelector('li.drag-list.filters');
+			const li = tmpl.querySelector('li.toggle-list');
+			const span = li.querySelector('span');
+			const btnAdd = li.querySelector("button[data-id='filter__add']");
+			li.dataset.id = token;
+			btnAdd.dataset.id = token;
+			btnAdd.dataset.type = element.type;
+			btnAdd.dataset.label = element.name;
+			// li.classList.add("filters");
+			li.dataset.elementSearch = 'search__filters_dlg_advanced_metric';
+			li.dataset.label = element.name;
+			btnAdd.addEventListener('click', addToMetric); // TODO: creare la Fn addToMetric()
+			span.innerText = element.name;
+			parent.appendChild(li);
+		}
 	}
 }
 
@@ -781,7 +777,7 @@ function addFilterToMetric(token) {
 	const span = li.querySelector('span');
 	const btnRemove = li.querySelector('button');
 	li.dataset.token = token;
-	span.innerText = WorkBook.filters.get(token).name;
+	span.innerText = WorkBook.elements.get(token).name;
 	btnRemove.dataset.token = token;
 	btnRemove.addEventListener('click', removeFilterByAdvancedMetric);
 	parent.appendChild(li);
@@ -885,13 +881,15 @@ function openContextMenu(e) {
 		// button.dataset.token = e.currentTarget.id;
 		button.dataset.token = e.currentTarget.dataset.id;
 		if (e.currentTarget.dataset.tableId) button.dataset.tableId = e.currentTarget.dataset.tableId;
-		// if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
+		const usage = checkUsage(e.currentTarget.dataset.id);
+		if (button.dataset.button === 'delete') button.disabled = (usage.size !== 0) ? true : false;
 	});
 	contextMenuRef.appendChild(content);
 
 	const { clientX: mouseX, clientY: mouseY } = e;
 	contextMenuRef.style.top = `${mouseY}px`;
 	contextMenuRef.style.left = `${mouseX}px`;
+	// apro il context menu
 	contextMenuRef.toggleAttribute('open');
 }
 
@@ -1026,7 +1024,6 @@ function customBaseMetricSave(e) {
 		// converto Set() -> Array() per poterlo salvare in localStorage
 		object.metrics = [...object.metrics];
 	}
-	debugger;
 	WorkBook.checkChanges(token);
 	WorkBook.elements = object;
 	(WorkBook.workSheet.hasOwnProperty(WorkBook.activeTable.id)) ?
@@ -1057,6 +1054,7 @@ function advancedMetricSave(e) {
 	const distinct = document.getElementById('check-distinct').checked;
 	let object = {
 		token,
+		// originToken: metric.token,
 		alias,
 		type: 'metric',
 		metric_type: 'advanced',

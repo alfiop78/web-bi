@@ -455,7 +455,8 @@ li.drag-list>i:not([draggable]) {
 }
 
 li.metrics.basic>i:not([draggable]),
-li.metrics.advanced>i:not([draggable]) {
+li.metrics.advanced>i:not([draggable]),
+i[data-metric-type="advanced"] {
 	color: var(--metrics);
 }
 

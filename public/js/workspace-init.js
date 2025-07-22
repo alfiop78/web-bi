@@ -27,6 +27,8 @@ const btn__save_column = document.getElementById('btn__save_column');
 const btn__newVisualization = document.getElementById('btn__newVisualization');
 const btn__showAdvancedMetricsUsage = document.getElementById('btn__showAdvancedMetricsUsage')
 const btn__showCompositeMetricsUsage = document.getElementById('btn__showCompositeMetricsUsage')
+const btn__showCustomMetricsUsage = document.getElementById('btn__showCustomMetricsUsage')
+const btn__showFiltersUsage = document.getElementById('btn__showFiltersUsage')
 // Dialogs
 const dlg__filters = document.getElementById('dlg__filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
@@ -51,6 +53,7 @@ const wbFilters = document.getElementById('wbFilters');
 // box
 const info__usage_advanced_metric = document.getElementById('info__usage_advanced_metric');
 const info__usage_composite_metric = document.getElementById('info__usage_composite_metric');
+const info__usage_custom_metric = document.getElementById('info__usage_custom_metric');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -263,7 +266,7 @@ const body = document.getElementById('body');
 		const span = li.querySelector('span');
 		const btnRemove = li.querySelector('button');
 		li.dataset.token = elementRef.id;
-		span.innerText = WorkBook.filters.get(elementRef.id).name;
+		span.innerText = WorkBook.elements.get(elementRef.id).name;
 		btnRemove.dataset.token = elementRef.id;
 		e.target.appendChild(li);
 	}
@@ -312,12 +315,16 @@ const body = document.getElementById('body');
 		const input = document.getElementById('input-base-custom-metric-name');
 		input.value = metric.alias;
 		btnSave.dataset.token = e.currentTarget.dataset.token;
+		btn__showCustomMetricsUsage.dataset.token = e.currentTarget.dataset.token;
 		// NOTE: la memorizzazione su DB converte, (json_encode) gli spazi " " in elementi NULL nella formula e nell'SQL.
 		// Qui li riconverto per visualizzare la formula nel modo in cui è stata inserita, se è stata inserita con gli spazi.
 		const formula = metric.formula.map(item => (item) ? item : ' ');
 		const text = document.createTextNode(formula.join(''));
 		// aggiungo il testo della formula prima del tag <br>
 		textarea.insertBefore(text, textarea.lastChild);
+		debugger;
+		const usage = checkUsage(e.currentTarget.dataset.token);
+		info__usage_custom_metric.hidden = (usage.size !== 0) ? false : true;
 		dlgCustomMetric.showModal();
 	}
 
@@ -774,7 +781,7 @@ const body = document.getElementById('body');
 											obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
 											timingFunctionsFlag = true;
 										} else {
-											obj.filters[filterToken] = WorkBook.filters.get(filterToken);
+											obj.filters[filterToken] = WorkBook.elements.get(filterToken);
 										}
 									});
 								}
@@ -821,7 +828,7 @@ const body = document.getElementById('body');
 				return false;
 			} else {
 				Sheet.filters.forEach(token => {
-					const filter = WorkBook.filters.get(token);
+					const filter = WorkBook.elements.get(token);
 					filter.tables.forEach(table => Sheet.tables = table);
 					filters[token] = filter;
 				});
@@ -1008,34 +1015,16 @@ const body = document.getElementById('body');
 			});
 	}
 
-	// aggiungo il filtro selezionato allo Sheet
-	// WARN: 21.11.2024 verifica utilizzo
-	/* app.addFilter = (e) => {
-	  Sheet.filters = e.currentTarget.dataset.token;
-	  // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-	  const li = document.getElementById(e.currentTarget.dataset.token);
-	  li.dataset.selected = 'true';
-	} */
-
-	app.removeWBFilter = (e) => {
+	/*
+	 * Elimino il filtro dal WorkBook
+	 */
+	app.removeWorkBookFilter = (e) => {
 		// recupero il workbook_ref dal filtro che sto per eliminare
-		const workbook_ref = WorkBook.filters.get(e.currentTarget.dataset.token).workbook_ref;
-		// cerco gli sheet creati su questo workbook_ref, dovrò eliminare il
-		// filtro anche dagli sheet dove è stato utilizzato
-		const sheets = SheetStorage.sheets(workbook_ref);
-		if (sheets) {
-			// TODO: visualizzare una dialog con l'elenco dei report dove verrà cancellato il filtro
-			// Il tasto 'Conferma', nella dialog eliminerà il filtro da tutti i report
-			for (const value of Object.values(sheets)) {
-				const index = value.filters.indexOf(e.currentTarget.dataset.token);
-				value.filters.splice(index, 1);
-				value.updated_at = new Date().toLocaleDateString('it-IT', options);
-				SheetStorage.save(value);
-			}
-		}
-		WorkBook.filters.delete(e.currentTarget.dataset.token);
-		window.localStorage.removeItem(e.currentTarget.dataset.token);
-		document.querySelector(`li[id='${e.currentTarget.dataset.token}']`).remove();
+		WorkBook.elements.delete(e.currentTarget.dataset.token);
+		// elimino il filtro da WorkBook.workSheet e aggiorno il WorkBook nello Storage
+		delete WorkBook.workSheet.filters[e.currentTarget.dataset.token];
+		document.querySelector(`li[data-id='${e.currentTarget.dataset.token}']`).remove();
+		WorkBook.update();
 	}
 
 	/*
@@ -1046,12 +1035,17 @@ const body = document.getElementById('body');
 	*/
 	app.editFilter = (e) => {
 		// console.log(e.target.dataset.token);
-		// il context-menu è sempre aperto in questo caso, lo chiudo
+		// il context-menu è sempre aperto in questo caso, lo chiudo, è stato già aperto in
+		// openContextMenu()
 		contextMenuRef.toggleAttribute('open');
-		const filter = WorkBook.filters.get(e.target.dataset.token);
+		const filter = WorkBook.elements.get(e.target.dataset.token);
 		input__filter_name.value = filter.name;
 		// imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
 		btnFilterSave.dataset.token = e.target.dataset.token;
+		btn__showFiltersUsage.dataset.token = e.target.dataset.token;
+		const usage = checkUsage(e.target.dataset.token);
+		// verifico se abilitare il tasto 'Elimina' in base al risultato di 'usage'
+		info__usage_filters.hidden = (usage.size !== 0) ? false : true;
 		// const text = document.createTextNode(filter.formula.join(''));
 		const text = document.createTextNode(filter.formula);
 		// aggiungo il testo della formula prima del tag <br>
@@ -1122,9 +1116,9 @@ const body = document.getElementById('body');
 		btn__showAdvancedMetricsUsage.dataset.token = e.target.dataset.token;
 		// reimposto le proprietà della metrica nella dialog
 		app.inputAdvMetricName.value = metric.alias;
-		// TODO: 21.07.2025 Verifico l'utilizzo della metrica
+		// 21.07.2025 Verifico l'utilizzo della metrica
 		const usage = checkUsage(e.target.dataset.token);
-		info__usage_advanced_metric.hidden = (Object.keys(usage).length !== 0) ? false : true;
+		info__usage_advanced_metric.hidden = (usage.size !== 0) ? false : true;
 		// apro prima la dialog (qui viene popolata la lista filtri #id__ul_filters)
 		// e successivamente, se sono presenti filtri su questa metrica, ne imposto la visualizzazione
 		// sul corrispondente elemento in #id__ul_filters
@@ -1145,6 +1139,17 @@ const body = document.getElementById('body');
 		}
 	}
 
+	/*
+	 * Elimino la metrica avanzata dal WorkBook
+	 */
+	app.removeAdvancedMetric = (e) => {
+		// recupero il workbook_ref dal filtro che sto per eliminare
+		WorkBook.elements.delete(e.currentTarget.dataset.token);
+		delete WorkBook.workSheet[e.currentTarget.dataset.tableId][e.currentTarget.dataset.token];
+		document.querySelector(`li[data-id='${e.currentTarget.dataset.token}']`).remove();
+		WorkBook.update();
+	}
+
 	// la Fn deriva dal menù contestuale quindi, l'evento, viene attivato dal MutationObserver
 	app.editCompositeMetric = (e) => {
 		contextMenuRef.toggleAttribute('open');
@@ -1163,8 +1168,19 @@ const body = document.getElementById('body');
 		textarea__composite_metric.insertBefore(text, textarea__composite_metric.lastChild);
 		getMetricsList();
 		const usage = checkUsage(e.target.dataset.token);
-		info__usage_composite_metric.hidden = (Object.keys(usage).length !== 0) ? false : true;
+		info__usage_composite_metric.hidden = (usage.size !== 0) ? false : true;
 		dlg__composite_metric.showModal();
+	}
+
+	/*
+	 * Elimino la metrica composta dal WorkBook
+	 */
+	app.removeCompositeMetric = (e) => {
+		// recupero il workbook_ref dal filtro che sto per eliminare
+		WorkBook.elements.delete(e.currentTarget.dataset.token);
+		delete WorkBook.workSheet.composite[e.currentTarget.dataset.token];
+		document.querySelector(`li[data-id='${e.currentTarget.dataset.token}']`).remove();
+		WorkBook.update();
 	}
 
 	/* NOTE: MOUSE EVENTS */
@@ -1843,7 +1859,9 @@ const body = document.getElementById('body');
 			}
 		}
 		// TEST: verificare errori con un workbook senza nessun filtro
-		for (const token of WorkBook.filters.keys()) { appendFilter(token); }
+		for (const [token, element] of WorkBook.elements) {
+			if (element.type === 'filter') appendFilter(token);
+		}
 		app.addDefinedCompositeMetrics();
 	}
 

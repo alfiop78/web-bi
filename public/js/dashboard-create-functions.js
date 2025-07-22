@@ -256,9 +256,6 @@ function urlGenerate(e) {
 
 function workbookSelected(e) {
 	console.log(e.currentTarget.dataset.token);
-	// recupero l'elenco degli sheets del workbook selezionato
-	const sheets = Storages.getSheetsByWorkbookId(e.currentTarget.dataset.token);
-	console.log(sheets);
 	// recupero Sheet appartenenti al workbookId selezionato
 	App.showConsole("Recupero elenco Sheet...", 'info', null);
 	fetch(`/fetch_api/workbook_token/${e.currentTarget.dataset.token}/sheetsByWorkbookId`)

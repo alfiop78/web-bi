@@ -277,7 +277,6 @@ class WorkBooks {
 	#activeTable;
 	#elements = new Map();
 	#customMetrics = new Map();
-	#fields = new Map();
 	#filters = new Map();
 	#metrics = new Map();
 	#join = new Map();
@@ -321,6 +320,17 @@ class WorkBooks {
 		};
 
 		this.workSheet = {};
+	}
+
+	/*
+	* Restituisce un Object Map() delle metriche del WorkBook corrente
+	*/
+	getMetrics() {
+		let object = new Map();
+		for (const [token, element] of this.elements) {
+			if (element.type === 'metric') object.set(token, element);
+		}
+		return object;
 	}
 
 	set name(value) {
@@ -575,7 +585,7 @@ class WorkBooks {
 						break;
 				}
 				// aggiungo le metriche e le colonne custom create, si trovano nella proprietà "worksheet".
-				// Qui si trovano anche le metriche avanzate e le metriche di base custom
+				// Qui si trovano tutti e tre i tipi di metriche
 				if (this.workSheet.hasOwnProperty(table.id)) {
 					for (const [token, object] of Object.entries(this.workSheet[table.id])) {
 						if (object.factId === table.id || object.tableId === table.id) {
@@ -590,7 +600,9 @@ class WorkBooks {
 		// Recupero dei filtri del WorkBook dalla proprietà worksheet
 		if (this.workSheet.filters) {
 			for (const object of Object.values(this.workSheet.filters)) {
-				this.filters = object;
+				// this.filters = object;
+				// TODO: 21.07.2025 proavare ad aggiungere al WorkBook.elements anche i filtri
+				this.elements = object;
 			}
 		}
 		if (this.workSheet.composite) {
@@ -671,9 +683,12 @@ class WorkBooks {
 
 	checkMetricNames(table, alias) {
 		// debugger;
+		// TODO: 22.07.2025 da rivedere
 		for (const value of this.elements.values()) {
-			if (table === value.factId) {
-				if (value.alias.toLowerCase() === alias.toLowerCase()) return true;
+			if (table === value.tableId) {
+				if (value.type === 'metric') {
+					if (value.alias.toLowerCase() === alias.toLowerCase()) return true;
+				}
 			}
 		}
 		return false;

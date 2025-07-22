@@ -212,24 +212,46 @@ function getMetricsList() {
  * la metrica passata come parametro
  */
 function checkUsage(token) {
-	let result = {};
-	const metric = WorkBook.elements.get(token);
 	// verifico prima se l'elemento è presente negli Sheet
-	result = Storages.getSheetsUsage(token);
-	// WARN: 18.07.2025 Verificare cosa contiene result se non
-	// viene restituito nessuno sheet
-	// ciclo l'Object Map WorkBook.elements dove sono contenute tutte
-	// le metriche e i filtri del WorkBook
-	for (const [key, value] of WorkBook.elements) {
-		if (value.type === 'metric') {
+	let result = new Map();
+	let sheets = Storages.getSheetsByWorkbookId(WorkBook.workBook.token);
+	const metrics = WorkBook.getMetrics();
+	let recursiveFn = (tokenRecursive) => {
+		// verifico se la metrica avanzata è presente nello Sheet
+		for (const [sheetKey, sheet] of sheets) {
+			if (sheet.sheet.metrics.hasOwnProperty(tokenRecursive)) result.set(sheetKey, { name: sheet.name, type: sheet.type });
+			if (sheet.sheet.filters.includes(tokenRecursive)) result.set(sheetKey, { name: sheet.name, type: sheet.type });
+		}
+		for (const [key, value] of metrics) {
 			// ogni tipo di metrica può essere utilizzata solo in metriche composte e
-			// negli Sheets
-			if (value.metric_type === 'composite' && value.formula.includes(metric.alias)) {
-				// la metrica passata come argomento è utilizzata da una metrica composta
-				result[key] = { name: value.alias, type: value.type, metric_type: value.metric_type };
+			// negli Sheets. I filtri possono essere utilizzate nelle metriche avanzate
+			// e, ricorsivamente, queste ultime possono essere utilizzate in metriche composte
+			switch (value.metric_type) {
+				case 'composite':
+					// recupero la defnizione da WorkBook.elements per poter recuperare l'alias della metrica
+					const element = WorkBook.elements.get(tokenRecursive);
+					// la metrica passata come argomento è utilizzata da una metrica composta
+					if (value.formula.includes(element.alias)) {
+						result.set(key, { name: value.alias, type: value.type, metric_type: value.metric_type });
+						// 22.07.2025 la metrica composta può essere contenuta, a sua volta, in un altra metrica composta, qui è necessaria
+						// una funzione ricorsiva
+						recursiveFn(key);
+					}
+					break;
+				case 'advanced':
+					// if (value.filters.includes(token)) result[key] = { name: value.alias, type: value.type, metric_type: value.metric_type };
+					if (value.filters.includes(tokenRecursive)) {
+						// la metrica advanced contiene il filtro, ora bisogna verificare se la metrica è contenuta in
+						// qualche metrica composta, in caso positivo deve essere restituita anche quella in 'result'
+						result.set(key, { name: value.alias, type: value.type, metric_type: value.metric_type });
+						recursiveFn(key);
+					}
+					break;
+				default:
 			}
 		}
 	}
+	recursiveFn(token);
 	return result;
 }
 
@@ -240,35 +262,31 @@ function checkUsage(token) {
 function setUsedElementsList(token) {
 	const usedElements = checkUsage(token);
 	ul__used_elements.querySelectorAll('li').forEach(item => item.remove());
-	if (usedElements) {
-		// 18.07.2025 popolo la lista degli elementi utilizzati
-		// Sono presenti elementi (metriche/sheets) utilizzati dall'elemento (metriche/filtri)
-		// passato come argometnto
-		for (const [elementToken, element] of Object.entries(usedElements)) {
-			const content = template_li.content.cloneNode(true);
-			const li = content.querySelector('li.default.icon');
-			const i = li.querySelector('i');
-			const span = li.querySelector('span');
-			li.dataset.token = elementToken;
-			span.innerText = element.name;
-			// imposto l'icona in base al type dell'elemento in ciclo
-			switch (element.type) {
-				case 'sheet':
-					i.innerText = 'flowsheet';
-					i.dataset.type = 'sheet';
-					break;
-				case 'metric':
-					i.innerText = 'multiline_chart';
-					i.dataset.metricType = element.metric_type;
-					break;
-				default:
-					// colonne custom
-					i.innerText = 'table_rows';
-			}
-			ul__used_elements.appendChild(li);
+	// 18.07.2025 popolo la lista degli elementi utilizzati
+	// Sono presenti elementi (metriche/sheets) utilizzati dall'elemento (metriche/filtri)
+	// passato come argometnto
+	for (const [elementToken, element] of usedElements) {
+		const content = template_li.content.cloneNode(true);
+		const li = content.querySelector('li.default.icon');
+		const i = li.querySelector('i');
+		const span = li.querySelector('span');
+		li.dataset.token = elementToken;
+		span.innerText = element.name;
+		// imposto l'icona in base al type dell'elemento in ciclo
+		switch (element.type) {
+			case 'sheet':
+				i.innerText = 'flowsheet';
+				i.dataset.type = 'sheet';
+				break;
+			case 'metric':
+				i.innerText = (element.metric_type === 'composite') ? 'multiline_chart' : 'function';
+				i.dataset.metricType = element.metric_type;
+				break;
+			default:
+				// colonne custom
+				i.innerText = 'table_rows';
 		}
-	} else {
-		// TODO: 21.07.2025 da implementare. Nessun elemento utilizzato da questa metrica
+		ul__used_elements.appendChild(li);
 	}
 }
 

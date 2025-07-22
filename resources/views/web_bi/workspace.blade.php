@@ -333,7 +333,7 @@
 			<!-- context-menu per i filtri -->
 			<ul id="ul-context-menu-filter" class="context-menu-items">
 				<button data-fn="editFilter" class="btn-link-context">Modifica</button>
-				<button data-button="delete" data-fn="removeWBFilter" class="btn-link-context" disabled>Elimina</button>
+				<button data-button="delete" data-fn="removeWorkBookFilter" class="btn-link-context" disabled>Elimina</button>
 			</ul>
 
 			<!-- context-menu per le colonne custom -->
@@ -345,7 +345,7 @@
 			<!-- context-menu per le metriche di base -->
 			<ul id="ul-context-menu-basic" class="context-menu-items">
 				<button data-fn="newAdvMeasure" class="btn-link-context">Crea metrica avanzata</button>
-				<button data-button="delete" data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
+				<!-- <button data-button="delete" data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button> -->
 			</ul>
 
 			<!-- context-menu per le metriche di base custom -->
@@ -358,15 +358,13 @@
 			<!-- context-menu per le metriche avanzate -->
 			<ul id="ul-context-menu-advanced" class="context-menu-items">
 				<button data-fn="editAdvancedMetric" class="btn-link-context">Modifica</button>
-				<button data-fn="removeAdvancedMetric" class="btn-link-context" disabled>Elimina</button>
-				<!-- <button data-fn="renameAdvancedMetric" class="btn-link-context" disabled>Rinomina</button> -->
+				<button data-button="delete" data-fn="removeAdvancedMetric" class="btn-link-context" disabled>Elimina</button>
 			</ul>
 
 			<!-- context-menu per le metriche composte -->
 			<ul id="ul-context-menu-composite" class="context-menu-items">
 				<button data-fn="editCompositeMetric" class="btn-link-context">Modifica</button>
-				<button data-fn="removeCompositeMetric" class="btn-link-context" disabled>Elimina</button>
-				<!-- <button data-fn="renameCompositeMetric" class="btn-link-context" disabled>Rinomina</button> -->
+				<button data-button="delete" data-fn="removeCompositeMetric" class="btn-link-context" disabled>Elimina</button>
 			</ul>
 		</template>
 
@@ -741,12 +739,12 @@
 					</section>
 				</dialog>
 
-				<dialog id="dlg-custom-metric" data-x="0" data-y="40" class="mediumSize absolute moveable">
+				<dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium absolute moveable">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Creazione Metrica di base</h5>
 						<section class="dlg-content">
 							<section class="row">
-								<section class="col col-8-span">
+								<section class="col col-8">
 									<section class="textarea-formula">
 										<input type="text" id="input-base-custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
 										<div class="textarea__container">
@@ -758,7 +756,7 @@
 										<textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
 									</section>
 								</section>
-								<section class="col col-4-span">
+								<section class="col col-4">
 									<div>
 										<label for="sel__aggregation_base_metric">Aggregazione</label>
 										<select id="sel__aggregation_base_metric" disabled>
@@ -771,6 +769,15 @@
 										</select>
 									</div>
 								</section>
+							</section>
+							<section class="row">
+								<div class="col col-12">
+									<div id="info__usage_custom_metric" class="info__usage" hidden>
+										<i class="material-symbols-rounded md-24 warn">warning</i>
+										<p>Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
+										<button id="btn__showCustomMetricsUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
+									</div>
+								</div>
 							</section>
 						</section>
 						<section class="dlg-buttons">
@@ -850,7 +857,7 @@
 						<h5 class="title moveable">Creazione Filtro</h5>
 						<section class="dlg-content">
 							<section class="row">
-								<section class="col col-4-span">
+								<section class="col col-4">
 									<div class="list-search">
 										<input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="3">
 										<div class="relative-ul">
@@ -858,7 +865,7 @@
 										</div>
 									</div>
 								</section>
-								<section class="col col-8-span">
+								<section class="col col-8">
 									<section class="textarea-formula">
 										<input type="text" id="input__filter_name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
 										<div class="textarea__container">
@@ -870,6 +877,15 @@
 										<textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
 									</section>
 								</section>
+							</section>
+							<section class="row">
+								<div class="col col-12">
+									<div id="info__usage_filters" class="info__usage" hidden>
+										<i class="material-symbols-rounded md-24 warn">warning</i>
+										<p>Questo filtro è utilizzato su altri elementi, la modifica verrà propagata su tutti gli elementi che lo utilizzano.</p>
+										<button id="btn__showFiltersUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
+									</div>
+								</div>
 							</section>
 						</section>
 						<section class="dlg-buttons">
@@ -980,8 +996,8 @@
 														</foreignObject>
 													</defs>
 													<!-- <foreignObject x="100" y="150" width="20" height="20">
-                              <button class="material-symbols-rounded md-18">edit</button>
-                            </foreignObject> -->
+														  <button class="material-symbols-rounded md-18">edit</button>
+														</foreignObject> -->
 												</svg>
 												<span id="coords"></span>
 											</div>
@@ -1134,11 +1150,11 @@
 																</section>
 															</section>
 															<!-- <section id="sheet__options" class="sheet__contents">
-                                <div id="toolbar_div">
-                                  <a id="export__datatable_csv" target="_blank" type="button" value="Export CSV">Export DataTable CSV</a>
-                                  <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
-                                </div>
-                              </section> -->
+																<div id="toolbar_div">
+																  <a id="export__datatable_csv" target="_blank" type="button" value="Export CSV">Export DataTable CSV</a>
+																  <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
+																</div>
+															  </section> -->
 														</section>
 														<section id="datatable" class="progress">
 															<div id="sheet__preview">
@@ -1161,9 +1177,9 @@
 													</div>
 												</section>
 												<!-- <div class="progressBar">
-                          <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
-                          <progress id="progress-bar" max="100" value="0">70 %</progress>
-                        </div> -->
+													  <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
+													  <progress id="progress-bar" max="100" value="0">70 %</progress>
+													</div> -->
 											</div>
 										</section>
 									</section>

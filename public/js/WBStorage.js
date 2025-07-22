@@ -24,36 +24,13 @@ class Storages {
 		return workbooks;
 	}
 
+	// Restituisce un Object Map() di tutti i report appartenenti al workbookId passato nei prametri
 	static getSheetsByWorkbookId(workbookId) {
-		let sheets = [];
-		for (const object of Object.values(window.localStorage)) {
-			if (JSON.parse(object).type === 'sheet' && JSON.parse(object).workbook_ref === workbookId) {
-				sheets.push(JSON.parse(object));
-			}
-		}
-		return sheets;
-	}
-
-	static getSheetsUsage(token) {
-		// TODO: 18.07.2025 Controllare se i filtri sono presenti in WorkBook.elements
-		const element = WorkBook.elements.get(token);
-		const workbook_ref = WorkBook.workBook.token;
-		let sheets = {};
-		for (const [sheetToken, sheet] of Object.entries(window.localStorage)) {
-			const jsonSheet = JSON.parse(sheet);
-			if (jsonSheet.type === 'sheet' && jsonSheet.workbook_ref === workbook_ref) {
-				switch (element.type) {
-					case 'metric':
-						// verifico se la metrica è presente nello Sheet
-						if (jsonSheet.sheet.metrics.hasOwnProperty(token)) sheets[sheetToken] = { name: jsonSheet.name, type: jsonSheet.type };
-						break;
-					case 'filter':
-						// TODO: 18.07.2025 da implementare
-						break;
-					default:
-						// colonne custom
-						// TODO: 18.07.2025 da implementare
-				}
+		let sheets = new Map();
+		for (const [token, sheet] of Object.entries(window.localStorage)) {
+			const json = JSON.parse(sheet);
+			if (json.type === 'sheet' && json.workbook_ref === workbookId) {
+				sheets.set(token, json);
 			}
 		}
 		return sheets;
