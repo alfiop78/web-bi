@@ -1,4 +1,3 @@
-// TODO: le funzioni che non utilizzano la classe WorkBook possono essere spostate in supportFn.js
 var App = new Application();
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
@@ -29,9 +28,10 @@ const btn__showAdvancedMetricsUsage = document.getElementById('btn__showAdvanced
 const btn__showCompositeMetricsUsage = document.getElementById('btn__showCompositeMetricsUsage')
 const btn__showCustomMetricsUsage = document.getElementById('btn__showCustomMetricsUsage')
 const btn__showFiltersUsage = document.getElementById('btn__showFiltersUsage')
+const btn__showCustomColumnsUsage = document.getElementById('btn__showCustomColumnsUsage')
 // Dialogs
 const dlg__filters = document.getElementById('dlg__filters');
-const dlgCustomMetric = document.getElementById('dlg-custom-metric');
+const dlg__custom_metric = document.getElementById('dlg__custom_metric');
 const dlg__composite_metric = document.getElementById('dlg__composite_metric');
 const dlg__advancedMetric = document.getElementById('dlg__advanced_metric');
 const dlg__custom_columns = document.getElementById('dlg__custom_column');
@@ -54,6 +54,7 @@ const wbFilters = document.getElementById('wbFilters');
 const info__usage_advanced_metric = document.getElementById('info__usage_advanced_metric');
 const info__usage_composite_metric = document.getElementById('info__usage_composite_metric');
 const info__usage_custom_metric = document.getElementById('info__usage_custom_metric');
+const info__usage_custom_column = document.getElementById('info__usage_custom_column');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -322,10 +323,9 @@ const body = document.getElementById('body');
 		const text = document.createTextNode(formula.join(''));
 		// aggiungo il testo della formula prima del tag <br>
 		textarea.insertBefore(text, textarea.lastChild);
-		debugger;
 		const usage = checkUsage(e.currentTarget.dataset.token);
 		info__usage_custom_metric.hidden = (usage.size !== 0) ? false : true;
-		dlgCustomMetric.showModal();
+		dlg__custom_metric.showModal();
 	}
 
 	// TODO: 25.11.2024 da implementare
@@ -1068,13 +1068,15 @@ const body = document.getElementById('body');
 		inputName.value = element.name;
 		// imposto il token sul tasto #btn__save_column, in questo modo posso salvare/aggiornare la colonna custom in base alla presenza o meno di data-token
 		btn__save_column.dataset.token = e.target.dataset.token;
+		btn__showCustomColumnsUsage.dataset.token = e.target.dataset.token;
 		// const text = document.createTextNode(filter.formula.join(''));
 		const text = document.createTextNode(element.formula);
 		// aggiungo il testo della formula prima del tag <br>
 		textarea__custom_column.insertBefore(text, textarea__custom_column.lastChild);
 		createTableStruct(wbColumns);
 		WorkBook.activeTable = element.tableId;
-		console.log(WorkBook.activeTable);
+		const usage = checkUsage(e.target.dataset.token);
+		info__usage_custom_column.hidden = (usage.size !== 0) ? false : true;
 		dlg__custom_columns.showModal();
 		input__column_name.focus();
 	}
@@ -1108,7 +1110,7 @@ const body = document.getElementById('body');
 		input.appendChild(field);
 		// Nella creazione di una metrica filtrata, alcune proprietà, vengono "riprese" dalla metrica di base da cui deriva.
 		// Per questo motivo ho bisogno sempre del token della metrica di base, lo imposto sul btn-metric-save[data-origin-token]
-		btnSave.dataset.originToken = e.target.dataset.token;
+		btnSave.dataset.originToken = metric.originToken;
 		// ...inoltre, siccome questo tasto entra in 'edit' della metrica, aggiungo anche il token
 		// della metrica che si sta modificando. In questo modo, in saveMetric() posso usare la logica di
 		// aggiornamento/creazione in base al data-token presente su btnSave
@@ -1765,13 +1767,10 @@ const body = document.getElementById('body');
 	// basic/advanced vengono aggiungo "sotto" alla tabella di appartenenza (creata in workbookMap)
 	app.addDefinedCompositeMetrics = () => {
 		// const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-		// if (WorkBook.metrics.size !== 0) {
 		for (const [token, value] of WorkBook.elements) {
 			// aggiungo qui solo le metriche composte
-			// if (value.metric_type === "composite") app.appendMetric(parent, token, value);
 			if (value.metric_type === "composite") appendCompositeMetric(token);
 		}
-		// }
 	}
 
 	// Apertura step Sheet, vengono caricati gli elementi del WorkBook

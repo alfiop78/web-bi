@@ -505,7 +505,7 @@
 					</section>
 				</dialog>
 
-				<dialog id="dialog-time" data-x="0" data-y="40" class="mediumSize absolute moveable">
+				<dialog id="dialog-time" data-x="0" data-y="40" class="medium absolute moveable">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Imposta relazione con tabella TIME</h5>
 						<section class="dlg-content">
@@ -673,7 +673,7 @@
 								<div class="col col-12">
 									<div id="info__usage_advanced_metric" class="info__usage" hidden>
 										<i class="material-symbols-rounded md-24 warn">warning</i>
-										<p>Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
+										<p class="message warn">Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
 										<button id="btn__showAdvancedMetricsUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
 									</div>
 								</div>
@@ -726,7 +726,7 @@
 								<div class="col col-12">
 									<div id="info__usage_composite_metric" class="info__usage" hidden>
 										<i class="material-symbols-rounded md-24 warn">warning</i>
-										<p>Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
+										<p class="message warn">Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
 										<button id="btn__showCompositeMetricsUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
 									</div>
 								</div>
@@ -739,7 +739,7 @@
 					</section>
 				</dialog>
 
-				<dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium absolute moveable">
+				<dialog id="dlg__custom_metric" data-x="0" data-y="40" class="medium absolute moveable">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Creazione Metrica di base</h5>
 						<section class="dlg-content">
@@ -774,7 +774,7 @@
 								<div class="col col-12">
 									<div id="info__usage_custom_metric" class="info__usage" hidden>
 										<i class="material-symbols-rounded md-24 warn">warning</i>
-										<p>Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
+										<p class="message warn">Questa metrica è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
 										<button id="btn__showCustomMetricsUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
 									</div>
 								</div>
@@ -852,7 +852,7 @@
 					</section>
 				</dialog>
 
-				<dialog id="dlg__filters" data-x="0" data-y="40" class="mediumSize absolute moveable">
+				<dialog id="dlg__filters" data-x="0" data-y="40" class="medium absolute moveable">
 					<section class="dlg-grid">
 						<h5 class="title moveable">Creazione Filtro</h5>
 						<section class="dlg-content">
@@ -882,7 +882,7 @@
 								<div class="col col-12">
 									<div id="info__usage_filters" class="info__usage" hidden>
 										<i class="material-symbols-rounded md-24 warn">warning</i>
-										<p>Questo filtro è utilizzato su altri elementi, la modifica verrà propagata su tutti gli elementi che lo utilizzano.</p>
+										<p class="message warn">Questo filtro è utilizzato su altri elementi, la modifica verrà propagata su tutti gli elementi che lo utilizzano.</p>
 										<button id="btn__showFiltersUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
 									</div>
 								</div>
@@ -897,12 +897,12 @@
 
 				<div class="wrapper">
 
-					<dialog id="dlg__custom_column" data-x="0" data-y="40" class="mediumSize absolute moveable">
+					<dialog id="dlg__custom_column" data-x="0" data-y="40" class="medium absolute moveable">
 						<section class="dlg-grid">
 							<h5 class="title moveable">Definizione colonna personalizzata</h5>
 							<section class="dlg-content">
 								<section class="row">
-									<section class="col col-4-span">
+									<section class="col col-4">
 										<div class="list-search">
 											<input type="search" id="input__search_columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="3">
 											<div class="relative-ul">
@@ -910,7 +910,7 @@
 											</div>
 										</div>
 									</section>
-									<section class="col col-8-span">
+									<section class="col col-8">
 										<section class="textarea-formula">
 											<input type="text" id="input__column_name" placeholder="Nome" autocomplete="off" tabindex="1">
 											<div class="textarea__container">
@@ -921,6 +921,15 @@
 											</div>
 										</section>
 									</section>
+								</section>
+								<section class="row">
+									<div class="col col-12">
+										<div id="info__usage_custom_column" class="info__usage" hidden>
+											<i class="material-symbols-rounded md-24 warn">warning</i>
+											<p class="message warn">Questa colonna è utilizzata su altri elementi, la modifica verrà propagata su tutti gli elementi che la utilizzano.</p>
+											<button id="btn__showCustomColumnsUsage" data-id="btn__showUsage" class="btn link">Visualizza elementi</button>
+										</div>
+									</div>
 								</section>
 							</section>
 							<section class="dlg-buttons">

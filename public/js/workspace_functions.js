@@ -1,3 +1,6 @@
+// TODO: 22.07.2025 spostare queste funzioni nei file specifici per il workbook e per il worksheet/sheet
+// Creare il file worksheet_functions come fatto con workbook_functions ed eliminare workspace_functions.js
+// e workspace_sheet.js
 console.info('workspace_functions');
 let chartEditor = null;
 // ho incluso, qui, i datatype di vertica a mysql :
@@ -734,8 +737,6 @@ function appendFilter(token) {
 }
 
 function appendFilterToDialogAdvMetrics() {
-	debugger;
-	// TEST: 21.07.2025 da testare dopo aver aggiunto i filtri in WorkBook.elements
 	const parent = document.getElementById('id__ul_filters');
 	// reset della #id__ul_filters
 	parent.querySelectorAll('li').forEach(element => element.remove());
@@ -796,7 +797,7 @@ function addToMetric(e) {
 // aggiungo la metrica advanced/composite alla strutturaa #workbook-objects
 // OPTIMIZE: 22.11.2024 questa Fn è simile a appendCustomMetric(), alcune parti possono essere scritte in una Fn separata, oppure in un modulo che esporta
 // alcuni elementi ripetuti, in questo caso la creazione del template
-function appendMetric(parent, token) {
+function appendMetric(token) {
 	// const metric = WorkBook.metris.get(token);
 	const metric = WorkBook.elements.get(token);
 	const referenceElement = document.querySelector(`#${metric.factId}_new_metric`);
@@ -809,7 +810,10 @@ function appendMetric(parent, token) {
 	i.id = token;
 	li.dataset.type = metric.metric_type;
 	li.dataset.elementSearch = 'elements';
-	if (metric.metric_type !== 'composite') li.dataset.factId = parent.dataset.factId;
+	if (metric.metric_type !== 'composite') {
+		li.dataset.factId = metric.factId;
+		li.dataset.tableId = metric.factId;
+	}
 	li.dataset.label = metric.alias;
 	// definisco quale context-menu-template apre questo elemento
 	li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
@@ -917,7 +921,7 @@ function closeDialogCustomColumn() {
 
 dlg__composite_metric.addEventListener('close', () => textarea__composite_metric.firstChild?.remove());
 
-dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?.remove());
+dlg__custom_metric.addEventListener('close', () => textareaCustomMetric.firstChild?.remove());
 
 // elementi della dialog filters
 // WARN: codice molto simile a app.addTableStruct, da ottimizzare
@@ -1040,7 +1044,7 @@ function customBaseMetricSave(e) {
 		dragIcon.dataset.label = alias;
 		span.textContent = alias;
 	}
-	dlgCustomMetric.close();
+	dlg__custom_metric.close();
 }
 
 // salvataggio metrica avanzata
@@ -1048,24 +1052,26 @@ function advancedMetricSave(e) {
 	const alias = document.getElementById("input-advanced-metric-name").value;
 	const token = (e.target.dataset.token) ? e.target.dataset.token : `_${rand().substring(0, 7)}`;
 	let filters = new Set();
-	const metric = WorkBook.elements.get(e.target.dataset.originToken);
+	// const metric = WorkBook.elements.get(e.target.dataset.token);
+	const originMetric = WorkBook.elements.get(e.target.dataset.originToken);
 	// WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
 	const aggregateFn = dlg__advancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
 	const distinct = document.getElementById('check-distinct').checked;
+	debugger;
 	let object = {
 		token,
-		// originToken: metric.token,
+		originToken: originMetric.token,
 		alias,
 		type: 'metric',
 		metric_type: 'advanced',
-		factId: metric.factId,
+		factId: originMetric.factId,
 		aggregateFn,
-		SQL: metric.SQL,
+		SQL: originMetric.SQL,
 		distinct
 	};
 	// se è presente la proprietà 'metrics' la aggiungo. Questa proprietà è presente nei casi in cui la metrica
 	// contiene una formula (non un solo campo della tabella)
-	if (metric.metrics) object.metrics = metric.metrics;
+	if (originMetric.metrics) object.metrics = originMetric.metrics;
 	// recupero tutti i filtri droppati in #filter-drop
 	// salvo solo il riferimento al filtro e non tutta la definizione del filtro
 	dlg__advancedMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
@@ -1093,8 +1099,8 @@ function advancedMetricSave(e) {
 	// window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
 	if (!e.target.dataset.token) {
 		// aggiungo la nuova metrica nello stesso <details> della metrica originaria (originToken)
-		const parent = document.querySelector(`li[data-id='${e.target.dataset.originToken}']`).parentElement;
-		appendMetric(parent, token);
+		// const parent = document.querySelector(`li[data-id='${e.target.dataset.originToken}']`).parentElement;
+		appendMetric(token);
 	} else {
 		// la metrica già esiste, aggiorno il nome
 		const li = document.querySelector(`li[data-id='${token}']`);
@@ -1704,7 +1710,7 @@ function addFields(parent, fields) {
 function createCustomMetric(e) {
 	// const tableId = e.currentTarget.dataset.tableId;
 	WorkBook.activeTable = e.currentTarget.dataset.tableId;
-	dlgCustomMetric.showModal();
+	dlg__custom_metric.showModal();
 }
 
 function createCustomColumn(e) {

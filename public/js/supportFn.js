@@ -32,7 +32,7 @@ async function getDatabaseTable(schema) {
 (() => {
 	var app = {
 		dialogAdvMetric: document.getElementById('dlg-metric'),
-		dialogCustomMetric: document.getElementById('dlg-custom-metric'),
+		dialogCustomMetric: document.getElementById('dlg__custom_metric'),
 		dialogColumns: document.getElementById('dlg-columns'),
 		btnSchema: document.getElementById('btnSchemata'),
 		dialogSchema: document.getElementById('dlg-schema')

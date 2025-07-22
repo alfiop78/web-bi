@@ -11,6 +11,8 @@
 	--main-color-button-flat: #8c5f11;
 	--main-color-header-table: #d2d2d2;
 	--main-important-color: #d9665b;
+	--main-error-color: #d9665b;
+	--main-warning-color: #c5791b;
 	--mark-color: #f2d98d;
 	--filters-color: #f2d98d;
 	--metrics: #A6786D;
@@ -89,8 +91,7 @@ h4 {
 	font-size: 1.2rem;
 }
 
-@media screen and (min-width: 1921px) {
-}
+@media screen and (min-width: 1921px) {}
 
 body {
 	display: grid;
@@ -663,3 +664,18 @@ code.code,
 	align-items: center;
 }
 
+p.message {
+	margin: 0px .5rem;
+	padding: .5rem;
+	border-radius: 4px;
+}
+
+p.message.error {
+	background-color: var(--main-important-color);
+	color: white;
+}
+
+p.message.warn {
+	background-color: var(--main-warning-color);
+	color: white;
+}

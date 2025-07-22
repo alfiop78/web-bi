@@ -239,8 +239,7 @@ function checkUsage(token) {
 					}
 					break;
 				case 'advanced':
-					// if (value.filters.includes(token)) result[key] = { name: value.alias, type: value.type, metric_type: value.metric_type };
-					if (value.filters.includes(tokenRecursive)) {
+					if (value.filters.includes(tokenRecursive) || value.originToken === tokenRecursive) {
 						// la metrica advanced contiene il filtro, ora bisogna verificare se la metrica è contenuta in
 						// qualche metrica composta, in caso positivo deve essere restituita anche quella in 'result'
 						result.set(key, { name: value.alias, type: value.type, metric_type: value.metric_type });

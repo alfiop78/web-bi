@@ -5,7 +5,7 @@
 dialog {
 	background-color: white;
 	color: #494949;
-	width: 40%;
+	width: 60%;
 }
 
 @media screen and (min-height: 800px) {
@@ -13,8 +13,8 @@ dialog {
 		width: 70%;
 	}
 
-	dialog.mediumSize {
-		width: 50%;
+	dialog.medium {
+		width: 65%;
 	}
 
 	dialog.smallSize {
@@ -108,7 +108,7 @@ dialog::backdrop {
 }
 
 dialog.large {
-	width: 74%;
+	width: 80%;
 }
 
 dialog.large-max {
