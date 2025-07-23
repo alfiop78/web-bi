@@ -18,7 +18,7 @@ class BIworkbookController extends Controller
 		// $workbooks = BIworkbook::all();
 		/* $workbooks = BIworkbook::where('connectionId', session('db_id'))->get();
 		return response()->json(['workbook' => $workbooks]); */
-		$workbooks= BIworkbook::select('token','name', 'workbook_updated_at')->where('connectionId', session('db_id'))->get();
+		$workbooks = BIworkbook::select('token', 'name', 'workbook_updated_at')->where('connectionId', session('db_id'))->get();
 		$result = [];
 		foreach ($workbooks->collect() as $workbook) {
 			$result[] = [
@@ -29,7 +29,11 @@ class BIworkbookController extends Controller
 				// "json_value" => $workbook->json_value // temporaneo, non mi servirà più dopo aver aggiornato tutti gli workbook (issue#292)
 			];
 		}
-		return response()->json(['workbook' => $result]);
+		// risposta in json per la fetch_api, non l'ho più utilizzata perchè
+		// sostituita dalla risposta della view
+		// return response()->json(['workbook' => $result]);
+		// dd($result);
+		return view('web_bi.versioning')->with('workbook', $result);
 	}
 
 	/**

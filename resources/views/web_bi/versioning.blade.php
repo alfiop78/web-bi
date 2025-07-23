@@ -103,7 +103,19 @@
 								<section class="list-search">
 									<input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
 									<div class="relative-ul" data-id="workbook" data-type="workbook">
-										<ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
+										<ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook">
+											@foreach($workbook as $item)
+											<li id="{{ $item['token'] }}" class="checkInput" data-element-search="workbook" data-label="{{ $item['name'] }}" data-storage="db" data-searchable="true" data-sync="false">
+												<input type="checkbox" data-id="{{ $item['token'] }}" data-type="{{ $item['type'] }}" />
+												<div class="li-content" data-token="{{ $item['token'] }}" data-type="{{ $item['type'] }}" data-fn="showResource" data-storage="db">
+													<i class="material-symbols-rounded" data-sync-status>sync</i>
+													<div class="li-content-details">
+														<span data-value="{{ $item['name'] }}" class="text-ellipsis">{{ $item['name'] }}</span>
+													</div>
+												</div>
+											</li>
+											@endforeach
+										</ul>
 									</div>
 								</section>
 							</div>

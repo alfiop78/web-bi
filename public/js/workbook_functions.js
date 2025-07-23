@@ -104,7 +104,7 @@ function workbookOpenDialog() {
 	const parent = document.getElementById("ul-workbooks");
 	// reset list
 	parent.querySelectorAll('li').forEach(workbook => workbook.remove());
-	for (const [token, object] of Object.entries(WorkBookStorage.workBooks(+document.querySelector('main').dataset.databaseId))) {
+	for (const [token, object] of WorkBookStorage.workBooks(+document.querySelector('main').dataset.databaseId)) {
 		const tmpl = template_li.content.cloneNode(true);
 		const li = tmpl.querySelector('li.select-list');
 		const span = li.querySelector('span');
@@ -215,38 +215,40 @@ function checkUsage(token) {
 	// verifico prima se l'elemento è presente negli Sheet
 	let result = new Map();
 	let sheets = Storages.getSheetsByWorkbookId(WorkBook.workBook.token);
-	const metrics = WorkBook.getMetrics();
 	let recursiveFn = (tokenRecursive) => {
 		// verifico se la metrica avanzata è presente nello Sheet
 		for (const [sheetKey, sheet] of sheets) {
 			if (sheet.sheet.metrics.hasOwnProperty(tokenRecursive)) result.set(sheetKey, { name: sheet.name, type: sheet.type });
 			if (sheet.sheet.filters.includes(tokenRecursive)) result.set(sheetKey, { name: sheet.name, type: sheet.type });
+			if (sheet.sheet.fields.hasOwnProperty(tokenRecursive)) result.set(sheetKey, { name: sheet.name, type: sheet.type });
 		}
-		for (const [key, value] of metrics) {
+		for (const [key, value] of WorkBook.elements) {
 			// ogni tipo di metrica può essere utilizzata solo in metriche composte e
-			// negli Sheets. I filtri possono essere utilizzate nelle metriche avanzate
-			// e, ricorsivamente, queste ultime possono essere utilizzate in metriche composte
-			switch (value.metric_type) {
-				case 'composite':
-					// recupero la defnizione da WorkBook.elements per poter recuperare l'alias della metrica
-					const element = WorkBook.elements.get(tokenRecursive);
-					// la metrica passata come argomento è utilizzata da una metrica composta
-					if (value.formula.includes(element.alias)) {
-						result.set(key, { name: value.alias, type: value.type, metric_type: value.metric_type });
-						// 22.07.2025 la metrica composta può essere contenuta, a sua volta, in un altra metrica composta, qui è necessaria
-						// una funzione ricorsiva
-						recursiveFn(key);
-					}
-					break;
-				case 'advanced':
-					if (value.filters.includes(tokenRecursive) || value.originToken === tokenRecursive) {
-						// la metrica advanced contiene il filtro, ora bisogna verificare se la metrica è contenuta in
-						// qualche metrica composta, in caso positivo deve essere restituita anche quella in 'result'
-						result.set(key, { name: value.alias, type: value.type, metric_type: value.metric_type });
-						recursiveFn(key);
-					}
-					break;
-				default:
+			// negli Sheets. I filtri possono essere utilizzati nelle metriche avanzate
+			// e, ricorsivamente, nelle metriche composte
+			if (value.type === 'metric') {
+				switch (value.metric_type) {
+					case 'composite':
+						// recupero la defnizione da WorkBook.elements per poter recuperare l'alias della metrica
+						const element = WorkBook.elements.get(tokenRecursive);
+						// la metrica passata come argomento è utilizzata da una metrica composta
+						if (value.formula.includes(element.alias)) {
+							result.set(key, { name: value.alias, type: value.type, metric_type: value.metric_type });
+							// 22.07.2025 la metrica composta può essere contenuta, a sua volta, in un altra metrica composta, qui è necessaria
+							// una funzione ricorsiva
+							recursiveFn(key);
+						}
+						break;
+					case 'advanced':
+						if (value.filters.includes(tokenRecursive) || value.originToken === tokenRecursive) {
+							// la metrica advanced contiene il filtro, ora bisogna verificare se la metrica è contenuta in
+							// qualche metrica composta, in caso positivo deve essere restituita anche quella in 'result'
+							result.set(key, { name: value.alias, type: value.type, metric_type: value.metric_type });
+							recursiveFn(key);
+						}
+						break;
+					default:
+				}
 			}
 		}
 	}

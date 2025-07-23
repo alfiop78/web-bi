@@ -41,8 +41,9 @@ var Storage = new SheetStorages();
 	observerList.observe(document.getElementById('body'), config);
 
 	app.checkObjects = (data) => {
+		console.log('checkObjects');
 		for (const [type, elements] of Object.entries(data)) {
-			// console.log(elements);
+			console.log(elements);
 			elements.forEach(element => {
 				// TODO: 09.04.2025 invece di recuperare tutto il json_value, implementare, come fatto in BisheetController->index()
 				// un result che restituisce solo i dati che servono qui (updated_at, type, workbook_ref, ecc...)
@@ -109,13 +110,72 @@ var Storage = new SheetStorages();
 					return response.json();
 				}))
 			})
-			.then((data) => {
-				data.forEach((elementData) => app.checkObjects(elementData));
+			.then(data => {
+				// data.forEach((elementData) => app.checkObjects(elementData));
+				// aggiungo gli elementi alle <ul>
+				// console.log(data);
+				data.forEach(type => {
+					// type : workbook / sheet
+					for (const items of Object.values(type)) {
+						// console.log(items);
+						items.forEach(item => {
+							const content_li = app.tmpl_li.content.cloneNode(true);
+							const li = content_li.querySelector('li');
+							const liContent = li.querySelector('.li-content');
+							const inputCheck = li.querySelector('input');
+							const statusIcon = li.querySelector('i[data-sync-status]');
+							const span = li.querySelector('span[data-value]');
+							// recupero lo stesso elemento presente in localStorage per poterli confrontare
+							const localItem = JSON.parse(localStorage.getItem(item.token));
+							let updated_atFromDB;
+							if (localItem) {
+								// l'elemento in ciclo è presente anche in locale, verifico updated_at
+								updated_atFromDB = new Date(item.updated_at);
+								updated_atFromDB.setUTCHours(updated_atFromDB.getHours());
+								updated_atFromDB = updated_atFromDB.toISOString();
+								if (updated_atFromDB === localItem.updated_at) {
+									// oggetti identici
+									li.dataset.identical = 'true';
+									statusIcon.classList.add('done');
+									statusIcon.innerText = "done";
+								} else {
+									// oggetti con updated_at diverse
+									// TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
+									li.dataset.identical = 'false';
+									statusIcon.innerText = "sync_problem";
+								}
+							} else {
+								// l'elemento non è presente in locale
+								debugger;
+								statusIcon.innerText = 'sync';
+								li.dataset.storage = 'db';
+								liContent.dataset.storage = 'db';
+							}
+							inputCheck.dataset.id = item.token;
+							inputCheck.dataset.type = item.type;
+							inputCheck.addEventListener('click', app.checked);
+							li.dataset.elementSearch = item.type;
+							li.id = item.token;
+							liContent.dataset.token = item.token;
+							liContent.dataset.type = item.type;
+							// la proprietà workbook_ref viene impostata come dataset
+							if (item.hasOwnProperty('workbook_ref')) {
+								li.dataset.workbookRef = item.workbook_ref;
+							}
+							li.dataset.label = item.name;
+							span.dataset.value = item.name;
+							span.innerText = item.name;
+							document.querySelector(`#ul-${item.type}`).appendChild(li);
+						});
+					}
+				});
+
 			})
 			.catch(err => console.error(err));
 	}
 
 	app.addElement = (token, object, storage) => {
+		console.log('addElement');
 		const content_li = app.tmpl_li.content.cloneNode(true);
 		const li = content_li.querySelector('li');
 		const liContent = li.querySelector('.li-content');
@@ -430,7 +490,7 @@ var Storage = new SheetStorages();
 		// imposto data-fn sugli elementi di ul-objects
 		document.querySelectorAll('menu').forEach(menu => menu.dataset.init = 'true');
 		// recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
-		app.getLocal();
+		// app.getLocal();
 		app.getDB();
 	}
 
@@ -495,6 +555,6 @@ var Storage = new SheetStorages();
 		}
 	}
 
-	app.init();
+	// app.init();
 
 })();

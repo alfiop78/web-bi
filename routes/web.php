@@ -7,8 +7,6 @@ use App\Http\Controllers\BIConnectionsController;
 use App\Http\Controllers\BIdashboardController;
 use App\Http\Controllers\BIworkbookController;
 use App\Http\Controllers\BIsheetController;
-use App\Http\Controllers\BImetricController;
-use App\Http\Controllers\BIfilterController;
 use App\Models\BIdashboard;
 // uso i Model BIsheet, BIworkbook, BImetric e BIfilter che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 // use App\Models\BIsheet;
@@ -47,10 +45,11 @@ Route::get('/dashboard', function () {
 // routes
 Route::get('/connections', [BIConnectionsController::class, 'index'])->middleware(['auth'])->name('web_bi.connections');
 Route::get('/workspace', [MapDatabaseController::class, 'workspace'])->middleware(['auth'])->name('web_bi.workspace');
-Route::get('/versioning', function () {
+/* Route::get('/versioning', function () {
 	// TODO: recuperare solo gli Workbook del DB collegato
 	return view('web_bi.versioning');
-})->middleware(['auth'])->name('web_bi.versioning');
+})->middleware(['auth'])->name('web_bi.versioning'); */
+Route::get('/versioning', [BIworkbookController::class, 'index'])->middleware(['auth'])->name('web_bi.versioning');
 
 Route::get('/dashboards', [BIdashboardController::class, 'index'])->middleware(['auth'])->name('web_bi.dashboards');
 

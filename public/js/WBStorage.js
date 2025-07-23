@@ -4,7 +4,8 @@ La classe recupera il local storage ad ogni accesso alla pagina e contiene Metod
 class Storages {
 	#selected; // l'elemento selezionato in un determinato momento
 	#workbook;
-	#workBooks = {};
+	#workBooks = new Map();
+	#workBooksList = [];
 
 	constructor() {
 		this.storage = window.localStorage;
@@ -99,11 +100,31 @@ class Storages {
 
 	// tutti gli workBooks
 	workBooks(databaseId) {
+		this.#workBooks.clear();
+		this.#workBooksList = [];
 		for (const [token, object] of Object.entries(this.storage)) {
-			if (JSON.parse(object).type === 'workbook' && JSON.parse(object).databaseId === databaseId) {
-				this.#workBooks[token] = JSON.parse(object);
+			const json = JSON.parse(object);
+			if (json.type === 'workbook' && json.databaseId === databaseId) {
+				// this.#workBooks.set(token, json);
+				this.#workBooksList.push(json);
 			}
 		}
+		// const sort = [...this.#workBooks.values()].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+		// INFO: ordinamento per updated_at in ordine decrescente
+		/* const sort = [...this.#workBooks.values()].sort((a, b) => {
+			const bDate = new Date(b.updated_at).getTime().toString();
+			const aDate = new Date(a.updated_at).getTime().toString();
+			return bDate.localeCompare(aDate)
+		}); */
+		const sort_workbooks = this.#workBooksList.sort((a, b) => {
+			const bDate = new Date(b.updated_at).getTime().toString();
+			const aDate = new Date(a.updated_at).getTime().toString();
+			return bDate.localeCompare(aDate)
+		});
+		// console.log(sort);
+		// console.log(sort_workbooks);
+		// converto l'array ordinato per updated_at in un Map()
+		sort_workbooks.forEach(workbook => this.#workBooks.set(workbook.token, workbook));
 		return this.#workBooks;
 	}
 
@@ -212,6 +233,7 @@ class SheetStorages extends Storages {
 				this.#sheets[token] = JSON.parse(object);
 			}
 		}
+		// TODO: 23.07.2025 ordinare per updated_at come fatto per gli workbook
 		return this.#sheets;
 	}
 
