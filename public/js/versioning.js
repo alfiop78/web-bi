@@ -40,191 +40,73 @@ var Storage = new SheetStorages();
 	// console.log(document.getElementById('body'));
 	observerList.observe(document.getElementById('body'), config);
 
-	app.checkObjects = (data) => {
-		console.log('checkObjects');
-		for (const [type, elements] of Object.entries(data)) {
-			console.log(elements);
-			elements.forEach(element => {
-				// TODO: 09.04.2025 invece di recuperare tutto il json_value, implementare, come fatto in BisheetController->index()
-				// un result che restituisce solo i dati che servono qui (updated_at, type, workbook_ref, ecc...)
-				const dbElement = (type === "sheet" || type === 'workbook') ? element : JSON.parse(element.json_value);
-				// debugger;
-				// const dbElement = JSON.parse(element.json_value);
-				const localElement = JSON.parse(localStorage.getItem(dbElement.token));
-				// console.log(element, element.token);
-				// verifico lo stato dell'elemento in ciclo rispetto al localStorage
-				// (sincronizzato, non sincronizzato, ecc...)
-				const div = document.querySelector(`div[data-type='${type}']`);
-				// let li;
-				if (div.querySelector(`li[id='${dbElement.token}']`)) {
-					// l'elemento in ciclo (dal db) è presente anche in locale
-					const li = div.querySelector(`li[id='${dbElement.token}']`);
-					const statusIcon = li.querySelector('i[data-sync-status]');
-					li.dataset.sync = 'true';
-					// verifico se l'elemento in ciclo è "identico" all'elemento in storage
-					// FIX: Codice utilizzato temporaneamente. Modificherò questo codice quando
-					// tutti i Controller relativi al metadato avranno la colonna updated_at come fatto in bi_sheets
-					// Inoltre tutti gli oggetti memorizzati dovranno avere, sia in locale che su db, le date formattate con ISO 8601, come
-					// fatto con bi_sheets
-					let db_updated_at;
-					// if (dbElement.token === 'xxiwl72') {
-					if (type === 'sheet' || type === 'workbook') {
-						db_updated_at = new Date(dbElement.updated_at);
-						db_updated_at.setUTCHours(db_updated_at.getHours());
-						db_updated_at = db_updated_at.toISOString();
-					} else {
-						db_updated_at = dbElement.updated_at;
-					}
-					// if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
-					if (dbElement.updated_at && (localElement.updated_at === db_updated_at)) {
+	/*
+	* Verifico lo stato degli oggetti:
+	* sincronizzato
+	* conflitto di sincronizzazione
+	* presente solo su sb
+	* presente solo in locale
+	* */
+	app.checkStatus = () => {
+		// lista di tutti gli elementi dello storage
+		const databaseId = +document.querySelector('main').dataset.databaseId;
+		for (const [token, object] of Storage.getAll(databaseId)) {
+			// WARN: 28.07.2025 al momento verifico solo gli workbook
+			if (object.type === 'workbook') {
+				console.log(object.type);
+				const parent = document.querySelector(`#ul-${object.type}`);
+				// Verifico se l'elemento in ciclo è presente su db
+				const li_db = document.getElementById(token);
+				if (li_db) {
+					li_db.dataset.storage = 'db';
+					li_db.dataset.sync = 'true';
+					// l'elemento del localStorage è presente anche sul db, verifico lo
+					// stato della sincronizzazione
+					let updated_db = new Date(li_db.dataset.updated);
+					updated_db.setUTCHours(updated_db.getHours());
+					updated_db = updated_db.toISOString();
+					if (updated_db === object.updated_at) {
 						// oggetti identici
-						li.dataset.identical = 'true';
-						statusIcon.classList.add('done');
-						statusIcon.innerText = "done";
+						li_db.dataset.identical = 'true';
+						li_db.querySelector('i[data-sync-status]').classList.add('done');
+						li_db.querySelector('i[data-sync-status]').innerText = 'done';
 					} else {
 						// oggetti con updated_at diverse
 						// TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
-						li.dataset.identical = 'false';
-						statusIcon.innerText = "sync_problem";
+						li_db.dataset.identical = 'false';
+						li_db.querySelector('i[data-sync-status]').innerText = 'sync_problem';
 					}
 				} else {
-					// l'elemento non è presente in locale
-					// aggiungo l'elemento alla <ul> con attributo data-storage="db"
-					app.addElement(dbElement.token, dbElement, 'db');
-				}
-			});
-		}
-	}
-
-	app.getDB = async () => {
-		// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
-		const urls = [
-			'/fetch_api/versioning/workbooks',
-			'/fetch_api/versioning/sheets'
-		];
-		// ottengo tutte le risposte in un array
-		await Promise.all(urls.map(url => fetch(url)))
-			.then(responses => {
-				return Promise.all(responses.map(response => {
-					if (!response.ok) { throw Error(response.statusText); }
-					return response.json();
-				}))
-			})
-			.then(data => {
-				// data.forEach((elementData) => app.checkObjects(elementData));
-				// aggiungo gli elementi alle <ul>
-				// console.log(data);
-				data.forEach(type => {
-					// type : workbook / sheet
-					for (const items of Object.values(type)) {
-						// console.log(items);
-						items.forEach(item => {
-							const content_li = app.tmpl_li.content.cloneNode(true);
-							const li = content_li.querySelector('li');
-							const liContent = li.querySelector('.li-content');
-							const inputCheck = li.querySelector('input');
-							const statusIcon = li.querySelector('i[data-sync-status]');
-							const span = li.querySelector('span[data-value]');
-							// recupero lo stesso elemento presente in localStorage per poterli confrontare
-							const localItem = JSON.parse(localStorage.getItem(item.token));
-							let updated_atFromDB;
-							if (localItem) {
-								// l'elemento in ciclo è presente anche in locale, verifico updated_at
-								updated_atFromDB = new Date(item.updated_at);
-								updated_atFromDB.setUTCHours(updated_atFromDB.getHours());
-								updated_atFromDB = updated_atFromDB.toISOString();
-								if (updated_atFromDB === localItem.updated_at) {
-									// oggetti identici
-									li.dataset.identical = 'true';
-									statusIcon.classList.add('done');
-									statusIcon.innerText = "done";
-								} else {
-									// oggetti con updated_at diverse
-									// TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
-									li.dataset.identical = 'false';
-									statusIcon.innerText = "sync_problem";
-								}
-							} else {
-								// l'elemento non è presente in locale
-								debugger;
-								statusIcon.innerText = 'sync';
-								li.dataset.storage = 'db';
-								liContent.dataset.storage = 'db';
-							}
-							inputCheck.dataset.id = item.token;
-							inputCheck.dataset.type = item.type;
-							inputCheck.addEventListener('click', app.checked);
-							li.dataset.elementSearch = item.type;
-							li.id = item.token;
-							liContent.dataset.token = item.token;
-							liContent.dataset.type = item.type;
-							// la proprietà workbook_ref viene impostata come dataset
-							if (item.hasOwnProperty('workbook_ref')) {
-								li.dataset.workbookRef = item.workbook_ref;
-							}
-							li.dataset.label = item.name;
-							span.dataset.value = item.name;
-							span.innerText = item.name;
-							document.querySelector(`#ul-${item.type}`).appendChild(li);
-						});
+					// l'elemento non è presente sul db
+					const content_li = app.tmpl_li.content.cloneNode(true);
+					const li = content_li.querySelector('li');
+					const liContent = li.querySelector('.li-content');
+					const inputCheck = li.querySelector('input');
+					const statusIcon = li.querySelector('i[data-sync-status]');
+					const span = li.querySelector('span[data-value]');
+					inputCheck.dataset.id = token;
+					inputCheck.dataset.type = object.type;
+					inputCheck.addEventListener('click', app.checked);
+					li.dataset.elementSearch = object.type;
+					li.id = token;
+					liContent.dataset.token = token;
+					liContent.dataset.type = object.type;
+					// la proprietà workbook_ref viene impostata come dataset
+					if (object.hasOwnProperty('workbook_ref')) {
+						li.dataset.workbookRef = object.workbook_ref;
 					}
-				});
-
-			})
-			.catch(err => console.error(err));
-	}
-
-	app.addElement = (token, object, storage) => {
-		console.log('addElement');
-		const content_li = app.tmpl_li.content.cloneNode(true);
-		const li = content_li.querySelector('li');
-		const liContent = li.querySelector('.li-content');
-		const inputCheck = li.querySelector('input');
-		const statusIcon = li.querySelector('i[data-sync-status]');
-		const span = li.querySelector('span[data-value]');
-		// const updated_at = li.querySelector('span[data-updated_at]');
-		if (storage === 'db') statusIcon.innerText = 'sync';
-		inputCheck.dataset.id = token;
-		inputCheck.dataset.type = object.type;
-		inputCheck.addEventListener('click', app.checked);
-		li.dataset.elementSearch = object.type;
-		li.dataset.storage = storage;
-		li.id = token;
-		liContent.dataset.token = token;
-		liContent.dataset.storage = storage;
-		liContent.dataset.type = object.type;
-		// la proprietà workbook_ref viene impostata come dataset
-		if (object.hasOwnProperty('workbook_ref')) {
-			li.dataset.workbookRef = object.workbook_ref;
-			// TODO recupero il nome del WorkBook a cui è associato questa risorsa
-			// Questo deve essere fatto DOPO il caricamento degli oggetti dal DB
-			// const workbookName = document.querySelector(`#ul-workbook > li[id='${object.workbook_ref}']`);
-			// workBookRef.innerText = workbookName.dataset.label;
-		}
-		li.dataset.label = object.name;
-		span.dataset.value = object.name;
-		span.innerText = object.name;
-		/* switch (object.type) {
-			case 'sheet':
-			case 'workbook':
-				li.dataset.label = object.name;
-				span.dataset.value = object.name;
-				span.innerText = object.name;
-				break;
-			default:
-				li.dataset.label = object.alias;
-				span.dataset.value = object.alias;
-				span.innerText = object.alias;
-				break;
-		} */
-		document.querySelector(`#ul-${object.type}`).appendChild(li);
-	}
-
-	app.getLocal = () => {
-		// lista di tutti gli sheet del workbook in ciclo
-		const databaseId = +document.querySelector('main').dataset.databaseId;
-		for (const [token, object] of Object.entries(Storage.getAll(databaseId))) {
-			app.addElement(token, object, 'local');
+					li.dataset.label = object.name;
+					span.dataset.value = object.name;
+					span.innerText = object.name;
+					statusIcon.innerText = 'sync';
+					li.dataset.storage = 'local';
+					liContent.dataset.storage = 'local';
+					console.log(li);
+					console.log(object.name);
+					debugger;
+					parent.appendChild(li);
+				}
+			}
 		}
 	}
 
@@ -485,13 +367,10 @@ var Storage = new SheetStorages();
 	app.checked = (e) => app.checkVersioning(e.target.dataset.type);
 
 	app.init = () => {
-		// scarico elenco oggetti dal DB (WorkBooks, WorkSheets e Sheets)
+		// scarico elenco oggetti dal DB (WorkBooks e Sheets)
 		// visualizzo oggetti locali (da qui possono essere salvati su DB)
 		// imposto data-fn sugli elementi di ul-objects
 		document.querySelectorAll('menu').forEach(menu => menu.dataset.init = 'true');
-		// recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
-		// app.getLocal();
-		app.getDB();
 	}
 
 	app.selectObject = (e) => {
@@ -556,5 +435,7 @@ var Storage = new SheetStorages();
 	}
 
 	// app.init();
+
+	app.checkStatus();
 
 })();

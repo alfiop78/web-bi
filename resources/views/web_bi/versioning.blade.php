@@ -105,7 +105,7 @@
 									<div class="relative-ul" data-id="workbook" data-type="workbook">
 										<ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook">
 											@foreach($workbook as $item)
-											<li id="{{ $item['token'] }}" class="checkInput" data-element-search="workbook" data-label="{{ $item['name'] }}" data-storage="db" data-searchable="true" data-sync="false">
+											<li id="{{ $item['token'] }}" class="checkInput" data-element-search="workbook" data-label="{{ $item['name'] }}" data-storage="db" data-searchable="true" data-updated="{{ $item['updated_at']}}" data-sync="false">
 												<input type="checkbox" data-id="{{ $item['token'] }}" data-type="{{ $item['type'] }}" />
 												<div class="li-content" data-token="{{ $item['token'] }}" data-type="{{ $item['type'] }}" data-fn="showResource" data-storage="db">
 													<i class="material-symbols-rounded" data-sync-status>sync</i>

@@ -193,13 +193,13 @@ class Storages {
 
 	getAll(databaseId) {
 		// Recupero tutti gli oggetti appartenenti al db connesso e, a cascata, appartenenti al workbook in ciclo
-		let all = {};
-		for (const [workbookToken, workbook] of Object.entries(this.workBooks(databaseId))) {
-			all[workbookToken] = workbook;
+		let all = new Map();
+		for (const [workbookToken, workbook] of this.workBooks(databaseId)) {
+			all.set(workbookToken, workbook);
 			for (const [token, object] of Object.entries(this.storage)) {
 				// verifico se l'object appartiene al workbook
 				const json = JSON.parse(object);
-				if (json.workbook_ref === workbookToken) all[token] = json;
+				if (json.workbook_ref === workbookToken) all.set(token, json);
 			}
 		}
 		return all;
