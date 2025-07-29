@@ -25,9 +25,10 @@ var Storage = new SheetStorages();
 					}
 				});
 			} else if (mutation.type === 'attributes') {
-				// console.log(`The ${mutation.attributeName} attribute was modified.`);
+				console.log(`The ${mutation.attributeName} attribute was modified.`);
 				// console.log(mutation.target);
 				if (mutation.target.hasChildNodes()) {
+					console.log(mutation.target);
 					mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
 				}
 			}
@@ -50,99 +51,60 @@ var Storage = new SheetStorages();
 	app.checkStatus = () => {
 		// lista di tutti gli elementi dello storage
 		const databaseId = +document.querySelector('main').dataset.databaseId;
+		// aggiungo gli eventi click sugli elementi scaricati dal db
+		document.querySelectorAll('ul *[data-fn-reference]').forEach(item => {
+			item.dataset.fn = item.dataset.fnReference;
+		});
 		for (const [token, object] of Storage.getAll(databaseId)) {
-			// WARN: 28.07.2025 al momento verifico solo gli workbook
-			if (object.type === 'workbook') {
-				console.log(object.type);
-				const parent = document.querySelector(`#ul-${object.type}`);
-				// Verifico se l'elemento in ciclo è presente su db
-				const li_db = document.getElementById(token);
-				if (li_db) {
-					li_db.dataset.storage = 'db';
-					li_db.dataset.sync = 'true';
-					// l'elemento del localStorage è presente anche sul db, verifico lo
-					// stato della sincronizzazione
-					let updated_db = new Date(li_db.dataset.updated);
-					updated_db.setUTCHours(updated_db.getHours());
-					updated_db = updated_db.toISOString();
-					if (updated_db === object.updated_at) {
-						// oggetti identici
-						li_db.dataset.identical = 'true';
-						li_db.querySelector('i[data-sync-status]').classList.add('done');
-						li_db.querySelector('i[data-sync-status]').innerText = 'done';
-					} else {
-						// oggetti con updated_at diverse
-						// TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
-						li_db.dataset.identical = 'false';
-						li_db.querySelector('i[data-sync-status]').innerText = 'sync_problem';
-					}
+			// console.log(object.type);
+			const parent = document.querySelector(`#ul-${object.type}`);
+			// Verifico se l'elemento in ciclo è presente su db
+			const li_db = document.getElementById(token);
+			if (li_db) {
+				const input = li_db.querySelector('input');
+				input.addEventListener('click', app.checkItem);
+				li_db.dataset.storage = 'db';
+				li_db.dataset.sync = 'true';
+				// l'elemento del localStorage è presente anche sul db, verifico lo
+				// stato della sincronizzazione
+				let updated_db = new Date(li_db.dataset.updated);
+				updated_db.setUTCHours(updated_db.getHours());
+				updated_db = updated_db.toISOString();
+				if (updated_db === object.updated_at) {
+					// oggetti identici
+					li_db.dataset.identical = 'true';
+					li_db.querySelector('i[data-sync-status]').classList.add('done');
+					li_db.querySelector('i[data-sync-status]').innerText = 'done';
 				} else {
-					// l'elemento non è presente sul db
-					const content_li = app.tmpl_li.content.cloneNode(true);
-					const li = content_li.querySelector('li');
-					const liContent = li.querySelector('.li-content');
-					const inputCheck = li.querySelector('input');
-					const statusIcon = li.querySelector('i[data-sync-status]');
-					const span = li.querySelector('span[data-value]');
-					inputCheck.dataset.id = token;
-					inputCheck.dataset.type = object.type;
-					inputCheck.addEventListener('click', app.checked);
-					li.dataset.elementSearch = object.type;
-					li.id = token;
-					liContent.dataset.token = token;
-					liContent.dataset.type = object.type;
-					// la proprietà workbook_ref viene impostata come dataset
-					if (object.hasOwnProperty('workbook_ref')) {
-						li.dataset.workbookRef = object.workbook_ref;
-					}
-					li.dataset.label = object.name;
-					span.dataset.value = object.name;
-					span.innerText = object.name;
-					statusIcon.innerText = 'sync';
-					li.dataset.storage = 'local';
-					liContent.dataset.storage = 'local';
-					console.log(li);
-					console.log(object.name);
-					debugger;
-					parent.appendChild(li);
+					// oggetti con updated_at diverse
+					// TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
+					li_db.dataset.identical = 'false';
+					li_db.querySelector('i[data-sync-status]').innerText = 'sync_problem';
 				}
-			}
-		}
-	}
-
-	// Verifico gli elementi selezionati in modo da abilitare/disabilitare alcuni tasti in
-	// .allButtons
-	app.checkVersioning = (type) => {
-		// Ciclo gli elementi selezionati
-		console.clear();
-		// se è stato selezionato più di un elemento visualizzo .allButtons
-		const countChecked = document.querySelectorAll(`#ul-${type} li input:checked`).length;
-		// visualizzo/nascondo .allButtons
-		document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = (countChecked) ? false : true;
-		if (countChecked) {
-			const allButtons = {
-				upload: document.querySelector(`button[data-type='${type}'][data-upload]`),
-				download: document.querySelector(`button[data-type='${type}'][data-download]`),
-				upgrade: document.querySelector(`button[data-type='${type}'][data-upgrade]`),
-				delete: document.querySelector(`button[data-type='${type}'][data-delete]`),
-			}
-			// Not Sync abilita i tasti download, upgrade, delete
-			const NotSync = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'local');
-			(NotSync) ? allButtons.upload.disabled = false : allButtons.upload.disabled = true;
-			// data-synx=false data-storage=db : Visualizzazione download
-			// elementi presenti SOLO su DB
-			const NotSyncDB = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'db');
-			(NotSyncDB) ? allButtons.download.disabled = false : allButtons.download.disabled = true;
-			if (!NotSyncDB && !NotSync) {
-				// data-sync=true e data-identical=false
-				const notIdentical = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'true' && el.parentElement.dataset.identical === 'false');
-				if (notIdentical) {
-					allButtons.download.disabled = false;
-					allButtons.upgrade.disabled = false;
-				} else {
-					allButtons.download.disabled = true;
-					allButtons.upgrade.disabled = true;
-				}
+			} else {
+				// l'elemento non è presente sul db, è presente solo in locale
+				const content_li = app.tmpl_li.content.cloneNode(true);
+				const li = content_li.querySelector('li');
+				const liContent = li.querySelector('.li-content');
+				const input = li.querySelector('input');
+				const statusIcon = li.querySelector('i[data-sync-status]');
+				const span = li.querySelector('span[data-value]');
+				input.dataset.id = token;
+				input.dataset.type = object.type;
+				input.addEventListener('click', app.checkItem);
+				li.dataset.elementSearch = object.type;
+				li.id = token;
+				liContent.dataset.token = token;
+				liContent.dataset.type = object.type;
+				if (object.hasOwnProperty('workbook_ref')) li.dataset.workbookRef = object.workbook_ref;
+				li.dataset.label = object.name;
+				span.dataset.value = object.name;
+				span.innerText = object.name;
+				statusIcon.innerText = 'label';
+				li.dataset.storage = 'local';
+				liContent.dataset.storage = 'local';
+				console.log(object.name);
+				parent.appendChild(li);
 			}
 		}
 	}
@@ -364,15 +326,6 @@ var Storage = new SheetStorages();
 
 	document.querySelectorAll('button[data-unselect-all]').forEach(button => button.addEventListener('click', (e) => app.unselect(e.currentTarget.dataset.type)));
 
-	app.checked = (e) => app.checkVersioning(e.target.dataset.type);
-
-	app.init = () => {
-		// scarico elenco oggetti dal DB (WorkBooks e Sheets)
-		// visualizzo oggetti locali (da qui possono essere salvati su DB)
-		// imposto data-fn sugli elementi di ul-objects
-		document.querySelectorAll('menu').forEach(menu => menu.dataset.init = 'true');
-	}
-
 	app.selectObject = (e) => {
 		document.querySelectorAll('menu button[data-selected]').forEach(button => delete button.dataset.selected);
 		e.target.dataset.selected = 'true';
@@ -434,7 +387,42 @@ var Storage = new SheetStorages();
 		}
 	}
 
-	// app.init();
+	app.checkItem = (e) => {
+		console.clear();
+		const type = e.target.dataset.type;
+		// Ciclo gli elementi selezionati
+		// se è stato selezionato più di un elemento visualizzo .allButtons
+		const countChecked = document.querySelectorAll(`#ul-${type} li input:checked`).length;
+		// visualizzo/nascondo .allButtons
+		document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = (countChecked) ? false : true;
+		if (countChecked) {
+			const allButtons = {
+				upload: document.querySelector(`button[data-type='${type}'][data-upload]`),
+				download: document.querySelector(`button[data-type='${type}'][data-download]`),
+				upgrade: document.querySelector(`button[data-type='${type}'][data-upgrade]`),
+				delete: document.querySelector(`button[data-type='${type}'][data-delete]`),
+			}
+			// Not Sync abilita i tasti download, upgrade, delete
+			const NotSync = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'local');
+			(NotSync) ? allButtons.upload.disabled = false : allButtons.upload.disabled = true;
+			// data-synx=false data-storage=db : Visualizzazione download
+			// elementi presenti SOLO su DB
+			const NotSyncDB = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'db');
+			(NotSyncDB) ? allButtons.download.disabled = false : allButtons.download.disabled = true;
+			if (!NotSyncDB && !NotSync) {
+				// data-sync=true e data-identical=false
+				const notIdentical = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'true' && el.parentElement.dataset.identical === 'false');
+				if (notIdentical) {
+					allButtons.download.disabled = false;
+					allButtons.upgrade.disabled = false;
+				} else {
+					allButtons.download.disabled = true;
+					allButtons.upgrade.disabled = true;
+				}
+			}
+		}
+
+	}
 
 	app.checkStatus();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BIworkbook;
+use App\Models\BIsheet;
 use Illuminate\Http\Request;
 use DateTimeImmutable;
 
@@ -18,22 +19,36 @@ class BIworkbookController extends Controller
 		// $workbooks = BIworkbook::all();
 		/* $workbooks = BIworkbook::where('connectionId', session('db_id'))->get();
 		return response()->json(['workbook' => $workbooks]); */
+
 		$workbooks = BIworkbook::select('token', 'name', 'workbook_updated_at')->where('connectionId', session('db_id'))->get();
-		$result = [];
+		// dump($workbooks);
+		$result_workbooks = [];
+		$result_sheets = [];
 		foreach ($workbooks->collect() as $workbook) {
-			$result[] = [
+			$result_workbooks[] = [
 				"name" => $workbook->name,
 				"token" => $workbook->token,
 				"updated_at" => $workbook->workbook_updated_at,
 				"type" => 'workbook'
-				// "json_value" => $workbook->json_value // temporaneo, non mi servirà più dopo aver aggiornato tutti gli workbook (issue#292)
 			];
+			$sheets = BIsheet::select("token", "name", "workbookId", "sheet_updated_at")->where("workbookId", $workbook->token)->get();
+			foreach ($sheets->collect() as $sheet) {
+				$result_sheets[] = [
+					"name" => $sheet->name,
+					"token" => $sheet->token,
+					"updated_at" => $sheet->sheet_updated_at,
+					"workbookId" => $sheet->workbookId,
+					"type" => "sheet"
+				];
+			}
 		}
+		// dd($result);
 		// risposta in json per la fetch_api, non l'ho più utilizzata perchè
 		// sostituita dalla risposta della view
 		// return response()->json(['workbook' => $result]);
 		// dd($result);
-		return view('web_bi.versioning')->with('workbook', $result);
+		// return view('web_bi.versioning')->with('workbook', $result);
+		return view('web_bi.versioning')->with(['workbooks' => $result_workbooks, "sheets" => $result_sheets]);
 	}
 
 	/**
