@@ -45,12 +45,9 @@ Route::get('/dashboard', function () {
 // routes
 Route::get('/connections', [BIConnectionsController::class, 'index'])->middleware(['auth'])->name('web_bi.connections');
 Route::get('/workspace', [MapDatabaseController::class, 'workspace'])->middleware(['auth'])->name('web_bi.workspace');
-/* Route::get('/versioning', function () {
-	// TODO: recuperare solo gli Workbook del DB collegato
+Route::get('/versioning', function () {
 	return view('web_bi.versioning');
-})->middleware(['auth'])->name('web_bi.versioning'); */
-// Route per la pagina versioning, vengono recuperati gli WorkBook e gli Sheet del database corrente
-Route::get('/versioning', [BIworkbookController::class, 'index'])->middleware(['auth'])->name('web_bi.versioning');
+})->middleware(['auth'])->name('web_bi.versioning');
 
 Route::get('/dashboards', [BIdashboardController::class, 'index'])->middleware(['auth'])->name('web_bi.dashboards');
 
@@ -130,7 +127,7 @@ Route::prefix('/fetch_api/name/')->group(function () {
 });
 // index
 Route::prefix('/fetch_api/versioning/')->group(function () {
-	// Route::get('workbooks', [BIworkbookController::class, 'index']);
+	Route::get('workbooks', [BIworkbookController::class, 'index']);
 	Route::get('sheets', [BIsheetController::class, 'index']);
 	Route::get('dashboards', [BIdashboardController::class, 'index']);
 });

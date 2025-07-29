@@ -28,7 +28,7 @@ var Storage = new SheetStorages();
 				console.log(`The ${mutation.attributeName} attribute was modified.`);
 				// console.log(mutation.target);
 				if (mutation.target.hasChildNodes()) {
-					console.log(mutation.target);
+					// console.log(mutation.target);
 					mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
 				}
 			}
@@ -41,71 +41,114 @@ var Storage = new SheetStorages();
 	// console.log(document.getElementById('body'));
 	observerList.observe(document.getElementById('body'), config);
 
+	// Recupero degli WorkBooks e Sheets dal DB
+	app.getData = async () => {
+		const urls = [
+			'/fetch_api/versioning/workbooks',
+			'/fetch_api/versioning/sheets'
+		];
+		// ottengo tutte le risposte in un array
+		await Promise.all(urls.map(url => fetch(url)))
+			.then(responses => {
+				return Promise.all(responses.map(response => {
+					if (!response.ok) { throw Error(response.statusText); }
+					return response.json();
+				}))
+			})
+			.then((data) => {
+				console.log(data);
+				app.createLocalElementList();
+				// debugger;
+				data.forEach((elementData) => app.createDBElementList(elementData));
+			})
+			.catch(err => console.error(err));
+	}
+
 	/*
-	* Verifico lo stato degli oggetti:
-	* sincronizzato
-	* conflitto di sincronizzazione
-	* presente solo su sb
-	* presente solo in locale
-	* */
-	app.checkStatus = () => {
-		// lista di tutti gli elementi dello storage
+	 * Creo le liste con gli elementi memorizzate in locale
+	 */
+	app.createLocalElementList = () => {
 		const databaseId = +document.querySelector('main').dataset.databaseId;
-		// aggiungo gli eventi click sugli elementi scaricati dal db
-		document.querySelectorAll('ul *[data-fn-reference]').forEach(item => {
-			item.dataset.fn = item.dataset.fnReference;
-		});
 		for (const [token, object] of Storage.getAll(databaseId)) {
 			// console.log(object.type);
 			const parent = document.querySelector(`#ul-${object.type}`);
-			// Verifico se l'elemento in ciclo è presente su db
-			const li_db = document.getElementById(token);
-			if (li_db) {
-				const input = li_db.querySelector('input');
-				input.addEventListener('click', app.checkItem);
-				li_db.dataset.storage = 'db';
-				li_db.dataset.sync = 'true';
-				// l'elemento del localStorage è presente anche sul db, verifico lo
-				// stato della sincronizzazione
-				let updated_db = new Date(li_db.dataset.updated);
-				updated_db.setUTCHours(updated_db.getHours());
-				updated_db = updated_db.toISOString();
-				if (updated_db === object.updated_at) {
-					// oggetti identici
-					li_db.dataset.identical = 'true';
-					li_db.querySelector('i[data-sync-status]').classList.add('done');
-					li_db.querySelector('i[data-sync-status]').innerText = 'done';
+			const content_li = app.tmpl_li.content.cloneNode(true);
+			const li = content_li.querySelector('li');
+			const liContent = li.querySelector('.li-content');
+			const input = li.querySelector('input');
+			const statusIcon = li.querySelector('i[data-sync-status]');
+			const span = li.querySelector('span[data-value]');
+			li.dataset.elementSearch = object.type;
+			li.id = token;
+			li.dataset.label = object.name;
+			li.dataset.storage = 'local';
+			li.dataset.updated_at = object.updated_at;
+			if (object.hasOwnProperty('workbook_ref')) li.dataset.workbookRef = object.workbook_ref;
+			input.dataset.id = token;
+			input.dataset.type = object.type;
+			input.addEventListener('click', app.checkItem);
+			liContent.dataset.token = token;
+			liContent.dataset.type = object.type;
+			liContent.dataset.storage = 'local';
+			span.dataset.value = object.name;
+			span.innerText = object.name;
+			statusIcon.innerText = 'label';
+			console.log(object.name);
+			parent.appendChild(li);
+		}
+	}
+
+	// dati provenienti dal DB
+	app.createDBElementList = (data) => {
+		for (const [type, elements] of Object.entries(data)) {
+			const parent = document.getElementById(`ul-${type}`);
+			// console.log(elements);
+			elements.forEach(element => {
+				const localElementRef = document.getElementById(element.token);
+				if (localElementRef) {
+					// l'elemento è presente anche in locale, oltre che sul DB.
+					// Eseguo le verifiche delle date
+					let updated_at_db = new Date(element.updated_at);
+					updated_at_db.setUTCHours(updated_at_db.getHours());
+					updated_at_db = updated_at_db.toISOString();
+					if (updated_at_db === localElementRef.dataset.updated_at) {
+						// oggetti identici
+						localElementRef.dataset.identical = 'true';
+						localElementRef.querySelector('i[data-sync-status]').classList.add('done');
+						localElementRef.querySelector('i[data-sync-status]').innerText = 'done';
+					} else {
+						// oggetti con updated_at diverse
+						// TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
+						localElementRef.dataset.identical = 'false';
+						localElementRef.querySelector('i[data-sync-status]').innerText = 'sync_problem';
+					}
 				} else {
-					// oggetti con updated_at diverse
-					// TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
-					li_db.dataset.identical = 'false';
-					li_db.querySelector('i[data-sync-status]').innerText = 'sync_problem';
+					// l'elemento non è presente in locale, lo creo.
+					const content_li = app.tmpl_li.content.cloneNode(true);
+					const li = content_li.querySelector('li');
+					const liContent = li.querySelector('.li-content');
+					const input = li.querySelector('input');
+					const statusIcon = li.querySelector('i[data-sync-status]');
+					const span = li.querySelector('span[data-value]');
+					li.dataset.elementSearch = element.type;
+					li.id = token;
+					li.dataset.label = element.name;
+					li.dataset.storage = 'db';
+					li.dataset.updated_at = element.updated_at;
+					if (element.hasOwnProperty('workbook_ref')) li.dataset.workbookRef = element.workbook_ref;
+					input.dataset.id = token;
+					input.dataset.type = element.type;
+					input.addEventListener('click', app.checkItem);
+					liContent.dataset.token = token;
+					liContent.dataset.type = element.type;
+					liContent.dataset.storage = 'db';
+					span.dataset.value = element.name;
+					span.innerText = element.name;
+					statusIcon.innerText = 'sync';
+					console.log(element.name);
+					parent.appendChild(li);
 				}
-			} else {
-				// l'elemento non è presente sul db, è presente solo in locale
-				const content_li = app.tmpl_li.content.cloneNode(true);
-				const li = content_li.querySelector('li');
-				const liContent = li.querySelector('.li-content');
-				const input = li.querySelector('input');
-				const statusIcon = li.querySelector('i[data-sync-status]');
-				const span = li.querySelector('span[data-value]');
-				input.dataset.id = token;
-				input.dataset.type = object.type;
-				input.addEventListener('click', app.checkItem);
-				li.dataset.elementSearch = object.type;
-				li.id = token;
-				liContent.dataset.token = token;
-				liContent.dataset.type = object.type;
-				if (object.hasOwnProperty('workbook_ref')) li.dataset.workbookRef = object.workbook_ref;
-				li.dataset.label = object.name;
-				span.dataset.value = object.name;
-				span.innerText = object.name;
-				statusIcon.innerText = 'label';
-				li.dataset.storage = 'local';
-				liContent.dataset.storage = 'local';
-				console.log(object.name);
-				parent.appendChild(li);
-			}
+			});
 		}
 	}
 
@@ -424,6 +467,6 @@ var Storage = new SheetStorages();
 
 	}
 
-	app.checkStatus();
+	app.getData();
 
 })();

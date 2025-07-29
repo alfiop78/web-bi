@@ -103,19 +103,7 @@
 								<section class="list-search">
 									<input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
 									<div class="relative-ul" data-id="workbook" data-type="workbook">
-										<ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook">
-											@foreach($workbooks as $workbook)
-											<li id="{{ $workbook['token'] }}" class="checkInput" data-element-search="workbook" data-label="{{ $workbook['name'] }}" data-storage="db" data-searchable="true" data-updated="{{ $workbook['updated_at'] }}" data-sync="false">
-												<input type="checkbox" data-fn-reference="checkItem" data-fn data-id="{{ $workbook['token'] }}" data-type="{{ $workbook['type'] }}" />
-												<div class="li-content" data-token="{{ $workbook['token'] }}" data-type="{{ $workbook['type'] }}" data-fn-reference="showResource" data-storage="db">
-													<i class="material-symbols-rounded" data-sync-status>sync</i>
-													<div class="li-content-details">
-														<span data-value="{{ $workbook['name'] }}" class="text-ellipsis">{{ $workbook['name'] }}</span>
-													</div>
-												</div>
-											</li>
-											@endforeach
-										</ul>
+										<ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
 									</div>
 								</section>
 							</div>
@@ -143,19 +131,7 @@
 								<section class="list-search">
 									<input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
 									<div class="relative-ul" data-id="sheet" data-type="sheet">
-										<ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet">
-											@foreach($sheets as $sheet)
-											<li id="{{ $sheet['token'] }}" data-workbook-ref="{{ $sheet['workbookId'] }}" class="checkInput" data-element-search="sheet" data-label="{{ $sheet['name'] }}" data-storage="db" data-searchable="true" data-updated="{{ $sheet['updated_at']}}" data-sync="false">
-												<input type="checkbox" data-fn-reference="checkItem" data-id="{{ $sheet['token'] }}" data-type="{{ $sheet['type'] }}" />
-												<div class="li-content" data-token="{{ $sheet['token'] }}" data-type="{{ $sheet['type'] }}" data-fn-reference="showResource" data-storage="db">
-													<i class="material-symbols-rounded" data-sync-status>sync</i>
-													<div class="li-content-details">
-														<span data-value="{{ $sheet['name'] }}" class="text-ellipsis">{{ $sheet['name'] }}</span>
-													</div>
-												</div>
-											</li>
-											@endforeach
-										</ul>
+										<ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
 									</div>
 								</section>
 							</div>
