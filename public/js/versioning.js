@@ -13,7 +13,7 @@ var Storage = new SheetStorages();
 		// console.log(mutationList, observer);
 		for (const mutation of mutationList) {
 			if (mutation.type === 'childList') {
-				console.info('A child node has been added or removed.');
+				// console.info('A child node has been added or removed.');
 				Array.from(mutation.addedNodes).forEach(node => {
 					// console.log(node);
 					// console.log(node.nodeName);
@@ -25,7 +25,7 @@ var Storage = new SheetStorages();
 					}
 				});
 			} else if (mutation.type === 'attributes') {
-				console.log(`The ${mutation.attributeName} attribute was modified.`);
+				// console.log(`The ${mutation.attributeName} attribute was modified.`);
 				// console.log(mutation.target);
 				if (mutation.target.hasChildNodes()) {
 					// console.log(mutation.target);

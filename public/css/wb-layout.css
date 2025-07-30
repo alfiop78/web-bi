@@ -357,19 +357,20 @@ menu.standard>.dbStatus>span[data-database-id="0"] {
 
 .visual {
 	height: 100%;
-	padding: .5em;
-	margin: 0.5rem 0;
+	/* padding: .5em;
+	margin: 0.5rem 0; */
 }
 
 .card.grid {
 	display: grid;
 	grid-template-rows: auto 1fr auto;
+	grid-row-gap: 1em;
 	/* card con contenuti header, body, footer */
 }
 
 .card.grid>.visual {
 	display: grid;
-	grid-template-rows: auto 1fr;
+	grid-template-rows: 1fr;
 }
 
 h1 {
