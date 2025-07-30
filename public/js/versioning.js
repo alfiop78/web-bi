@@ -108,6 +108,7 @@ var Storage = new SheetStorages();
 				if (localElementRef) {
 					// l'elemento è presente anche in locale, oltre che sul DB.
 					// Eseguo le verifiche delle date
+					localElementRef.dataset.sync = 'true';
 					let updated_at_db = new Date(element.updated_at);
 					updated_at_db.setUTCHours(updated_at_db.getHours());
 					updated_at_db = updated_at_db.toISOString();
@@ -130,22 +131,22 @@ var Storage = new SheetStorages();
 					const input = li.querySelector('input');
 					const statusIcon = li.querySelector('i[data-sync-status]');
 					const span = li.querySelector('span[data-value]');
+					console.log(element.name);
 					li.dataset.elementSearch = element.type;
-					li.id = token;
+					li.id = element.token;
 					li.dataset.label = element.name;
 					li.dataset.storage = 'db';
 					li.dataset.updated_at = element.updated_at;
 					if (element.hasOwnProperty('workbook_ref')) li.dataset.workbookRef = element.workbook_ref;
-					input.dataset.id = token;
+					input.dataset.id = element.token;
 					input.dataset.type = element.type;
 					input.addEventListener('click', app.checkItem);
-					liContent.dataset.token = token;
+					liContent.dataset.token = element.token;
 					liContent.dataset.type = element.type;
 					liContent.dataset.storage = 'db';
 					span.dataset.value = element.name;
 					span.innerText = element.name;
 					statusIcon.innerText = 'sync';
-					console.log(element.name);
 					parent.appendChild(li);
 				}
 			});
@@ -439,28 +440,32 @@ var Storage = new SheetStorages();
 		// visualizzo/nascondo .allButtons
 		document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = (countChecked) ? false : true;
 		if (countChecked) {
-			const allButtons = {
+			const buttons = {
 				upload: document.querySelector(`button[data-type='${type}'][data-upload]`),
 				download: document.querySelector(`button[data-type='${type}'][data-download]`),
 				upgrade: document.querySelector(`button[data-type='${type}'][data-upgrade]`),
 				delete: document.querySelector(`button[data-type='${type}'][data-delete]`),
 			}
+			// imposto tutto a disabled
+			for (const value of Object.values(buttons)) { value.disabled = true; }
+
 			// Not Sync abilita i tasti download, upgrade, delete
-			const NotSync = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'local');
-			(NotSync) ? allButtons.upload.disabled = false : allButtons.upload.disabled = true;
-			// data-synx=false data-storage=db : Visualizzazione download
-			// elementi presenti SOLO su DB
+			// data-sync : false / data-storage : local
+			const NotSyncLocal = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'local');
+			(NotSyncLocal) ? buttons.upload.disabled = false : buttons.upload.disabled = true;
+			// data-sync : false / data-storage : local
+			// visualizzo solo il tasto download
 			const NotSyncDB = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'db');
-			(NotSyncDB) ? allButtons.download.disabled = false : allButtons.download.disabled = true;
-			if (!NotSyncDB && !NotSync) {
+			(NotSyncDB) ? buttons.download.disabled = false : buttons.download.disabled = true;
+			if (!NotSyncDB && !NotSyncLocal) {
 				// data-sync=true e data-identical=false
 				const notIdentical = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'true' && el.parentElement.dataset.identical === 'false');
 				if (notIdentical) {
-					allButtons.download.disabled = false;
-					allButtons.upgrade.disabled = false;
+					buttons.download.disabled = false;
+					buttons.upgrade.disabled = false;
 				} else {
-					allButtons.download.disabled = true;
-					allButtons.upgrade.disabled = true;
+					buttons.download.disabled = true;
+					buttons.upgrade.disabled = true;
 				}
 			}
 		}
