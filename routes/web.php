@@ -198,5 +198,4 @@ Route::get('/mapping/vertica_odbc', [MapDatabaseController::class, 'vertica_odbc
 Route::get('/python_scripts/{script}', [MapDatabaseController::class, 'executePythonScript']);
 
 // routes
-
 require __DIR__ . '/auth.php';
