@@ -1,0 +1,70 @@
+{
+  "parentElement_id": "template-layout",
+  "id": "layout-1",
+  "name": "generic data table",
+  "comment": "Template con 2 righe, una per i filtri e una per la DataTable",
+  "childs": [
+    {
+      "tag": "div",
+      "classes": [
+        "grid",
+        "content"
+      ],
+      "childs": [
+        {
+          "tag": "section",
+          "classes": [
+            "row"
+          ],
+          "childs": [
+            {
+              "tag": "section",
+              "classes": [
+                "col"
+              ],
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "filter__dashboard",
+                  "classes": [
+                    "contentObject"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "row"
+          ],
+          "childs": [
+            {
+              "tag": "section",
+              "classes": [
+                "col"
+              ],
+              "attributes": {
+                "resource": true
+              },
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "chart_div",
+                  "classes": [
+                    "chart-elements",
+                    "contentObject"
+                  ],
+                  "attributes": {
+                    "fn": "addResource"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+/*
+La classe recupera il local storage ad ogni accesso alla pagina e contiene Metodi per recuperare ad esempio solo i CUBE o solo le DIMENSION, ecc...
+*/
+class Storages {
+	#selected; // l'elemento selezionato in un determinato momento
+	#workbook;
+	#workBooks = new Map();
+	#workBooksList = [];
+
+	constructor() {
+		this.storage = window.localStorage;
+		// this.storageKeys = Object.keys(window.localStorage);
+		this.JSONData = null;
+		// tutti gli workbook
+	}
+
+	static getWorkbookByDatabaseId(databaseId) {
+		let workbooks = [];
+		for (const [token, object] of Object.entries(window.localStorage)) {
+			if (JSON.parse(object).type === 'workbook' && JSON.parse(object).databaseId === +databaseId) {
+				// workbooks[token] = JSON.parse(object);
+				workbooks.push(JSON.parse(object));
+			}
+		}
+		return workbooks;
+	}
+
+	// Restituisce un Object Map() di tutti i report appartenenti al workbookId passato nei prametri
+	static getSheetsByWorkbookId(workbookId) {
+		let sheets = new Map();
+		for (const [token, sheet] of Object.entries(window.localStorage)) {
+			const json = JSON.parse(sheet);
+			if (json.type === 'sheet' && json.workbook_ref === workbookId) {
+				sheets.set(token, json);
+			}
+		}
+		return sheets;
+	}
+
+	static getCompositeMetricsByWorkbookId(workbookId) {
+		let metrics = [];
+		for (const object of Object.values(window.localStorage)) {
+			if (JSON.parse(object).metric_type === 'composite' && JSON.parse(object).workbook_ref === workbookId) {
+				metrics.push(JSON.parse(object));
+			}
+		}
+		return metrics;
+	}
+
+	static getFilterByWorkbookId(workbookId) {
+		let filters = [];
+		for (const object of Object.values(window.localStorage)) {
+			if (JSON.parse(object).type === 'filter' && JSON.parse(object).workbook_ref === workbookId) {
+				filters.push(JSON.parse(object));
+			}
+		}
+		return filters;
+	}
+
+	// utilizzare questo Metodo statico al posto dei 4 qui sopra
+	static getObjectsByWorkbookId(workbookId, type, metric_type) {
+		// type: sheet, filter, metric, ecc...
+		// metric_type : utilizzato solo in caso di recupero delle metriche
+		let objects = [];
+		for (const json of Object.values(window.localStorage)) {
+			const object = JSON.parse(json);
+			if (object.workbook_ref === workbookId) {
+				if (metric_type) {
+					// è una metrica, quindi è richiesto anche la proprietà metric_type
+					if (object.type === type && object.metric_type === metric_type) objects.push(object);
+				} else {
+					if (object.type === type) objects.push(object);
+				}
+			}
+		}
+		return objects;
+	}
+
+	set workBook(value) {
+		// value : il token del workbook
+		this.#workbook = value;
+	}
+
+	get workBook() {
+		// return window.localStorage.getItem(this.#workbook);
+		return JSON.parse(window.localStorage.getItem(this.#workbook));
+	}
+
+	save(object) {
+		window.localStorage.setItem(object.token, JSON.stringify(object));
+	}
+
+	set selected(token) {
+		this.#selected = token;
+	}
+
+	get selected() {
+		return JSON.parse(this.storage.getItem(this.#selected));
+	}
+
+	// tutti gli workBooks
+	workBooks(databaseId) {
+		this.#workBooks.clear();
+		this.#workBooksList = [];
+		for (const [token, object] of Object.entries(this.storage)) {
+			const json = JSON.parse(object);
+			if (json.type === 'workbook' && json.databaseId === databaseId) {
+				// this.#workBooks.set(token, json);
+				this.#workBooksList.push(json);
+			}
+		}
+		// const sort = [...this.#workBooks.values()].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+		// INFO: ordinamento per updated_at in ordine decrescente
+		/* const sort = [...this.#workBooks.values()].sort((a, b) => {
+			const bDate = new Date(b.updated_at).getTime().toString();
+			const aDate = new Date(a.updated_at).getTime().toString();
+			return bDate.localeCompare(aDate)
+		}); */
+		const sort_workbooks = this.#workBooksList.sort((a, b) => {
+			const bDate = new Date(b.updated_at).getTime().toString();
+			const aDate = new Date(a.updated_at).getTime().toString();
+			return bDate.localeCompare(aDate)
+		});
+		// console.log(sort);
+		// console.log(sort_workbooks);
+		// converto l'array ordinato per updated_at in un Map()
+		sort_workbooks.forEach(workbook => this.#workBooks.set(workbook.token, workbook));
+		return this.#workBooks;
+	}
+
+
+	// salvataggio delle tabelle nel sessionStorage
+	saveTables(data) {
+		// salvataggio in sessionStorage da una chiamata promise.all
+		data.forEach(tables => {
+			for (const [table, columns] of Object.entries(tables)) {
+				window.sessionStorage.setItem(table, JSON.stringify(columns));
+			}
+		});
+	}
+
+	// salvataggio delle colonne delle tabelle
+	saveSession(data) {
+		// salvo in sessionStorage la tabella appena droppata nel canvas
+		for (const [table, columns] of Object.entries(data)) {
+			window.sessionStorage.setItem(table, JSON.stringify(columns));
+		}
+	}
+
+	getTable(table) {
+		return JSON.parse(window.sessionStorage.getItem(table));
+	}
+
+	/* getFilters(workBookToken) {
+	  let filters = {};
+	  for (const [token, object] of Object.entries(this.storage)) {
+		if (JSON.parse(object).type === 'filter' && JSON.parse(object).workbook_ref === workBookToken) {
+		  filters[token] = JSON.parse(object);
+		}
+	  }
+	  return filters;
+	} */
+
+	getFilters() {
+		let filters = {};
+		for (const [token, object] of Object.entries(this.storage)) {
+			if (JSON.parse(object).type === 'filter') {
+				filters[token] = JSON.parse(object);
+			}
+		}
+		return filters;
+	}
+
+	/* getMetrics(workBookToken) {
+	  let metrics = {};
+	  for (const [token, object] of Object.entries(this.storage)) {
+		if (JSON.parse(object).type === 'metric' && JSON.parse(object).workbook_ref === workBookToken) {
+		  metrics[token] = JSON.parse(object);
+		}
+	  }
+	  return metrics;
+	} */
+
+	getMetrics() {
+		let metrics = {};
+		for (const [token, object] of Object.entries(this.storage)) {
+			if (JSON.parse(object).type === 'metric') {
+				metrics[token] = JSON.parse(object);
+			}
+		}
+		return metrics;
+	}
+
+	getAll(databaseId) {
+		// Recupero tutti gli oggetti appartenenti al db connesso e, a cascata, appartenenti al workbook in ciclo
+		let all = new Map();
+		for (const [workbookToken, workbook] of this.workBooks(databaseId)) {
+			all.set(workbookToken, workbook);
+			for (const [token, object] of Object.entries(this.storage)) {
+				// verifico se l'object appartiene al workbook
+				const json = JSON.parse(object);
+				if (json.workbook_ref === workbookToken) all.set(token, json);
+			}
+		}
+		return all;
+	}
+}
+
+class SheetStorages extends Storages {
+	#sheets = {};
+	#sheet;
+	constructor() { super(); }
+
+	set sheet(value) {
+		// value : il token dello sheet
+		this.#sheet = value;
+	}
+
+	get sheet() {
+		// return window.localStorage.getItem(this.#workbook);
+		return JSON.parse(window.localStorage.getItem(this.#sheet));
+	}
+
+	static getSheetSpecifications(token) {
+		return JSON.parse(window.localStorage.getItem(token)).specs;
+	}
+
+	// restituisce gli sheet con il workbook_ref passato come parametro
+	sheets(workBookToken) {
+		this.#sheets = {};
+		for (const [token, object] of Object.entries(this.storage)) {
+			if (JSON.parse(object).type === 'sheet' && JSON.parse(object).workbook_ref === workBookToken) {
+				this.#sheets[token] = JSON.parse(object);
+			}
+		}
+		// TODO: 23.07.2025 ordinare per updated_at come fatto per gli workbook
+		return this.#sheets;
+	}
+
+	/* getSheets(workBookToken) {
+	  let sheets = {};
+	  for (const [token, object] of Object.entries(this.storage)) {
+		if (JSON.parse(object).type === 'Sheet' && JSON.parse(object).workBook_ref === workBookToken) {
+		  sheets[token] = JSON.parse(object);
+		}
+	  }
+	  return sheets;
+	} */
+
+	// recupero tutti gli sheets
+	getSheets() {
+		let sheets = {};
+		for (const [token, object] of Object.entries(this.storage)) {
+			if (JSON.parse(object).type === 'sheet') {
+				sheets[token] = JSON.parse(object);
+			}
+		}
+		return sheets;
+	}
+
+}

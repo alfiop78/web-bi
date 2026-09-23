@@ -1,0 +1,433 @@
+.col[data-resource] {
+	padding: 1em;
+	background-color: white;
+	border-radius: 2px;
+	box-shadow: 0px 0px 4px 2px #cbcaca;
+}
+
+.google-visualization-table-table {
+	font-size: .75rem !important;
+	font-family: 'Barlow', sans-serif !important;
+}
+
+#filter__dashboard {
+	display: flex;
+	flex-wrap: wrap;
+	user-select: none;
+	background-color: white;
+	/* margin: 1em 0em 2em; */
+	border-radius: 2px;
+	box-shadow: 0px 0px 4px -1px grey;
+	/* justify-content: center; */
+}
+
+.contentObject>.filters {
+	padding: 1em;
+}
+
+.gradient {
+	background-image: none !important;
+}
+
+.google-visualization-table-table th {
+	padding: 12px !important;
+}
+
+.g-table-header {
+	background-color: #f3f3f3;
+	white-space: nowrap;
+}
+
+.g-table-row {
+	line-height: 2em;
+}
+
+th.frozen-column {
+	background-color: #494949;
+}
+
+td.frozen-column {
+	background-color: white;
+}
+
+td.align-right {
+	text-align: right;
+}
+
+/* .g-table-row { */
+/*   color: #494949; */
+/* } */
+
+.g-header-cell {
+	color: #494949;
+	border: none !important;
+	font-size: 11px;
+	text-transform: uppercase;
+}
+
+.g-table-cell {
+	color: #494949;
+	padding: 8px 12px !important;
+	white-space: nowrap;
+	border: none !important;
+}
+
+.google-visualization-table-type-number.g-table-cell {
+	text-align: right;
+	/* font-weight: bold; */
+	/* font-size: .7rem; */
+	/* background-color: lightblue; */
+}
+
+.google-visualization-table-type-date {
+	text-align: right;
+}
+
+/* .g-category-filter {
+  color: #494949;
+  display: flex;
+  align-items: center;
+  margin: 8px;
+} */
+
+/* .g-category-filter ul {
+  padding-inline-start: 0px;
+  padding-inline-end: 0px;
+  margin-block-start: 4px;
+  margin-block-end: 4px;
+  margin: 0px 1em;
+  background-color: #494949;
+  color: white;
+  border-radius: 4px;
+} */
+
+.g-category-filter li {
+	/* background-color: #494949; */
+	/* padding: 6px; */
+	/* margin: 0px 2px; */
+	/* color: white; */
+	/* line-height: unset; */
+}
+
+.g-category-filter li div {
+	margin: 0px 8px;
+}
+
+/* .goog-inline-block {
+  vertical-align: middle;
+} */
+
+/* .goog-combobox {
+  padding: 6px;
+  background: #e1e1e1 !important;
+  border: unset !important;
+  font: normal small 'Barlow', sans-serif !important;
+  border-radius: 4px;
+  display: flex !important;
+  align-items: center;
+} */
+
+.goog-combobox input {
+	padding: 8px !important;
+}
+
+/* .goog-combobox input.label-input-label {
+  background: none !important;
+  box-shadow: none;
+  border: unset;
+  color: #494949 !important;
+} */
+
+.chart-elements {
+	box-shadow: 0px 0px 4px -1px grey;
+	position: relative;
+	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	/* padding: .5em; */
+	background-color: white;
+	border-radius: 4px;
+}
+
+.google-visualization-table-div-page {
+	background: #494949 !important;
+	/* height: 35px; */
+}
+
+.google-visualization-table-div-page [role="button"] {
+	/* padding: 6px; */
+	/* height: 30px; */
+}
+
+/* tasto indietro nel paginate button*/
+.goog-custom-button-disabled .goog-custom-button-outer-box,
+.goog-custom-button-disabled .goog-custom-button-inner-box {
+	border: none !important;
+	color: red !important;
+}
+
+/* aggiungendo lo span rendo più specifico l'elemento a cui applicare il !important
+* https://developer.mozilla.org/en-US/docs/Web/CSS/important
+* */
+.goog-custom-button-disabled .goog-custom-button-outer-box>span,
+.goog-custom-button-disabled .goog-custom-button-inner-box>span {
+	color: var(--mark-color) !important;
+}
+
+.google-visualization-table-div-page [role="button"] {
+	font-size: unset !important;
+	line-height: unset !important;
+	margin: 0px 12px;
+}
+
+.google-visualization-table-div-page [role="button"] .goog-custom-button-inner-box {
+	/* padding: unset!important; */
+}
+
+.goog-custom-button-collapse-right,
+.goog-custom-button-collapse-right .goog-custom-button-outer-box,
+.goog-custom-button-collapse-right .goog-custom-button-inner-box {
+	/* margin: unset!important; */
+}
+
+.goog-custom-button-collapse-left .goog-custom-button-inner-box {
+	border-left: none !important;
+	margin: unset !important;
+}
+
+.goog-custom-button {
+	background: transparent !important;
+}
+
+.goog-custom-button-inner-box {
+	border: none !important;
+}
+
+.google-visualization-table-page-numbers {
+	/* padding: 6px; */
+	font-family: 'Barlow', sans-serif;
+}
+
+.google-visualization-table-page-number {
+	background-color: transparent !important;
+	border: none !important;
+	color: white !important;
+	padding: 8px !important;
+	font-size: 1rem !important;
+	/* font-family: 'Barlow', sans-serif; */
+}
+
+/* tasto "next" del paginate */
+.goog-custom-button-outer-box {
+	border: none !important;
+	color: var(--mark-color);
+}
+
+.google-visualization-table-page-number:hover {
+	background-color: var(--mark-color) !important;
+	font-weight: bold;
+	color: #494949 !important;
+}
+
+/* numero di pagina corrente*/
+.google-visualization-table-page-number.current {
+	font-weight: bold !important;
+	background-color: var(--main-important-color) !important;
+	border: none !important;
+	/* font-size: 10px!important; */
+	color: white !important;
+	padding: 12px !important;
+}
+
+.google-visualization-table {
+	user-select: none;
+	padding: 1em;
+}
+
+.google-visualization-table-page-next:before,
+.google-visualization-table-page-prev:before {
+	font-size: 1.2rem;
+}
+
+/* TEST: nuovi layout */
+
+.chart-elements.defined {
+	position: relative;
+	overflow: auto;
+	flex-direction: column;
+}
+
+.view {
+	display: grid;
+	/* padding: 1em; */
+	overflow-y: auto;
+	grid-gap: 1em;
+}
+
+.view>.layout {
+	display: grid;
+	justify-content: center;
+}
+
+.view>.layout .chartContent {
+	/* border-radius: 4px; */
+	padding: 1em;
+	/* display: grid; */
+	/* grid-template-rows: 1fr auto; */
+	display: flex;
+	flex-direction: column;
+}
+
+.view>.layout>.filters {
+	grid-column: 1 / 4;
+	/* background-color: #bfbdbd; */
+	grid-area: filterArea;
+	padding: 1em;
+}
+
+.view>#generic {
+	grid-template: auto minmax(60px, auto) 1fr auto / 1fr;
+	grid-template-areas:
+		"title"
+		"filterArea"
+		"mainArea"
+		"options";
+}
+
+.layout h1.title {
+	grid-area: title;
+	margin: .5em auto;
+	font-size: xx-large;
+}
+
+section.options {
+	grid-area: options;
+	padding: .5rem;
+}
+
+section.options>.options__button {
+	background-color: white;
+	padding: .5rem;
+	box-shadow: 0px 0px 6px -1px gray;
+}
+
+/* NOTE: horizontalCharts */
+.view>.layout.horizontalCharts {
+	grid-template: minmax(60px, auto) 1fr / 1fr 1fr;
+	grid-template-areas:
+		"filterArea filterArea"
+		"leftmain rightmain";
+}
+
+.horizontalCharts>.left {
+	grid-column: 1 / 2;
+	grid-area: leftmain;
+}
+
+.horizontalCharts>.right {
+	grid-column: 2 / 4;
+	grid-area: rightmain;
+}
+
+/* NOTE: horizontalCharts */
+
+/* NOTE: layout__threeSection */
+.view>.layout.threeSection {
+	grid-template: minmax(60px, auto) 1fr / 1fr 1fr;
+	grid-template-areas:
+		"filterArea filterArea"
+		"leftmain rightmain";
+}
+
+.view>.threeSection>.left {
+	grid-column: 1 / 2;
+	grid-area: leftmain;
+}
+
+.view>.threeSection>.right {
+	grid-column: 2 / 4;
+	grid-area: rightmain;
+	display: grid;
+	grid-template-areas:
+		"object-1"
+		"object-2";
+	grid-row-gap: 1em;
+}
+
+#object-1 {
+	grid-area: object-1;
+}
+
+#object-2 {
+	grid-area: object-2;
+}
+
+/* NOTE: layout__threeSection */
+
+
+.view>#generic>.main {
+	grid-column: 1 / 4;
+	/* background-color: #bfbdbd; */
+	grid-area: mainArea;
+	/* justify-content: center; */
+	grid-row-gap: 1em;
+}
+
+.view .chart-elements {
+	display: flex;
+	align-items: start;
+	justify-content: start;
+}
+
+.progressBar {
+	display: flex;
+	margin: 0 auto;
+	row-gap: 1em;
+	flex-direction: column;
+	align-items: center;
+	color: white;
+	padding: 1em;
+}
+
+/* menu dei filtri */
+/* .goog-combobox .goog-menu {
+  background-color: #494949;
+  border-radius: 2px;
+  margin-top: 8px !important;
+}
+
+div.goog-menuitem-content {
+  color: white;
+} */
+
+/* hover sugli elementi dei filtri */
+.goog-menuitem-highlight,
+.goog-menuitem-hover {
+	background-color: #636363 !important;
+	border: unset !important;
+	/* margin: 2px 6px !important; */
+	border-radius: 4px;
+	/* padding-bottom: 6px !important; */
+	/* padding-top: 6px !important; */
+}
+
+/* filtro aperto */
+/* .goog-combobox-active .goog-menu.goog-menu-vertical {
+  top: 30px;
+  max-height: 600px;
+  overflow-y: auto;
+} */
+
+/* TEST: nuovi layout */
+
+button.btn__options_main {
+	font-weight: bold;
+	background-color: var(--main-secondary-color);
+	color: white;
+	border-radius: 2px;
+	font-style: normal;
+	padding: 8px 12px;
+	border: unset;
+}

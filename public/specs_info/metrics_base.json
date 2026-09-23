@@ -1,0 +1,47 @@
+{
+  "token": "it9m7w6",
+  "alias": "NettoRiga",
+  "type": "metric",
+  "metric_type": "basic",
+  "__note_factId" : "Id della Fact corrispondente nel DataModel",
+  "factId": "svg-data-36874",
+  "__note_properties": "Utilizzato in fase di selezione di una tabella dal canvas. Con queste proprietà si possono evidenziare le colonne della tabella utilizzate come metriche",
+  "properties": {
+    "table": "DocVenditaDettaglio",
+    "__note_alias": "probabilmente da eliminare",
+    "alias": "DocVenditaDettaglio_874",
+    "fields": ["NettoRiga"]
+  },
+  "aggregateFn": "SUM",
+  "__note_SQL" : "Codice SQL che viene passato alla funzione PHP che si occupa di creare la query",
+  "SQL": "DocVenditaDettaglio_874.NettoRiga",
+  "distinct": false
+}
+
+{
+  "token": "yqp41ib",
+  "alias": "Costo",
+  "type": "metric",
+  "metric_type": "basic",
+  "__note_factId" : "Id della Fact corrispondente nel DataModel",
+  "factId": "svg-data-36874",
+  "__note_properties": "Utilizzato in fase di selezione di una tabella dal canvas. Con queste proprietà si possono evidenziare le colonne della tabella utilizzate come metriche",
+  "properties": {
+    "table": "DocVenditaDettaglio",
+    "__note_alias": "probabilmente da eliminare",
+    "alias": "DocVenditaDettaglio_874",
+    "fields": ["PrzMedioPond","Quantita"]
+  },
+  "__note_formula": "Contiene informazioni utili in fase di edit della metrica, per ricostruire la formula e ripristinare il codice nella textarea",
+  "formula": [
+    "( ",
+    "PrzMedioPond",
+    " * ",
+    "Quantita",
+    " )"
+  ],
+  "aggregateFn": "SUM",
+  "__note_SQL" : "Codice SQL che viene passato alla funzione PHP che si occupa di creare la query",
+  "SQL": "( DocVenditaDettaglio_874.PrzMedioPond * DocVenditaDettaglio_874.Quantita )",
+  "distinct": false
+}

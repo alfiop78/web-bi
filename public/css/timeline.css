@@ -1,0 +1,28 @@
+.timelineContent{display: flex; justify-content: center;flex-direction: column;align-items: center;}
+.timelineContainer{display: grid;width: 100%;justify-content: center;grid-template-rows: auto; grid-row-gap: 32px;}
+.timeline{display: flex;justify-content: center;margin: 8px;height: 32px;}
+.timeline > span{margin: 8px 16px;display: flex;align-items: center;padding: 8px;width: 4px; height: 4px;border-radius: 16px;border: solid thin grey;
+  position: relative;flex-direction: column;}
+.timeline > span > span{display: flex;flex-flow: row;margin: 12px;}
+.timeline > span > span > small{background: #494949;border-radius: 4px;box-shadow: 0 2px 4px 0 black;color: white;
+  margin: 8px;padding: 4px 8px;white-space: nowrap;font-size: .7rem;}
+/* l'ultima "palla" della timeline non deve avere la linea alla sua destra*/
+/* Nascondo momentaneamente la linea della timeline */
+/* .timeline span:not(:last-child)::after{content: '';width: 20px;background: grey;height: 1px;position: absolute;left: 26px;} */
+
+.timeline > span[active]{border: solid thin #a2a2a2;box-shadow: 0 0 6px 1px #a2a2a2;background: brown;}
+/* passo sopra i circle per visualizzare le due small al suo interno*/
+.timeline > span .infoCircle{visibility: hidden;}
+.timeline > span:hover .infoCircle{animation: popup 250ms ease;visibility: visible;}
+@keyframes popup {
+  0% {transform: scale(.2);}
+  75% {transform: scale(1.10);}
+  100% {transition: scale(1);}
+}
+
+.timelineOverflow{display: flex;overflow: hidden;transition: width 150ms;position: relative;width: auto;}
+/* .overflow[data-elements="1"]{width: 364px;} */
+.timelineTranslate{display: flex; transition: transform 400ms;}
+/* NOTE: se la width: 300px sulla card non viene inserta, la timeline funziona lo stesso perchè la larghezza poi dipende da .subElement*/
+.timelineContainer div[element]{width: 430px;display: flex;justify-content: center;color: white;padding: 0 68px;margin: 8px 18px;}
+.timelineContainer div[element] > div[sub-element]{/*background-color: salmon;*/width: 100%;}

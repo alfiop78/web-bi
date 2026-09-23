@@ -1,0 +1,156 @@
+:root{
+  --main-highlight-icons-color: sienna;
+  --columns-color: steelblue;
+  --metrics-color: darkgreen;
+  --btn-remove-column-defined: whitesmoke;
+  --danger-color: indianred;
+  --warning-color: #c5791b;
+  --done-color: seagreen;
+  --filters-color: #f2d98d;
+}
+
+.material-icons{padding: 6px;user-select: none;cursor: pointer;}
+
+.material-icons[hidden]{display: none;}
+.material-icons-round[hidden]{display: none;}
+
+.material-icons.noPad{padding: 0;}
+
+.margin-vert{margin: 6px 0px;}
+.material-icons.padding-4{padding: 4px;}
+.material-icons.md-14,
+.material-icons-round.md-14{font-size: 14px;}
+.material-icons.md-18,
+.material-icons-round.md-18{font-size: 18px; padding: 0px 2px;}
+.material-icons-round.md-24{font-size: 24px; padding: 0px 4px;}
+.material-icons-round.md-28{font-size: 28px; padding: 0px 4px;}
+.material-icons.md-24{font-size: 24px;}
+.material-icons.md-32{font-size: 32px;}
+.material-icons-round.md-32{font-size: 32px;}
+.material-icons.md-36{font-size: 36px;}
+.material-icons-round.md-48{font-size: 48px;padding: 0px;}
+.material-icons-round.md-42{font-size: 42px;padding: 0px;}
+.material-icons.md-48{font-size: 48px;}
+.material-icons.md-light{color: gainsboro}
+.material-icons.md-important-low{color: goldenrod;}
+.material-icons.md-important-high{color: var(--main-secondary-color);}
+.material-icons.sale{border-radius: 6px;box-shadow: 0 1px 8px 1px #848484;background-color: darkgoldenrod;}
+.material-icons.md-important-medium{color: olivedrab;}
+
+.material-icons[open]{color: var(--main-secondary-color);}
+.material-icons[fact]{color: var(--main-primary-color);}
+
+.material-icons-round.md-pad-2{padding: 2px;}
+.material-icons-round.md-pad-4{padding: 4px;}
+
+.material-icons[selected] {color: brown;}
+
+/* Rules for using icons as white on a dark background. */
+.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3);}
+
+.material-icons.md-dark {color: whitesmoke;}
+.material-icons.md-dark.md-inactive {color: #757575;}
+.material-icons.md-dark.md-active{color: forestgreen;}
+.material-icons.md-dark.options.md-inactive { color: rgba(0, 0, 0, 0.26);padding: 0px;}
+/* color*/
+.material-icons.important {color: indianred;padding: .5em;}
+.material-icons.info{color: gray;}
+.material-icons.highlighted{color: chocolate;}
+.material-icons-round.md-dimgray{color: dimgray;}
+
+/* range icon color*/
+.material-icons.lower, .material-icons.mediumRange, .material-icons.greater{font-weight: bold;}
+.material-icons.lower.lowRange{color: salmon;}
+.material-icons.lower.highRange{color: red;}
+.material-icons.mediumRange{color: orange;}
+.material-icons.greater.lowRange{color: darkseagreen;}
+.material-icons.greater.highRange{color: darkgreen;}
+
+.material-icons:active{color: black;}
+
+/* status icons */
+.material-icons.error{color: darkred;}
+
+/* circle button */
+.material-icons.md-circle{border-radius: 50%;background: var(--main-secondary-color);box-shadow: 0 2px 4px 0px dimgrey; color: white;}
+.material-icons.md-circle-navigate{border-radius: 50%;box-shadow: 0 2px 4px 0 dimgrey; color: var(--main-secondary-color);padding: .25em;}
+.material-icons.md-circle.primary{background: var(--main-primary-color);}
+
+/* two-tone */
+.material-icons-two-tone.noPad{padding: 0;}
+.material-icons-two-tone.md-36{font-size: 36px;}
+
+/* outlined*/
+.material-icons-outlined.noPad{padding: 0;}
+.material-icons-outlined.md-36{font-size: 36px;}
+
+
+@media screen and (color) and (max-device-width: 360px) {
+  .material-icons{font-size: 18px;}
+  .material-icons.md-circle{padding: .7em;font-size: 18px;}
+  .material-icons.sale{padding: .35em;}
+}
+
+.material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
+
+/* Raggruppamenti per colori, md-danger : indianred, md-info: , md-warning: brown,md-status: darkgrey*/
+.material-icons.md-warning{color: brown;}
+.material-icons-round.md-warning:enabled{color: brown;}
+/*.material-icons-round.md-warning{color: brown;}*/
+.material-icons.md-status{color: darkgrey;}
+.material-icons.md-attention{color: darkorange;}
+.material-icons.md-done{color: darkgreen;}
+
+/*colori*/
+.material-icons.md-orange{color: orange;}
+.material-icons.md-sienna{color: sienna;}
+
+.material-icons-round.filters {color: var(--filters-color);}
+
+.material-icons.md-highlight{color: var(--main-highlight-icons-color);}
+
+/*icons all'interno di buttons*/
+button:disabled.md-dark{color: #757575;} /*disabled dark*/
+button:disabled:hover.md-dark{cursor: not-allowed;} /*disabled dark*/
+button:disabled:hover{cursor: not-allowed;} /*disabled dark*/
+button:enabled:hover.md-dark{color: white;} /*disabled dark*/
+button:enabled:hover{cursor: pointer;}
+
+button.md-dark{color: gainsboro;} /*disabled dark*/
+.material-icons-round.md-color-highlight {color: sienna;}
+.material-icons-round.align-self-center{width: min-content; align-self: center;}
+.material-icons-round.md-opacity{opacity:.7;}
+.material-icons-round.md-opacity:hover{opacity:1;}
+
+
+/* colors */
+.material-icons-round.md-18.warning:not([disabled]){
+  color: var(--warning-color)!important;
+}
+
+.material-icons-round.md-18.danger:not([disabled]){
+  color: var(--danger-color)!important;
+}
+
+.material-icons-round.md-18.done:not([disabled]){
+  color: var(--done-color)!important;
+}
+
+.material-icons-round.md-18.columns:not([disabled]){
+  color: var(--columns-color);
+}
+
+.material-icons-round.md-18.metrics:not([disabled]){
+  color: var(--metrics-color);
+}
+
+.material-icons-round.md-18.column-defined:not([disabled]), .material-icons-round.md-18.metric-defined{
+  color: var(--btn-remove-column-defined);
+}
+
+* *[data-removed] > .material-icons-round.md-18 {
+  color: #4949497a!important;
+  }
+
+* *[draggable="true"] i {cursor: grab;}

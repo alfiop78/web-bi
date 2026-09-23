@@ -1,0 +1,120 @@
+{
+  "parentElement_id": "template-layout",
+  "id": "layout-threeSection",
+  "name": "Three sections",
+  "comment": "",
+  "childs": [
+    {
+      "tag": "div",
+      "id": "layout__threeSection",
+      "classes": [
+        "layout",
+        "threeSection"
+      ],
+      "attributes": {},
+      "childs": [
+        {
+          "tag": "section",
+          "classes": [
+            "filters",
+            "filterContent"
+          ],
+          "attributes": {},
+          "childs": [
+            {
+              "tag": "div",
+              "id": "filter__dashboard",
+              "classes": [
+                "contentObject"
+              ],
+              "attributes": {}
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "left",
+            "chartContent"
+          ],
+          "attributes": {
+            "resource": true
+          },
+          "childs": [
+            {
+              "tag": "div",
+              "id": "chart__1",
+              "classes": [
+                "chart-elements",
+                "contentObject"
+              ],
+              "attributes": {
+                "fn": "addResource",
+                "actions": true
+              }
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "right"
+          ],
+          "attributes": {},
+          "childs": [
+            {
+              "tag": "div",
+              "id": "object-1",
+              "classes": [
+                "chartContent",
+                "object"
+              ],
+              "attributes": {
+                "resource": true
+              },
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "chart__2",
+                  "classes": [
+                    "chart-elements",
+                    "contentObject"
+                  ],
+                  "attributes": {
+                    "fn": "addResource",
+                    "actions": true
+                  }
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "id": "object-2",
+              "classes": [
+                "chartContent",
+                "object"
+              ],
+              "attributes": {
+                "resource": true
+              },
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "chart__3",
+                  "classes": [
+                    "chart-elements",
+                    "contentObject"
+                  ],
+                  "attributes": {
+                    "fn": "addResource",
+                    "actions": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

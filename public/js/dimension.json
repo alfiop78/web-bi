@@ -1,0 +1,53 @@
+{
+  "token": "9q7752sqy4__",
+  "created_at": "20\/12\/2022, 12:10:10,4",
+  "updated_at": "20\/12\/2022, 12:10:10,4",
+  "type": "DIMENSION",
+  "name": "TIME",
+  "cubes": {},
+  "lastTableInHierarchy": {
+    "alias": "CodTipoRicambio_509",
+    "schema": "automotive_bi_data",
+    "table": "CodTipoRicambio"
+  },
+  "hierarchies": {
+    "7hapbgj": {
+      "order": [
+        {
+          "schema": "automotive_bi_data",
+          "table": "web_bi_lk_date",
+          "alias": "web_bi_lk_date"
+        }
+      ],
+      "name": "hier-lk-date",
+      "columns": {
+        "date": {
+          "a4n9ytw": {
+            "id": {
+              "field": "date",
+              "type": "da_completare",
+              "SQL": null,
+              "origin_field": "date"
+            },
+            "ds": {
+              "field": "weekday",
+              "type": "da_completare",
+              "SQL": null,
+              "origin_field": "weekday"
+            }
+          }
+        }
+      },
+      "joins": {
+        "web_bi_lk_date": {
+          "l2c6ojm": [
+            "web_bi_lk_date.date"
+          ]
+        }
+      },
+      "from": [
+        "automotive_bi_data.web_bi_lk_date AS web_bi_lk_date"
+      ]
+    }
+  }
+}

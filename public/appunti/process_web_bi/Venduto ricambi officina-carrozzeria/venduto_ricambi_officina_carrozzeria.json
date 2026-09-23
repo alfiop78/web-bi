@@ -1,0 +1,929 @@
+{
+    "hierarchiesTimeLevel": "WB_YEARS",
+    "facts": [
+        "svg-data-03737"
+    ],
+    "fields": {
+        "__64324_m2d1032": {
+            "token": "__64324_m2d1032",
+            "SQL": "( TipoMovimento_324.Codice ||'-'|| TipoMovimento_324.Descrizione )",
+            "name": "COD_DS_CONCAT_DS"
+        },
+        "_45990_NumeroCommessa": {
+            "token": "_45990_NumeroCommessa",
+            "field": "NumeroCommessa",
+            "SQL": "DocVenditaIntestazione_990.NumeroCommessa",
+            "tableAlias": "DocVenditaIntestazione_990",
+            "name": "NumeroCommessa"
+        },
+        "_15235_id": {
+            "token": "_15235_id",
+            "field": "id",
+            "SQL": "CodMarcaRicambi_235.id",
+            "tableAlias": "CodMarcaRicambi_235",
+            "name": "marca_ricambi_id"
+        },
+        "_15235_Descrizione": {
+            "token": "_15235_Descrizione",
+            "field": "Descrizione",
+            "SQL": "CodMarcaRicambi_235.Descrizione",
+            "tableAlias": "CodMarcaRicambi_235",
+            "name": "marca_ricambi"
+        },
+        "_WB_YEARS_year": {
+            "token": "_WB_YEARS_year",
+            "field": "year",
+            "SQL": "WB_YEARS.year",
+            "tableAlias": "WB_YEARS",
+            "name": "year"
+        }
+    },
+    "advancedMeasures": {
+        "svg-data-03737": {
+            "kr4o1lu": {
+                "token": "kr4o1lu",
+                "alias": "VENDUTO_LY_",
+                "aggregateFn": "SUM",
+                "SQL": "DocVenditaDettaglio_737.NettoRiga",
+                "distinct": false,
+                "filters": {
+                    "last-year": {
+                        "field": "year"
+                    }
+                }
+            },
+            "o6c4sm6": {
+                "token": "o6c4sm6",
+                "alias": "costo_ly",
+                "aggregateFn": "SUM",
+                "SQL": "( DocVenditaDettaglio_737.PrzMedioPond * DocVenditaDettaglio_737.Quantita )",
+                "distinct": false,
+                "filters": {
+                    "last-year": {
+                        "field": "year"
+                    }
+                }
+            }
+        }
+    },
+    "baseMeasures": {},
+    "compositeMeasures": {},
+    "filters": {
+        "h6i01bh": {
+            "type": "filter",
+            "name": "CancellatStampaS",
+            "token": "h6i01bh",
+            "tables": [
+                "DocVenditaDettaglio_737"
+            ],
+            "from": {
+                "svg-data-03737": []
+            },
+            "joins": {
+                "svg-data-03737": []
+            },
+            "formula": "DocVenditaDettaglio.CancellatStampa = 'S'",
+            "SQL": "DocVenditaDettaglio_737.CancellatStampa = 'S'",
+            "workbook_ref": "632th7v",
+            "updated_at": "28/11/2024, 12:06:55,5",
+            "created_at": "18/11/2024, 16:22:31,1"
+        },
+        "adzxdao": {
+            "type": "filter",
+            "name": "RepartoOFF",
+            "token": "adzxdao",
+            "tables": [
+                "DocVenditaDettaglio_737"
+            ],
+            "from": {
+                "svg-data-03737": []
+            },
+            "joins": {
+                "svg-data-03737": []
+            },
+            "formula": "DocVenditaDettaglio.Reparto = 'OFF'",
+            "SQL": "DocVenditaDettaglio_737.Reparto = 'OFF'",
+            "workbook_ref": "632th7v",
+            "updated_at": "28/11/2024, 12:12:01,2",
+            "created_at": "18/11/2024, 16:23:10,9"
+        },
+        "a8xkz4p": {
+            "type": "filter",
+            "name": "TipoRigaR",
+            "token": "a8xkz4p",
+            "tables": [
+                "DocVenditaDettaglio_737"
+            ],
+            "from": {
+                "svg-data-03737": []
+            },
+            "joins": {
+                "svg-data-03737": []
+            },
+            "formula": "DocVenditaDettaglio.TipoRiga = 'R'",
+            "SQL": "DocVenditaDettaglio_737.TipoRiga = 'R'",
+            "workbook_ref": "632th7v",
+            "updated_at": "28/11/2024, 12:12:13,9",
+            "created_at": "18/11/2024, 16:23:32,6"
+        },
+        "7verb7i": {
+            "type": "filter",
+            "name": "FlagAnnullataA",
+            "token": "7verb7i",
+            "tables": [
+                "DocVenditaIntestazione_990"
+            ],
+            "from": {
+                "svg-data-03737": {
+                    "DocVenditaIntestazione_990": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaIntestazione"
+                    },
+                    "DocVenditaDettaglio_737": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaDettaglio"
+                    }
+                }
+            },
+            "joins": {
+                "svg-data-03737": {
+                    "lpr8sfy": {
+                        "alias": "DocVenditaIntestazione_990",
+                        "type": "table",
+                        "SQL": [
+                            "DocVenditaIntestazione_990.NumRifInt",
+                            "DocVenditaDettaglio_737.NumRifInt"
+                        ],
+                        "from": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "NumRifInt"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "NumRifInt"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "6jjiif3": {
+                        "alias": "DocVenditaIntestazione_990",
+                        "type": "table",
+                        "SQL": [
+                            "DocVenditaIntestazione_990.id_Azienda",
+                            "DocVenditaDettaglio_737.id_Azienda"
+                        ],
+                        "from": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "id_Azienda"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "id_Azienda"
+                        },
+                        "factId": "svg-data-03737"
+                    }
+                }
+            },
+            "formula": "DocVenditaIntestazione.FlagAnnullata = 'A'",
+            "SQL": "DocVenditaIntestazione_990.FlagAnnullata = 'A'",
+            "workbook_ref": "632th7v",
+            "updated_at": "28/11/2024, 12:11:03,5",
+            "created_at": "18/11/2024, 16:23:57,2"
+        },
+        "3e9g7gh": {
+            "type": "filter",
+            "name": "IDAzienda",
+            "token": "3e9g7gh",
+            "tables": [
+                "Azienda_556"
+            ],
+            "from": {
+                "svg-data-03737": {
+                    "Azienda_556": {
+                        "schema": "automotive_bi_data",
+                        "table": "Azienda"
+                    },
+                    "CodSedeDealer_987": {
+                        "schema": "automotive_bi_data",
+                        "table": "CodSedeDealer"
+                    },
+                    "DocVenditaIntestazione_990": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaIntestazione"
+                    },
+                    "DocVenditaDettaglio_737": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaDettaglio"
+                    }
+                }
+            },
+            "joins": {
+                "svg-data-03737": {
+                    "ufqk1fv": {
+                        "alias": "Azienda_556",
+                        "type": "table",
+                        "SQL": [
+                            "Azienda_556.id",
+                            "CodSedeDealer_987.id_Azienda"
+                        ],
+                        "from": {
+                            "table": "Azienda",
+                            "alias": "Azienda_556",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "CodSedeDealer",
+                            "alias": "CodSedeDealer_987",
+                            "field": "id_Azienda"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "0espa8t": {
+                        "alias": "CodSedeDealer_987",
+                        "type": "table",
+                        "SQL": [
+                            "CodSedeDealer_987.id",
+                            "DocVenditaIntestazione_990.id_CodSedeDealer"
+                        ],
+                        "from": {
+                            "table": "CodSedeDealer",
+                            "alias": "CodSedeDealer_987",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "id_CodSedeDealer"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "lpr8sfy": {
+                        "alias": "DocVenditaIntestazione_990",
+                        "type": "table",
+                        "SQL": [
+                            "DocVenditaIntestazione_990.NumRifInt",
+                            "DocVenditaDettaglio_737.NumRifInt"
+                        ],
+                        "from": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "NumRifInt"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "NumRifInt"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "6jjiif3": {
+                        "alias": "DocVenditaIntestazione_990",
+                        "type": "table",
+                        "SQL": [
+                            "DocVenditaIntestazione_990.id_Azienda",
+                            "DocVenditaDettaglio_737.id_Azienda"
+                        ],
+                        "from": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "id_Azienda"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "id_Azienda"
+                        },
+                        "factId": "svg-data-03737"
+                    }
+                }
+            },
+            "formula": "Azienda.id IN (1000002287, 1000002079, 421, 424, 43, 437, 452, 465, 473, 481, 497, 511, 5209, 591, 1000001453, 1000003534, 1000002409)",
+            "SQL": "Azienda_556.id IN (1000002287, 1000002079, 421, 424, 43, 437, 452, 465, 473, 481, 497, 511, 5209, 591, 1000001453, 1000003534, 1000002409)",
+            "workbook_ref": "632th7v",
+            "updated_at": "28/11/2024, 12:11:43,2",
+            "created_at": "18/11/2024, 16:49:42,8"
+        },
+        "uudg8gt": {
+            "type": "filter",
+            "name": "RepartoEmissione CAROFF",
+            "token": "uudg8gt",
+            "tables": [
+                "TipoMovimento_324"
+            ],
+            "from": {
+                "svg-data-03737": {
+                    "TipoMovimento_324": {
+                        "schema": "automotive_bi_data",
+                        "table": "TipoMovimento"
+                    },
+                    "DocVenditaDettaglio_737": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaDettaglio"
+                    }
+                }
+            },
+            "joins": {
+                "svg-data-03737": {
+                    "6wxntbq": {
+                        "alias": "TipoMovimento_324",
+                        "type": "table",
+                        "SQL": [
+                            "TipoMovimento_324.id",
+                            "DocVenditaDettaglio_737.id_TipoMovimento"
+                        ],
+                        "from": {
+                            "table": "TipoMovimento",
+                            "alias": "TipoMovimento_324",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "id_TipoMovimento"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "t8d3s2r": {
+                        "alias": "TipoMovimento_324",
+                        "type": "table",
+                        "SQL": [
+                            "TipoMovimento_324.id_Azienda",
+                            "DocVenditaDettaglio_737.id_Azienda"
+                        ],
+                        "from": {
+                            "table": "TipoMovimento",
+                            "alias": "TipoMovimento_324",
+                            "field": "id_Azienda"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "id_Azienda"
+                        },
+                        "factId": "svg-data-03737"
+                    }
+                }
+            },
+            "formula": "TipoMovimento.RepartoEmissione IN ('CAR', 'OFF')",
+            "SQL": "TipoMovimento_324.RepartoEmissione IN ('CAR', 'OFF')",
+            "workbook_ref": "632th7v",
+            "updated_at": "28/11/2024, 12:10:44,8",
+            "created_at": "18/11/2024, 16:27:53,9"
+        },
+        "h6m8tir": {
+            "type": "filter",
+            "name": "id_year_filter",
+            "token": "h6m8tir",
+            "tables": [
+                "WB_YEARS"
+            ],
+            "from": {
+                "svg-data-03737": {
+                    "WB_YEARS": {
+                        "schema": "decisyon_cache",
+                        "table": "WB_YEARS"
+                    },
+                    "WB_QUARTERS": {
+                        "schema": "decisyon_cache",
+                        "table": "WB_QUARTERS"
+                    },
+                    "WB_MONTHS": {
+                        "schema": "decisyon_cache",
+                        "table": "WB_MONTHS"
+                    },
+                    "WB_DATE": {
+                        "schema": "decisyon_cache",
+                        "table": "WB_DATE"
+                    },
+                    "DocVenditaDettaglio_737": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaDettaglio"
+                    }
+                }
+            },
+            "joins": {
+                "svg-data-03737": {
+                    "WB_YEARS-03737": {
+                        "alias": "WB_YEARS",
+                        "type": "TIME",
+                        "SQL": [
+                            "WB_YEARS.id",
+                            "WB_QUARTERS.year_id"
+                        ],
+                        "factId": "svg-data-03737",
+                        "from": {
+                            "table": "WB_YEARS",
+                            "alias": "WB_YEARS",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "WB_QUARTERS",
+                            "alias": "WB_QUARTERS",
+                            "field": "year_id"
+                        }
+                    },
+                    "WB_QUARTERS-03737": {
+                        "alias": "WB_QUARTERS",
+                        "type": "TIME",
+                        "SQL": [
+                            "WB_QUARTERS.id",
+                            "WB_MONTHS.quarter_id"
+                        ],
+                        "factId": "svg-data-03737",
+                        "from": {
+                            "table": "WB_QUARTERS",
+                            "alias": "WB_QUARTERS",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "WB_MONTHS",
+                            "alias": "WB_MONTHS",
+                            "field": "quarter_id"
+                        }
+                    },
+                    "WB_MONTHS-03737": {
+                        "alias": "WB_MONTHS",
+                        "type": "TIME",
+                        "SQL": [
+                            "WB_MONTHS.id",
+                            "WB_DATE.month_id"
+                        ],
+                        "factId": "svg-data-03737",
+                        "from": {
+                            "table": "WB_MONTHS",
+                            "alias": "WB_MONTHS",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "WB_DATE",
+                            "alias": "WB_DATE",
+                            "field": "month_id"
+                        }
+                    },
+                    "WB_DATE-03737": {
+                        "alias": "WB_DATE",
+                        "type": "TIME",
+                        "datatype": "integer",
+                        "SQL": [
+                            "DocVenditaDettaglio_737.DataDocumento",
+                            "WB_DATE.id"
+                        ],
+                        "factId": "svg-data-03737",
+                        "from": {
+                            "table": "WB_DATE",
+                            "alias": "WB_DATE",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "DataDocumento"
+                        }
+                    }
+                }
+            },
+            "formula": "WB_YEARS.id = 2020",
+            "SQL": "WB_YEARS.id = 2020",
+            "workbook_ref": "632th7v",
+            "updated_at": "28/11/2024, 12:10:36,1",
+            "created_at": "18/11/2024, 16:52:57,0"
+        },
+        "pl6ar6g": {
+            "type": "filter",
+            "name": "AutodeltaCodMercatoIDAzienda",
+            "token": "pl6ar6g",
+            "tables": [
+                "Azienda_556"
+            ],
+            "from": {
+                "svg-data-03737": {
+                    "Azienda_556": {
+                        "schema": "automotive_bi_data",
+                        "table": "Azienda"
+                    },
+                    "CodSedeDealer_987": {
+                        "schema": "automotive_bi_data",
+                        "table": "CodSedeDealer"
+                    },
+                    "DocVenditaIntestazione_990": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaIntestazione"
+                    },
+                    "DocVenditaDettaglio_737": {
+                        "schema": "automotive_bi_data",
+                        "table": "DocVenditaDettaglio"
+                    }
+                }
+            },
+            "joins": {
+                "svg-data-03737": {
+                    "ufqk1fv": {
+                        "alias": "Azienda_556",
+                        "type": "table",
+                        "SQL": [
+                            "Azienda_556.id",
+                            "CodSedeDealer_987.id_Azienda"
+                        ],
+                        "from": {
+                            "table": "Azienda",
+                            "alias": "Azienda_556",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "CodSedeDealer",
+                            "alias": "CodSedeDealer_987",
+                            "field": "id_Azienda"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "0espa8t": {
+                        "alias": "CodSedeDealer_987",
+                        "type": "table",
+                        "SQL": [
+                            "CodSedeDealer_987.id",
+                            "DocVenditaIntestazione_990.id_CodSedeDealer"
+                        ],
+                        "from": {
+                            "table": "CodSedeDealer",
+                            "alias": "CodSedeDealer_987",
+                            "field": "id"
+                        },
+                        "to": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "id_CodSedeDealer"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "lpr8sfy": {
+                        "alias": "DocVenditaIntestazione_990",
+                        "type": "table",
+                        "SQL": [
+                            "DocVenditaIntestazione_990.NumRifInt",
+                            "DocVenditaDettaglio_737.NumRifInt"
+                        ],
+                        "from": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "NumRifInt"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "NumRifInt"
+                        },
+                        "factId": "svg-data-03737"
+                    },
+                    "6jjiif3": {
+                        "alias": "DocVenditaIntestazione_990",
+                        "type": "table",
+                        "SQL": [
+                            "DocVenditaIntestazione_990.id_Azienda",
+                            "DocVenditaDettaglio_737.id_Azienda"
+                        ],
+                        "from": {
+                            "table": "DocVenditaIntestazione",
+                            "alias": "DocVenditaIntestazione_990",
+                            "field": "id_Azienda"
+                        },
+                        "to": {
+                            "table": "DocVenditaDettaglio",
+                            "alias": "DocVenditaDettaglio_737",
+                            "field": "id_Azienda"
+                        },
+                        "factId": "svg-data-03737"
+                    }
+                }
+            },
+            "formula": "(Azienda.VersioneDMS = 'AUTODELTA' AND Azienda.CodMercato = 'IT' OR Azienda.id IN(1000001924, 1000003534, 1000002409) )",
+            "SQL": "(Azienda_556.VersioneDMS = 'AUTODELTA' AND Azienda_556.CodMercato = 'IT' OR Azienda_556.id IN(1000001924, 1000003534, 1000002409) )",
+            "workbook_ref": "632th7v",
+            "updated_at": "02/12/2024, 18:16:33,3",
+            "created_at": "18/11/2024, 16:47:46,9"
+        }
+    },
+    "from": {
+        "svg-data-03737": {
+            "DocVenditaIntestazione_990": {
+                "schema": "automotive_bi_data",
+                "table": "DocVenditaIntestazione"
+            },
+            "DocVenditaDettaglio_737": {
+                "schema": "automotive_bi_data",
+                "table": "DocVenditaDettaglio"
+            },
+            "CodMarcaRicambi_235": {
+                "schema": "automotive_bi_data",
+                "table": "CodMarcaRicambi"
+            },
+            "Ricambi_534": {
+                "schema": "automotive_bi_data",
+                "table": "Ricambi"
+            },
+            "WB_YEARS": {
+                "schema": "decisyon_cache",
+                "table": "WB_YEARS"
+            },
+            "WB_QUARTERS": {
+                "schema": "decisyon_cache",
+                "table": "WB_QUARTERS"
+            },
+            "WB_MONTHS": {
+                "schema": "decisyon_cache",
+                "table": "WB_MONTHS"
+            },
+            "WB_DATE": {
+                "schema": "decisyon_cache",
+                "table": "WB_DATE"
+            },
+            "Azienda_556": {
+                "schema": "automotive_bi_data",
+                "table": "Azienda"
+            },
+            "CodSedeDealer_987": {
+                "schema": "automotive_bi_data",
+                "table": "CodSedeDealer"
+            },
+            "TipoMovimento_324": {
+                "schema": "automotive_bi_data",
+                "table": "TipoMovimento"
+            }
+        }
+    },
+    "joins": {
+        "svg-data-03737": {
+            "lpr8sfy": {
+                "alias": "DocVenditaIntestazione_990",
+                "type": "table",
+                "SQL": [
+                    "DocVenditaIntestazione_990.NumRifInt",
+                    "DocVenditaDettaglio_737.NumRifInt"
+                ],
+                "from": {
+                    "table": "DocVenditaIntestazione",
+                    "alias": "DocVenditaIntestazione_990",
+                    "field": "NumRifInt"
+                },
+                "to": {
+                    "table": "DocVenditaDettaglio",
+                    "alias": "DocVenditaDettaglio_737",
+                    "field": "NumRifInt"
+                },
+                "factId": "svg-data-03737"
+            },
+            "6jjiif3": {
+                "alias": "DocVenditaIntestazione_990",
+                "type": "table",
+                "SQL": [
+                    "DocVenditaIntestazione_990.id_Azienda",
+                    "DocVenditaDettaglio_737.id_Azienda"
+                ],
+                "from": {
+                    "table": "DocVenditaIntestazione",
+                    "alias": "DocVenditaIntestazione_990",
+                    "field": "id_Azienda"
+                },
+                "to": {
+                    "table": "DocVenditaDettaglio",
+                    "alias": "DocVenditaDettaglio_737",
+                    "field": "id_Azienda"
+                },
+                "factId": "svg-data-03737"
+            },
+            "40b6lxe": {
+                "alias": "CodMarcaRicambi_235",
+                "type": "table",
+                "SQL": [
+                    "CodMarcaRicambi_235.id_Azienda",
+                    "Ricambi_534.id_Azienda"
+                ],
+                "from": {
+                    "table": "CodMarcaRicambi",
+                    "alias": "CodMarcaRicambi_235",
+                    "field": "id_Azienda"
+                },
+                "to": {
+                    "table": "Ricambi",
+                    "alias": "Ricambi_534",
+                    "field": "id_Azienda"
+                },
+                "factId": "svg-data-03737"
+            },
+            "7keur91": {
+                "alias": "CodMarcaRicambi_235",
+                "type": "table",
+                "SQL": [
+                    "CodMarcaRicambi_235.id",
+                    "Ricambi_534.id_CodMarcaRicambi"
+                ],
+                "from": {
+                    "table": "CodMarcaRicambi",
+                    "alias": "CodMarcaRicambi_235",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "Ricambi",
+                    "alias": "Ricambi_534",
+                    "field": "id_CodMarcaRicambi"
+                },
+                "factId": "svg-data-03737"
+            },
+            "owmhqkw": {
+                "alias": "Ricambi_534",
+                "type": "table",
+                "SQL": [
+                    "Ricambi_534.id_Azienda",
+                    "DocVenditaDettaglio_737.id_Azienda"
+                ],
+                "from": {
+                    "table": "Ricambi",
+                    "alias": "Ricambi_534",
+                    "field": "id_Azienda"
+                },
+                "to": {
+                    "table": "DocVenditaDettaglio",
+                    "alias": "DocVenditaDettaglio_737",
+                    "field": "id_Azienda"
+                },
+                "factId": "svg-data-03737"
+            },
+            "7ktqawn": {
+                "alias": "Ricambi_534",
+                "type": "table",
+                "SQL": [
+                    "Ricambi_534.id",
+                    "DocVenditaDettaglio_737.id_Ricambio"
+                ],
+                "from": {
+                    "table": "Ricambi",
+                    "alias": "Ricambi_534",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "DocVenditaDettaglio",
+                    "alias": "DocVenditaDettaglio_737",
+                    "field": "id_Ricambio"
+                },
+                "factId": "svg-data-03737"
+            },
+            "WB_YEARS-03737": {
+                "alias": "WB_YEARS",
+                "type": "TIME",
+                "SQL": [
+                    "WB_YEARS.id",
+                    "WB_QUARTERS.year_id"
+                ],
+                "factId": "svg-data-03737",
+                "from": {
+                    "table": "WB_YEARS",
+                    "alias": "WB_YEARS",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "WB_QUARTERS",
+                    "alias": "WB_QUARTERS",
+                    "field": "year_id"
+                }
+            },
+            "WB_QUARTERS-03737": {
+                "alias": "WB_QUARTERS",
+                "type": "TIME",
+                "SQL": [
+                    "WB_QUARTERS.id",
+                    "WB_MONTHS.quarter_id"
+                ],
+                "factId": "svg-data-03737",
+                "from": {
+                    "table": "WB_QUARTERS",
+                    "alias": "WB_QUARTERS",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "WB_MONTHS",
+                    "alias": "WB_MONTHS",
+                    "field": "quarter_id"
+                }
+            },
+            "WB_MONTHS-03737": {
+                "alias": "WB_MONTHS",
+                "type": "TIME",
+                "SQL": [
+                    "WB_MONTHS.id",
+                    "WB_DATE.month_id"
+                ],
+                "factId": "svg-data-03737",
+                "from": {
+                    "table": "WB_MONTHS",
+                    "alias": "WB_MONTHS",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "WB_DATE",
+                    "alias": "WB_DATE",
+                    "field": "month_id"
+                }
+            },
+            "WB_DATE-03737": {
+                "alias": "WB_DATE",
+                "type": "TIME",
+                "datatype": "integer",
+                "SQL": [
+                    "DocVenditaDettaglio_737.DataDocumento",
+                    "WB_DATE.id"
+                ],
+                "factId": "svg-data-03737",
+                "from": {
+                    "table": "WB_DATE",
+                    "alias": "WB_DATE",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "DocVenditaDettaglio",
+                    "alias": "DocVenditaDettaglio_737",
+                    "field": "DataDocumento"
+                }
+            },
+            "ufqk1fv": {
+                "alias": "Azienda_556",
+                "type": "table",
+                "SQL": [
+                    "Azienda_556.id",
+                    "CodSedeDealer_987.id_Azienda"
+                ],
+                "from": {
+                    "table": "Azienda",
+                    "alias": "Azienda_556",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "CodSedeDealer",
+                    "alias": "CodSedeDealer_987",
+                    "field": "id_Azienda"
+                },
+                "factId": "svg-data-03737"
+            },
+            "0espa8t": {
+                "alias": "CodSedeDealer_987",
+                "type": "table",
+                "SQL": [
+                    "CodSedeDealer_987.id",
+                    "DocVenditaIntestazione_990.id_CodSedeDealer"
+                ],
+                "from": {
+                    "table": "CodSedeDealer",
+                    "alias": "CodSedeDealer_987",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "DocVenditaIntestazione",
+                    "alias": "DocVenditaIntestazione_990",
+                    "field": "id_CodSedeDealer"
+                },
+                "factId": "svg-data-03737"
+            },
+            "6wxntbq": {
+                "alias": "TipoMovimento_324",
+                "type": "table",
+                "SQL": [
+                    "TipoMovimento_324.id",
+                    "DocVenditaDettaglio_737.id_TipoMovimento"
+                ],
+                "from": {
+                    "table": "TipoMovimento",
+                    "alias": "TipoMovimento_324",
+                    "field": "id"
+                },
+                "to": {
+                    "table": "DocVenditaDettaglio",
+                    "alias": "DocVenditaDettaglio_737",
+                    "field": "id_TipoMovimento"
+                },
+                "factId": "svg-data-03737"
+            },
+            "t8d3s2r": {
+                "alias": "TipoMovimento_324",
+                "type": "table",
+                "SQL": [
+                    "TipoMovimento_324.id_Azienda",
+                    "DocVenditaDettaglio_737.id_Azienda"
+                ],
+                "from": {
+                    "table": "TipoMovimento",
+                    "alias": "TipoMovimento_324",
+                    "field": "id_Azienda"
+                },
+                "to": {
+                    "table": "DocVenditaDettaglio",
+                    "alias": "DocVenditaDettaglio_737",
+                    "field": "id_Azienda"
+                },
+                "factId": "svg-data-03737"
+            }
+        }
+    },
+    "id": 1732803198891,
+    "datamartId": 2
+}

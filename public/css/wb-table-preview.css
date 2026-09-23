@@ -1,0 +1,140 @@
+/* .preview__content {
+  position: relative;
+} */
+
+#preview-datamart, #preview-table {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+table {
+  display: inline-block !important;
+  overflow-x: unset !important;
+  width: 100%;
+  /* height: 1080px; */
+}
+
+.g-table-header {
+  /* background-color: #494949; */
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.g-table-header>.g-header-cell:first-child {
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+
+.g-table-header>.g-header-cell:last-child {
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.g-header-cell {
+  color: #494949;
+  border: none !important;
+  font-size: .8rem;
+  background-color: gainsboro;
+  padding: 1em !important;
+}
+
+/* colonne con metriche */
+.g-header-cell.col-metrics {
+  /* color: #494949; */
+  background-color: var(--mark-color);
+}
+
+.g-table-cell {
+  /* color: #494949; */
+  padding: 4px 8px !important;
+  white-space: nowrap;
+  border: none !important;
+}
+
+.g-table-cell.col-metrics {
+  text-align: end;
+}
+
+.g-oddRow {
+  background-color: #f4f4f469;
+}
+
+/* .g-hoverRow {} */
+
+/* .g-rowNumberCell {} */
+
+.google-visualization-table .gradient {
+  background-image: unset!important;
+}
+
+/* paginate */
+.google-visualization-table-div-page {
+  font-family: inherit!important;
+  padding: 2px!important;
+  background-color: gainsboro!important;
+  background-image: unset!important;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.google-visualization-table-div-page [role="button"] {
+  padding: 4px;
+  font-family: inherit!important;
+  font-size: 1rem!important;
+  line-height: 1rem!important;
+  border: none;
+}
+
+.goog-custom-button {
+  background: unset!important;
+  margin: unset!important;
+}
+
+.google-visualization-table-page-next::before {
+  font-size: 1.5rem;
+  /* color: var(--mark-color); */
+  color: #494949;
+}
+
+.google-visualization-table-page-prev::before {
+  font-size: 1.5rem;
+  /* color: var(--mark-color); */
+  color: #494949;
+}
+
+.goog-custom-button-outer-box, .goog-custom-button-inner-box {
+  border-style: unset!important;
+  border-color: unset!important;
+}
+
+/* tasti numeri pagine */
+.google-visualization-table-page-numbers {
+  zoom: unset!important;
+  padding: 4px;
+}
+
+.google-visualization-table-page-number {
+  border: unset!important;
+  font-size: inherit!important;
+  background-color: #494949!important;
+  color: gainsboro!important;
+  /* background-color: var(--mark-color)!important; */
+  min-width: 22px!important;
+}
+
+.google-visualization-table-page-number:hover {
+  border: unset!important;
+  background-color: black!important;
+  color: white;
+}
+
+/* numero di pagina corrente */
+.google-visualization-table-page-number.current {
+  border: unset!important;
+  background-color: var(--mark-color)!important;
+  /* background-color: #494949!important; */
+  color: #494949!important;
+}

@@ -1,0 +1,110 @@
+oggetto 'fields' all'interno di workbookMap
+{
+    "token": "ovbq5x6",
+    "type": "column",
+    "schema": "automotive_bi_data",
+    "tableAlias": "DocVenditaDettaglio_874",
+    "tableId": "svg-data-36874",
+    "table": "DocVenditaDettaglio",
+    "name": "CodiceManoOpera",
+    "origin_field": "CodiceManoOpera",
+    "field": {
+        "id": {
+            "sql": [
+                "DocVenditaDettaglio_874.CodiceManoOpera"
+            ],
+            "formula": [
+                {
+                    "table_alias": "DocVenditaDettaglio_874",
+                    "table": "DocVenditaDettaglio",
+                    "field": "CodiceManoOpera",
+                    "datatype": "varchar"
+                }
+            ],
+            "datatype": "varchar"
+        },
+        "ds": {
+            "sql": [
+                "DocVenditaDettaglio_874.CodiceManoOpera"
+            ],
+            "formula": [
+                {
+                    "table_alias": "DocVenditaDettaglio_874",
+                    "table": "DocVenditaDettaglio",
+                    "field": "CodiceManoOpera",
+                    "datatype": "varchar"
+                }
+            ],
+            "datatype": "varchar"
+        }
+    }
+}
+
+oggetto WorkBook.fields
+{
+    "key": "DocVenditaDettaglio_874",
+    "value": {
+        "ovbq5x6": {
+            "token": "ovbq5x6",
+            "type": "column",
+            "schema": "automotive_bi_data",
+            "tableAlias": "DocVenditaDettaglio_874",
+            "tableId": "svg-data-36874",
+            "table": "DocVenditaDettaglio",
+            "name": "CodiceManoOpera",
+            "origin_field": "CodiceManoOpera",
+            "field": {
+                "id": {
+                    "sql": [
+                        "DocVenditaDettaglio_874.CodiceManoOpera"
+                    ],
+                    "formula": [
+                        {
+                            "table_alias": "DocVenditaDettaglio_874",
+                            "table": "DocVenditaDettaglio",
+                            "field": "CodiceManoOpera",
+                            "datatype": "varchar"
+                        }
+                    ],
+                    "datatype": "varchar"
+                },
+                "ds": {
+                    "sql": [
+                        "DocVenditaDettaglio_874.CodiceManoOpera"
+                    ],
+                    "formula": [
+                        {
+                            "table_alias": "DocVenditaDettaglio_874",
+                            "table": "DocVenditaDettaglio",
+                            "field": "CodiceManoOpera",
+                            "datatype": "varchar"
+                        }
+                    ],
+                    "datatype": "varchar"
+                }
+            }
+        }
+    }
+}
+
+
+metriche in WorkBook.metrics
+{
+    "key": "bwvbhel",
+    "value": {
+        "token": "bwvbhel",
+        "alias": "NettoRiga",
+        "type": "metric",
+        "metric_type": "basic",
+        "factId": "svg-data-36874",
+        "properties": {
+            "table": "DocVenditaDettaglio",
+            "fields": [
+                "NettoRiga"
+            ]
+        },
+        "aggregateFn": "SUM",
+        "SQL": "DocVenditaDettaglio_874.NettoRiga",
+        "distinct": false
+    }
+}

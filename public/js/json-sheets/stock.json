@@ -1,0 +1,322 @@
+{
+  "name": "Stock",
+  "comment": "Report stock veicoli nuovi",
+  "data": {
+    "columns": {
+      "Telaio_id": {
+        "label": "Telaio_id",
+        "type": "number"
+      },
+      "Telaio_ds": {
+        "label": "TELAIO",
+        "type": "string"
+      },
+      "custom_id_id": {
+        "label": "custom_id_id",
+        "type": "number"
+      },
+      "custom_id_ds": {
+        "label": "custom_id_ds",
+        "type": "string"
+      },
+      "NumeroTarga_id": {
+        "label": "targa_id",
+        "type": "string"
+      },
+      "NumeroTarga_ds": {
+        "label": "TARGA",
+        "type": "string"
+      },
+      "ubicazione_id": {
+        "label": "ubicazione_id",
+        "type": "number"
+      },
+      "ubicazione_ds": {
+        "label": "UBICAZIONE",
+        "type": "string"
+      },
+      "DtFattAcq_id": {
+        "label": "DtFattAcq_id",
+        "type": "string"
+      },
+      "DtFattAcq_ds": {
+        "label": "DATA FATT. ACQ.",
+        "type": "date"
+      },
+      "DtArrivo_id": {
+        "label": "DtArrivo_id",
+        "type": "string"
+      },
+      "DtArrivo_ds": {
+        "label": "ARRIVO",
+        "type": "date"
+      },
+      "DtFattVendita_id": {
+        "label": "DtFattVendita_id",
+        "type": "string"
+      },
+      "DtFattVendita_ds": {
+        "label": "DATA FATT. VENDITA",
+        "type": "date"
+      },
+      "codice_modello_id": {
+        "label": "codice_modello_id",
+        "type": "string"
+      },
+      "codice_modello_ds": {
+        "label": "DARTS",
+        "type": "string"
+      },
+      "codice_veicolo_id": {
+        "label": "codice_veicolo_id",
+        "type": "string"
+      },
+      "codice_veicolo_ds": {
+        "label": "CODICE VEICOLO",
+        "type": "string"
+      },
+      "ds_veicolo_id": {
+        "label": "ds_veicolo_id",
+        "type": "string"
+      },
+      "ds_veicolo_ds": {
+        "label": "VEICOLO",
+        "type": "string"
+      },
+      "fornitore_id": {
+        "label": "fornitore_id",
+        "type": "string"
+      },
+      "fornitore_ds": {
+        "label": "VENDITORE DMS",
+        "type": "string"
+      },
+      "NumOrdineFab_id": {
+        "label": "NumOrdineFab_id",
+        "type": "string"
+      },
+      "NumOrdineFab_ds": {
+        "label": "N. ORDINE",
+        "type": "string",
+        "p": "align-right"
+      },
+      "NrContrattoVendita_id": {
+        "label": "NrContrattoVendita_id",
+        "type": "string"
+      },
+      "NrContrattoVendita_ds": {
+        "label": "N. CONTRATTO",
+        "type": "string",
+        "p": "align-right"
+      },
+      "colore_est_id": {
+        "label": "colore_est_id",
+        "type": "string"
+      },
+      "colore_est_ds": {
+        "label": "COLORE EST.",
+        "type": "string"
+      },
+      "colore_int_id": {
+        "label": "colore_int_id",
+        "type": "string"
+      },
+      "colore_int_ds": {
+        "label": "COLORE INT.",
+        "type": "string"
+      },
+      "DtConsCliente_id": {
+        "label": "DtConsCliente_id",
+        "type": "string"
+      },
+      "DtConsCliente_ds": {
+        "label": "DATA CONSEGNA",
+        "type": "date"
+      },
+      "codice_cliente_id": {
+        "label": "CLIENTE",
+        "type": "string"
+      },
+      "codice_cliente_ds": {
+        "label": "CLIENTE",
+        "type": "string"
+      },
+      "MarcaConcessionaria_id": {
+        "label": "MarcaConcessionaria_id",
+        "type": "string"
+      },
+      "MarcaConcessionaria_ds": {
+        "label": "MarcaConcessionaria_ds",
+        "type": "string"
+      },
+      "NumFatAcqCasaM_id": {
+        "label": "NumFatAcqCasaM_id",
+        "type": "string"
+      },
+      "NumFatAcqCasaM_ds": {
+        "label": "NumFatAcqCasaM_ds",
+        "type": "string"
+      },
+      "NrFattAcq_id": {
+        "label": "NrFattAcq_id",
+        "type": "string"
+      },
+      "NrFattAcq_ds": {
+        "label": "NrFattAcq_ds",
+        "type": "string"
+      },
+      "optional_id": {
+        "label": "optional_id",
+        "type": "string"
+      },
+      "optional_ds": {
+        "label": "OPTIONALS",
+        "type": "string"
+      },
+      "marca_veicolo_id": {
+        "label": "marca_veicolo_id",
+        "type": "string"
+      },
+      "marca_veicolo_ds": {
+        "label": "marca_veicolo_ds",
+        "type": "string"
+      },
+      "modello_id": {
+        "label": "modello_id",
+        "type": "string"
+      },
+      "modello_ds": {
+        "label": "MODELLO",
+        "type": "string"
+      },
+      "settore_id": {
+        "label": "settore_id",
+        "type": "string"
+      },
+      "settore_ds": {
+        "label": "settore_ds",
+        "type": "string"
+      },
+      "DtOrdine_id": {
+        "label": "DtOrdine_id",
+        "type": "string"
+      },
+      "DtOrdine_ds": {
+        "label": "DATA ORDINE",
+        "type": "date"
+      },
+      "DtAssegnaz_id": {
+        "label": "DtAssegnaz_id",
+        "type": "string"
+      },
+      "DtAssegnaz_ds": {
+        "label": "ARRIVO STIMATO",
+        "type": "date"
+      },
+      "id_id": {
+        "label": "id_id",
+        "type": "string"
+      },
+      "id_ds": {
+        "label": "id_ds",
+        "type": "string"
+      },
+      "TotaleFA": {
+        "label": "IMP. FATT. ACQ",
+        "type": "number"
+      }
+    },
+    "formatter": {
+      "currency": [
+        54
+      ],
+      "percent": []
+    }
+  },
+  "filters": [
+    {
+      "containerId": "flt-1",
+      "filterColumnLabel": "UBICAZIONE",
+      "caption": "Ubicazione"
+    },
+    {
+      "containerId": "flt-2",
+      "filterColumnLabel": "marca_veicolo_ds",
+      "caption": "Marca"
+    },
+    {
+      "containerId": "flt-3",
+      "filterColumnLabel": "MODELLO",
+      "caption": "Modello"
+    },
+    {
+      "containerId": "flt-4",
+      "filterColumnLabel": "settore_ds",
+      "caption": "Settore"
+    }
+  ],
+  "bind-comment": "un array con 3 elementi, ogni elemento ha un array che definisce il bind dei filtri del dashboard",
+  "bind": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ]
+  ],
+  "wrapper": {
+    "chartType": "Table",
+    "containerId": "chart_div",
+    "options": {
+      "width": "100%",
+      "height": "auto",
+      "page": "enabled",
+      "frozenColumns": 2,
+      "pageSize": 20,
+      "allowHtml": true,
+      "cssClassNames": {
+        "headerRow": "g-table-header",
+        "tableRow": "g-table-row",
+        "oddTableRow": "",
+        "selectedTableRow": "",
+        "hoverTableRow": "",
+        "headerCell": "g-header-cell",
+        "tableCell": "g-table-cell",
+        "rowNumberCell": ""
+      }
+    },
+    "view": {
+      "columns": [
+        1,
+        "NumOrdineFab_ds",
+        "ubicazione_ds",
+        "DtArrivo_ds",
+        "DtAssegnaz_ds",
+        "DtFattAcq_ds",
+        "NrContrattoVendita_ds",
+        "NumeroTarga_ds",
+        "codice_modello_ds",
+        "modello_ds",
+        "codice_veicolo_ds",
+        "ds_veicolo_ds",
+        "colore_est_ds",
+        "colore_int_ds",
+        "optional_ds",
+        "codice_cliente_id",
+        "codice_cliente_ds",
+        "DtFattVendita_ds",
+        "fornitore_ds",
+        "DtConsCliente_ds",
+        "DtOrdine_ds",
+        "TotaleFA"
+      ]
+    }
+  },
+  "wrapperComment": "nella prop 'view' definisco le colonne da visualizzare per questo ChartWrapper"
+}

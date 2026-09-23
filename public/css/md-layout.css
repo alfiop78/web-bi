@@ -1,0 +1,16 @@
+#content.custom-scrollbar::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+  height: 5px;
+}
+
+#content.custom-scrollbar::-webkit-scrollbar-thumb {
+  display: block;
+  background-color: #5f6162c7;
+  border-radius: 2px;
+}
+
+#content.custom-scrollbar::-webkit-scrollbar-track {
+  display: block;
+  background-color: gainsboro;
+}

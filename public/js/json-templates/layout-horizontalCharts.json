@@ -1,0 +1,85 @@
+{
+  "parentElement_id": "template-layout",
+  "id": "layout-horizontalCharts",
+  "name": "Horizontal Charts",
+  "comment": "Template con l'area filtri e due graifici posizionati in orizzontale",
+  "childs": [
+    {
+      "tag": "div",
+      "id": "layout__horizontalCharts",
+      "classes": [
+        "layout",
+        "horizontalCharts"
+      ],
+      "attributes": {},
+      "childs": [
+        {
+          "tag": "section",
+          "classes": [
+            "filters",
+            "filterContent"
+          ],
+          "attributes": {},
+          "childs": [
+            {
+              "tag": "div",
+              "id": "filter__dashboard",
+              "classes": [
+                "contentObject"
+              ],
+              "attributes": {}
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "left",
+            "chartContent"
+          ],
+          "attributes": {
+            "resource": true
+          },
+          "childs": [
+            {
+              "tag": "div",
+              "id": "chart__1",
+              "classes": [
+                "chart-elements",
+                "contentObject"
+              ],
+              "attributes": {
+                "fn": "addResource",
+                "actions": true
+              }
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "right",
+            "chartContent"
+          ],
+          "attributes": {
+            "resource": true
+          },
+          "childs": [
+            {
+              "tag": "div",
+              "id": "chart__2",
+              "classes": [
+                "chart-elements",
+                "contentObject"
+              ],
+              "attributes": {
+                "fn": "addResource",
+                "actions": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

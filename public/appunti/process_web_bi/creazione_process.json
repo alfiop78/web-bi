@@ -1,0 +1,584 @@
+{
+  "facts": [
+    "svg-data-35551"
+  ],
+  "fields": {
+    "hgal683": {
+      "token": "hgal683",
+      "field": {
+        "id": {
+          "sql": [
+            "Azienda_334.id"
+          ],
+          "formula": [
+            {
+              "table_alias": "Azienda_334",
+              "table": "Azienda",
+              "field": "id",
+              "datatype": "integer"
+            }
+          ],
+          "datatype": "integer"
+        },
+        "ds": {
+          "sql": [
+            "Azienda_334.descrizione"
+          ],
+          "formula": [
+            {
+              "table_alias": "Azienda_334",
+              "table": "Azienda",
+              "field": "descrizione",
+              "datatype": "varchar"
+            }
+          ],
+          "datatype": "varchar"
+        }
+      },
+      "tableAlias": "Azienda_334",
+      "name": "dealer"
+    },
+    "tok_WB_YEARS": {
+      "token": "tok_WB_YEARS",
+      "field": {
+        "id": {
+          "sql": [
+            "WB_YEARS.id"
+          ],
+          "datatype": "integer"
+        },
+        "ds": {
+          "sql": [
+            "WB_YEARS.year"
+          ],
+          "datatype": "char"
+        }
+      },
+      "tableAlias": "WB_YEARS",
+      "name": "WB_YEARS"
+    },
+    "tok_WB_QUARTERS": {
+      "token": "tok_WB_QUARTERS",
+      "field": {
+        "id": {
+          "sql": [
+            "WB_QUARTERS.id"
+          ],
+          "datatype": "integer"
+        },
+        "ds": {
+          "sql": [
+            "WB_QUARTERS.quarter"
+          ],
+          "datatype": "char"
+        }
+      },
+      "tableAlias": "WB_QUARTERS",
+      "name": "WB_QUARTERS"
+    },
+    "tok_WB_MONTHS": {
+      "token": "tok_WB_MONTHS",
+      "field": {
+        "id": {
+          "sql": [
+            "WB_MONTHS.id"
+          ],
+          "datatype": "integer"
+        },
+        "ds": {
+          "sql": [
+            "WB_MONTHS.month"
+          ],
+          "datatype": "char"
+        }
+      },
+      "tableAlias": "WB_MONTHS",
+      "name": "WB_MONTHS"
+    }
+  },
+  "hierarchiesTimeLevel": "tok_WB_MONTHS",
+  "advancedMeasures": {
+    "svg-data-35551": {
+      "l9x7lu8": {
+        "token": "l9x7lu8",
+        "alias": "venduto_last_month",
+        "aggregateFn": "SUM",
+        "field": "DocVenditaDettaglio_551.NettoRiga",
+        "SQL": "DocVenditaDettaglio_551.NettoRiga",
+        "distinct": false,
+        "filters": {
+          "last-month": {
+            "field": "previous"
+          }
+        }
+      }
+    }
+  },
+  "baseMeasures": {
+    "svg-data-35551": {
+      "zjdm5cj": {
+        "token": "zjdm5cj",
+        "alias": "NettoRiga",
+        "aggregateFn": "SUM",
+        "field": "DocVenditaDettaglio_551.NettoRiga",
+        "SQL": "DocVenditaDettaglio_551.NettoRiga",
+        "distinct": false
+      }
+    }
+  },
+  "compositeMeasures": {},
+  "filters": {
+    "6n8euyz": {
+      "token": "6n8euyz",
+      "name": "Autostar",
+      "tables": [
+        "Azienda_334"
+      ],
+      "sql": [
+        "Azienda_334.id",
+        "=",
+        "437"
+      ],
+      "from": {
+        "svg-data-35551": {
+          "Azienda_334": {
+            "schema": "automotive_bi_data",
+            "table": "Azienda"
+          },
+          "CodSedeDealer_512": {
+            "schema": "automotive_bi_data",
+            "table": "CodSedeDealer"
+          },
+          "DocVenditaIntestazione_572": {
+            "schema": "automotive_bi_data",
+            "table": "DocVenditaIntestazione"
+          },
+          "DocVenditaDettaglio_551": {
+            "schema": "automotive_bi_data",
+            "table": "DocVenditaDettaglio"
+          }
+        }
+      },
+      "joins": {
+        "svg-data-35551": {
+          "4am14ij": {
+            "alias": "Azienda_334",
+            "type": "table",
+            "SQL": [
+              "Azienda_334.id",
+              "CodSedeDealer_512.id_Azienda"
+            ],
+            "from": {
+              "table": "Azienda",
+              "alias": "Azienda_334",
+              "field": "id"
+            },
+            "to": {
+              "table": "CodSedeDealer",
+              "alias": "CodSedeDealer_512",
+              "field": "id_Azienda"
+            },
+            "factId": "svg-data-35551"
+          },
+          "tb51d66": {
+            "alias": "CodSedeDealer_512",
+            "type": "table",
+            "SQL": [
+              "CodSedeDealer_512.id",
+              "DocVenditaIntestazione_572.id_CodSedeDealer"
+            ],
+            "from": {
+              "table": "CodSedeDealer",
+              "alias": "CodSedeDealer_512",
+              "field": "id"
+            },
+            "to": {
+              "table": "DocVenditaIntestazione",
+              "alias": "DocVenditaIntestazione_572",
+              "field": "id_CodSedeDealer"
+            },
+            "factId": "svg-data-35551"
+          },
+          "uya4q28": {
+            "alias": "DocVenditaIntestazione_572",
+            "type": "table",
+            "SQL": [
+              "DocVenditaIntestazione_572.NumRifInt",
+              "DocVenditaDettaglio_551.NumRifInt"
+            ],
+            "from": {
+              "table": "DocVenditaIntestazione",
+              "alias": "DocVenditaIntestazione_572",
+              "field": "NumRifInt"
+            },
+            "to": {
+              "table": "DocVenditaDettaglio",
+              "alias": "DocVenditaDettaglio_551",
+              "field": "NumRifInt"
+            },
+            "factId": "svg-data-35551"
+          },
+          "vvkak44": {
+            "alias": "DocVenditaIntestazione_572",
+            "type": "table",
+            "SQL": [
+              "DocVenditaIntestazione_572.id_Azienda",
+              "DocVenditaDettaglio_551.id_Azienda"
+            ],
+            "from": {
+              "table": "DocVenditaIntestazione",
+              "alias": "DocVenditaIntestazione_572",
+              "field": "id_Azienda"
+            },
+            "to": {
+              "table": "DocVenditaDettaglio",
+              "alias": "DocVenditaDettaglio_551",
+              "field": "id_Azienda"
+            },
+            "factId": "svg-data-35551"
+          }
+        }
+      },
+      "type": "filter",
+      "formula": [
+        {
+          "table_alias": "Azienda_334",
+          "table": "Azienda",
+          "field": "id"
+        },
+        "=",
+        "437"
+      ],
+      "workbook_ref": "pfr765y",
+      "updated_at": "04/09/2024, 13:10:48,9",
+      "field": "id",
+      "created_at": "04/09/2024, 13:10:48,9"
+    },
+    "7xd3hiz": {
+      "token": "7xd3hiz",
+      "name": "dal 2021",
+      "tables": [
+        "WB_YEARS"
+      ],
+      "sql": [
+        "WB_YEARS.id",
+        ">=",
+        "2021"
+      ],
+      "from": {
+        "svg-data-35551": {
+          "WB_YEARS": {
+            "schema": "decisyon_cache",
+            "table": "WB_YEARS"
+          },
+          "WB_QUARTERS": {
+            "schema": "decisyon_cache",
+            "table": "WB_QUARTERS"
+          },
+          "WB_MONTHS": {
+            "schema": "decisyon_cache",
+            "table": "WB_MONTHS"
+          },
+          "WB_DATE": {
+            "schema": "decisyon_cache",
+            "table": "WB_DATE"
+          },
+          "DocVenditaDettaglio_551": {
+            "schema": "automotive_bi_data",
+            "table": "DocVenditaDettaglio"
+          }
+        }
+      },
+      "joins": {
+        "svg-data-35551": {
+          "WB_YEARS-35551": {
+            "alias": "WB_YEARS",
+            "type": "TIME",
+            "SQL": [
+              "WB_YEARS.id",
+              "WB_QUARTERS.year_id"
+            ],
+            "factId": "svg-data-35551",
+            "from": {
+              "table": "WB_YEARS",
+              "alias": "WB_YEARS",
+              "field": "id"
+            },
+            "to": {
+              "table": "WB_QUARTERS",
+              "alias": "WB_QUARTERS",
+              "field": "year_id"
+            }
+          },
+          "WB_QUARTERS-35551": {
+            "alias": "WB_QUARTERS",
+            "type": "TIME",
+            "SQL": [
+              "WB_QUARTERS.id",
+              "WB_MONTHS.quarter_id"
+            ],
+            "factId": "svg-data-35551",
+            "from": {
+              "table": "WB_QUARTERS",
+              "alias": "WB_QUARTERS",
+              "field": "id"
+            },
+            "to": {
+              "table": "WB_MONTHS",
+              "alias": "WB_MONTHS",
+              "field": "quarter_id"
+            }
+          },
+          "WB_MONTHS-35551": {
+            "alias": "WB_MONTHS",
+            "type": "TIME",
+            "SQL": [
+              "WB_MONTHS.id",
+              "WB_DATE.month_id"
+            ],
+            "factId": "svg-data-35551",
+            "from": {
+              "table": "WB_MONTHS",
+              "alias": "WB_MONTHS",
+              "field": "id"
+            },
+            "to": {
+              "table": "WB_DATE",
+              "alias": "WB_DATE",
+              "field": "month_id"
+            }
+          },
+          "WB_DATE-35551": {
+            "alias": "WB_DATE",
+            "type": "TIME",
+            "datatype": "integer",
+            "SQL": [
+              "DocVenditaDettaglio_551.DataDocumento",
+              "WB_DATE.id"
+            ],
+            "factId": "svg-data-35551",
+            "from": {
+              "table": "WB_DATE",
+              "alias": "WB_DATE",
+              "field": "id"
+            },
+            "to": {
+              "table": "DocVenditaDettaglio",
+              "alias": "DocVenditaDettaglio_551",
+              "field": "DataDocumento"
+            }
+          }
+        }
+      },
+      "type": "filter",
+      "formula": [
+        {
+          "table_alias": "WB_YEARS",
+          "table": "WB_YEARS",
+          "field": "id"
+        },
+        ">=",
+        "2021"
+      ],
+      "workbook_ref": "pfr765y",
+      "updated_at": "04/09/2024, 13:11:01,6",
+      "field": "id",
+      "created_at": "04/09/2024, 13:11:01,6"
+    }
+  },
+  "from": {
+    "svg-data-35551": {
+      "Azienda_334": {
+        "schema": "automotive_bi_data",
+        "table": "Azienda"
+      },
+      "CodSedeDealer_512": {
+        "schema": "automotive_bi_data",
+        "table": "CodSedeDealer"
+      },
+      "DocVenditaIntestazione_572": {
+        "schema": "automotive_bi_data",
+        "table": "DocVenditaIntestazione"
+      },
+      "DocVenditaDettaglio_551": {
+        "schema": "automotive_bi_data",
+        "table": "DocVenditaDettaglio"
+      },
+      "WB_YEARS": {
+        "schema": "decisyon_cache",
+        "table": "WB_YEARS"
+      },
+      "WB_QUARTERS": {
+        "schema": "decisyon_cache",
+        "table": "WB_QUARTERS"
+      },
+      "WB_MONTHS": {
+        "schema": "decisyon_cache",
+        "table": "WB_MONTHS"
+      },
+      "WB_DATE": {
+        "schema": "decisyon_cache",
+        "table": "WB_DATE"
+      }
+    }
+  },
+  "joins": {
+    "svg-data-35551": {
+      "4am14ij": {
+        "alias": "Azienda_334",
+        "type": "table",
+        "SQL": [
+          "Azienda_334.id",
+          "CodSedeDealer_512.id_Azienda"
+        ],
+        "from": {
+          "table": "Azienda",
+          "alias": "Azienda_334",
+          "field": "id"
+        },
+        "to": {
+          "table": "CodSedeDealer",
+          "alias": "CodSedeDealer_512",
+          "field": "id_Azienda"
+        },
+        "factId": "svg-data-35551"
+      },
+      "tb51d66": {
+        "alias": "CodSedeDealer_512",
+        "type": "table",
+        "SQL": [
+          "CodSedeDealer_512.id",
+          "DocVenditaIntestazione_572.id_CodSedeDealer"
+        ],
+        "from": {
+          "table": "CodSedeDealer",
+          "alias": "CodSedeDealer_512",
+          "field": "id"
+        },
+        "to": {
+          "table": "DocVenditaIntestazione",
+          "alias": "DocVenditaIntestazione_572",
+          "field": "id_CodSedeDealer"
+        },
+        "factId": "svg-data-35551"
+      },
+      "uya4q28": {
+        "alias": "DocVenditaIntestazione_572",
+        "type": "table",
+        "SQL": [
+          "DocVenditaIntestazione_572.NumRifInt",
+          "DocVenditaDettaglio_551.NumRifInt"
+        ],
+        "from": {
+          "table": "DocVenditaIntestazione",
+          "alias": "DocVenditaIntestazione_572",
+          "field": "NumRifInt"
+        },
+        "to": {
+          "table": "DocVenditaDettaglio",
+          "alias": "DocVenditaDettaglio_551",
+          "field": "NumRifInt"
+        },
+        "factId": "svg-data-35551"
+      },
+      "vvkak44": {
+        "alias": "DocVenditaIntestazione_572",
+        "type": "table",
+        "SQL": [
+          "DocVenditaIntestazione_572.id_Azienda",
+          "DocVenditaDettaglio_551.id_Azienda"
+        ],
+        "from": {
+          "table": "DocVenditaIntestazione",
+          "alias": "DocVenditaIntestazione_572",
+          "field": "id_Azienda"
+        },
+        "to": {
+          "table": "DocVenditaDettaglio",
+          "alias": "DocVenditaDettaglio_551",
+          "field": "id_Azienda"
+        },
+        "factId": "svg-data-35551"
+      },
+      "WB_YEARS-35551": {
+        "alias": "WB_YEARS",
+        "type": "TIME",
+        "SQL": [
+          "WB_YEARS.id",
+          "WB_QUARTERS.year_id"
+        ],
+        "factId": "svg-data-35551",
+        "from": {
+          "table": "WB_YEARS",
+          "alias": "WB_YEARS",
+          "field": "id"
+        },
+        "to": {
+          "table": "WB_QUARTERS",
+          "alias": "WB_QUARTERS",
+          "field": "year_id"
+        }
+      },
+      "WB_QUARTERS-35551": {
+        "alias": "WB_QUARTERS",
+        "type": "TIME",
+        "SQL": [
+          "WB_QUARTERS.id",
+          "WB_MONTHS.quarter_id"
+        ],
+        "factId": "svg-data-35551",
+        "from": {
+          "table": "WB_QUARTERS",
+          "alias": "WB_QUARTERS",
+          "field": "id"
+        },
+        "to": {
+          "table": "WB_MONTHS",
+          "alias": "WB_MONTHS",
+          "field": "quarter_id"
+        }
+      },
+      "WB_MONTHS-35551": {
+        "alias": "WB_MONTHS",
+        "type": "TIME",
+        "SQL": [
+          "WB_MONTHS.id",
+          "WB_DATE.month_id"
+        ],
+        "factId": "svg-data-35551",
+        "from": {
+          "table": "WB_MONTHS",
+          "alias": "WB_MONTHS",
+          "field": "id"
+        },
+        "to": {
+          "table": "WB_DATE",
+          "alias": "WB_DATE",
+          "field": "month_id"
+        }
+      },
+      "WB_DATE-35551": {
+        "alias": "WB_DATE",
+        "type": "TIME",
+        "datatype": "integer",
+        "SQL": [
+          "DocVenditaDettaglio_551.DataDocumento",
+          "WB_DATE.id"
+        ],
+        "factId": "svg-data-35551",
+        "from": {
+          "table": "WB_DATE",
+          "alias": "WB_DATE",
+          "field": "id"
+        },
+        "to": {
+          "table": "DocVenditaDettaglio",
+          "alias": "DocVenditaDettaglio_551",
+          "field": "DataDocumento"
+        }
+      }
+    }
+  },
+  "id": 1726499913201,
+  "datamartId": 2
+}

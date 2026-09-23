@@ -1,0 +1,11 @@
+.versioning-grid{display: grid;grid-template-columns: calc(50% - 8px) calc(50% - 8px); grid-gap: 16px; height: inherit;} /* 8px è il grid-gap */
+.versioning-sections{background-color: white;box-shadow: 0px 1px 3px -1px grey;padding: 1.5em;margin: 8px 0px;border-radius: 4px;height: 100%;}
+.versioning-status{display: grid; grid-template-columns: 40% 10% 25% 25%; align-items: center;}
+.versioning-status > div:not(:first-child){text-align: center;}
+.versioning-status .vers-title{padding: 10px;}
+.versioning-status .vers-status-descr{padding: 10px;}
+.versioning-status .vers-actions{padding: 10px;}
+.versioning-status-header{display: grid; grid-template-columns: 40% 10% 25% 25%; font-weight: bold; font-size: .8rem;}
+.versioning-status-header > div{text-align: center;}
+.versioning-sections fieldset{border-color: rgb(0 0 0 / 15%);border-width: 1px;border-radius: 4px;padding: 2em;}
+.versioning-sections .versioning-content.overflow-y{max-height: 350px; overflow-y: scroll;margin-top: 1.5em;margin-bottom: 1.5em;font-size: .8rem;}

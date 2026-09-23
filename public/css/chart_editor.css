@@ -1,0 +1,8 @@
+.modal-dialog {
+  z-index: 3;
+}
+
+.google-visualization-charteditor-dialog {
+  height: auto !important;
+  width: auto !important;
+}

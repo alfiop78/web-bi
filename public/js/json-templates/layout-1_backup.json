@@ -1,0 +1,105 @@
+{
+  "parentElement_id": "template-layout",
+  "id": "layout-1",
+  "name": "generic data table",
+  "comment": "Template con 2 righe, una per i filtri e una per la DataTable",
+  "childs": [
+    {
+      "tag": "div",
+      "classes": [
+        "grid",
+        "content"
+      ],
+      "childs": [
+        {
+          "tag": "section",
+          "classes": [
+            "row"
+          ],
+          "childs": [
+            {
+              "tag": "section",
+              "classes": [
+                "col"
+              ],
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "filter__dashboard",
+                  "classes": [
+                    "contentObject"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "row"
+          ],
+          "childs": [
+            {
+              "tag": "section",
+              "classes": [
+                "col"
+              ],
+              "attributes": {
+                "resource": true
+              },
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "chart_div",
+                  "classes": [
+                    "chart-elements",
+                    "contentObject"
+                  ],
+                  "attributes": {
+                    "fn": "addResource"
+                  }
+                },
+                {
+                  "tag": "section",
+                  "id": "btn-resource-section",
+                  "classes": [
+                    "resourceActions"
+                  ],
+                  "childs": [
+                    {
+                      "tag": "button",
+                      "type": "icon",
+                      "id": "resource-1-settings",
+                      "text": "settings",
+                      "classes": [
+                        "material-icons-round",
+                        "md-18"
+                      ],
+                      "attributes": {
+                        "fn": "resourceSettings"
+                      }
+                    },
+                    {
+                      "tag": "button",
+                      "type": "icon",
+                      "id": "resource-2-settings",
+                      "text": "delete",
+                      "classes": [
+                        "material-icons-round",
+                        "md-18"
+                      ],
+                      "attributes": {
+                        "fn": "resourceRemove"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

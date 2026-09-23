@@ -1,0 +1,129 @@
+TABELLE
+
+Azienda
+CodSedeDealer
+DocVenditaIntestazione
+DocVenditaDettaglio
+BasketMLIAnnuo
+CodMarcaRicambi
+CodTipoRicambio
+TipoMovimento
+ZonaVenditaCM
+
+COLONNE
+area
+zona
+codice Ford
+dealer
+mli
+year
+quarter
+month
+
+FILTRI
+Azienda
+isDealer = 1 AND CodMercato = 'IT' AND id_casaMadre = 1
+
+DocVenditaIntestazione :
+FlagAnnullata = 'A' AND cancellatStampa = 'S'
+
+DocVenditaDettaglio :
+DataDocumento >= 20190101
+
+CodMarcaRicambi :
+codice = 'FO'
+
+BasketMLIAnnuo
+CodiceMercato = 'IT' AND CodiceMLI IN('002', '010', '027', '029', '385', '036', '060', '068', '069', '085', '087', '100', '102', '103', '109', '119', '122', '124', '127', '129', '132', '139', '141', '146', '148', '149', '158', '164', '165', '187', '192', '193', '195', '198', '204', '219', '229', '285', '329', '415', '426', '427', '456', '502', '506', '507', '508', '553', '558', '567', '650', '685')
+
+METRICHE:
+costo_idrapporto_6 :
+filtri : kpi_id_rappclientecm_6
+Utilizzata sul report
+
+costo_idrapporto_2 :
+filtri : kpi_id_rappclientecm 2
+Utilizzata sul report
+
+ricavo_idrapporto_2 :
+filtri : kpi_id_rappclientecm 2
+Utilizzata sul report
+
+-costo_idrapp_4_notrader_2021
+filtri :
+kpi_id_rappclientecm 4
+No Trader 2021 + 6 PIVA
+
+-costo_idrapp_4_trader_2022
+filtri :
+Data Q4 2021
+kpi_id_rappclientecm 4
+GA 2022
+
+-costo_idrapp_5_emiliana_2022
+filtri :
+Q1 2022
+Emiliana KPI Automotive
+kpi_id_rappclientecm 5
+
+-ricavo_idrapp_4NoTrader_2021 :
+filtri :
+kpi_id_rappclientecm 4
+No Trader 2021 + 6 PIVA
+
+-ricavo_idrapp_4_Trader_2022 :
+filtri :
+Data Q4 2021
+kpi_id_rappclientecm 4
+GA 2022
+
+-ricavo_idrapp_5_emiliana_2022 :
+filtri :
+kpi_id_rappclientecm 5
+Emiliana KPI Automotive
+Q1 2022
+
+perc_margine_rapp_2 :
+(ricavo_idrapporto_2 - costo_idrapporto_2 ) / ricavo_idrapporto_2 * 100
+Utilizzata sul report
+
+costo_ve_cb_2022 :
+(costo_idrapp_4_notrader_2021 - costo_idrapp_4_trader_2022 + costo_idrapp_5_emiliana_2022)
+Utilizzata sul report
+
+ricavo_ve_cb_2022 :
+(ricavo_idrapp_4NoTrader_2021 - ricavo_idrapp_4_Trader_2022 + ricavo_idrapp_5_emiliana_2022)
+Utilizzata sul report
+
+marginalità_ve_cb_2022 :
+((ricavo_ve_cb_2022 - costo_ve_cb_2022) / ricavo_ve_cb_2022) * 100
+Utilizzata sul report
+
+FILTRI METRICHE:
+
+kpi_id_rappclientecm 2
+rapporto cliente 2
+
+kpi_id_rappclientecm 6
+( rapportocliente = 6 OR isfleetDich = 1 OR isServicePackDich = 1)
+
+kpi_id_rappclientecm 4
+rapporto cliente = 4
+
+kpi_id_rappclientecm 5
+rapportocliente = 5
+
+Emiliana KPI Automotive
+vat = 'IT01155510397'
+
+GA 2022
+(substr(vat, 3) IN ('01967930890', '01468910888', '01180330092', '03540260043', '03295630044', '00105830194', '02553340841', '02154980995', '01417270889', '01731360887', '02293000044', '01394120883', '02866340041') AND (rapporto cliente = 4))
+
+No Trader 2021 + 6 PIVA
+( substr(vat,3) NOT IN ('01062790884', '01111270888', '02889410045', '04911190488', '09704470013', '03740811207', '06151590012', '01924961004', '02728000122', '11464970968', '294210728') AND (rapporto cliente = 4 AND codcatateco NOT IN (1071, 525, 722, 1081)) )
+
+Q1 2022
+datadocumento >= 20220101
+
+Data Q4 2021
+datadocumento >= 20211001
