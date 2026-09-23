@@ -267,7 +267,8 @@
 		<template id="tmpl-join-field">
             <div class="join" data-join-id>
                 <div class="join-field" data-fn="setActiveJoin" data-field-from data-active>Campo</div>
-                <button type="button" class="material-symbols-rounded" data-fn="btnRemoveJoin" data-name data-join-id>delete_forever</button>
+                <button type="button" class="material-symbols-rounded" data-popover-id="popover__join_options" data-name="join_option">more_horiz</button>
+                <!--<button type="button" class="material-symbols-rounded" data-fn="btnRemoveJoin" data-name="remove_join">delete_forever</button>-->
                 <div class="join-field" data-fn="setActiveJoin" data-field-to data-active>Campo</div>
             </div>
 		</template>
@@ -411,6 +412,16 @@
 						<button id="btn__newVisualization">Editor</button>
 						<button id="export__datatable_xls">Excel</button>
 						<button id="export__dataview_csv" disabled>CSV</button>
+					</nav>
+				</div>
+
+				<div id="popover__join_options" popover>
+					<nav data-popover-id="popover__join_options">
+						<button id="btn__inner_join">Inner Join</button>
+						<button id="btn__left_join">Left Join</button>
+						<button id="btn__right_join">Right Join</button>
+						<button id="btn__cross_join">Cross Join</button>
+						<button id="btn__delete_join">Elimina</button>
 					</nav>
 				</div>
 

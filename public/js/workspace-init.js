@@ -1620,6 +1620,8 @@ const body = document.getElementById('body');
         app.dialogTime.close();
     }
 
+    // NOTE: funzioni per le join
+
     /*
      * clic sulla colonna selezionata per la join
      * inserisco la colonna selezionata per la creazione della join
@@ -1671,7 +1673,6 @@ const body = document.getElementById('body');
         }
     }
 
-    // NOTE: funzioni per le join
 
     /* Elimino una join
      * */
@@ -1682,20 +1683,24 @@ const body = document.getElementById('body');
         // anche la lunghezza dell'array. In questo caso andrò a modificare gli attributi data-id
         // presenti negli elementi ..joins > .join per riorganizzarli
         WorkBook.join_a.splice(joinId, 1);
-        // rimozione dal DOM
-        document.querySelector(`.joins > .join[data-id='${joinId}']`).remove()
-        // riorganizzazione joinId che rispettano l'ordine dell'array WorkBook.join_a
-        document.querySelectorAll('.joins > .join').forEach((join, index) => {
-            join.dataset.id = index;
-            join.querySelector('button').dataset.id = index;
-        });
-        // se non ci sono più campi in join tra le due tabelle viene contrassegnata la
-        // linea di join come NON legata (data-joined = false)
-
-        if (WorkBook.join_a.length === 0) {
-            Draw.currentLineRef.dataset.joined = false;
-            Draw.joinLines.get(Draw.currentLineRef.id).joined = false;
-            Draw.newJoin();
+        if (joinId === 0) {
+            // la prima join (con id=0 non può essere eliminata dal DOM, viene resettata)
+            Draw.resetJoin();
+        } else {
+            // rimozione dal DOM
+            document.querySelector(`.joins > .join[data-id='${joinId}']`).remove()
+            // riorganizzazione joinId che rispettano l'ordine dell'array WorkBook.join_a
+            document.querySelectorAll('.joins > .join').forEach((join, index) => {
+                join.dataset.id = index;
+                join.querySelector('button').dataset.id = index;
+            });
+            // se non ci sono più campi in join tra le due tabelle viene contrassegnata la
+            // linea di join come NON legata (data-joined = false)
+            if (WorkBook.join_a.length === 0) {
+                Draw.currentLineRef.dataset.joined = false;
+                Draw.joinLines.get(Draw.currentLineRef.id).joined = false;
+                Draw.resetJoin();
+            }
         }
     }
 
@@ -1712,14 +1717,10 @@ const body = document.getElementById('body');
         Draw.editJoin();
     }
 
-
     /*
     * * 22.09.2026 Elimino tutte le join tra le due tabelle
     */
     app.removeJoins = () => {
-        // Elimino dal DOM
-        [...document.querySelectorAll('.joins > .join')].filter(join => join.remove());
-
         // 1. Recupero l'alias della tabella from (è questo il nome della key memorizzata in WorkBook._joins)
         const tableId = document.querySelector('section[data-table-from]').dataset.tableId;
         const alias = Draw.tables.get(tableId).alias;
@@ -1728,10 +1729,10 @@ const body = document.getElementById('body');
         // e imposto la proprietà joined = false sulla linea di join
         if (WorkBook._joins.hasOwnProperty(alias)) {
             WorkBook._joins[alias].fields = [];
+            WorkBook.join_a = [];
             Draw.currentLineRef.dataset.joined = false;
             Draw.joinLines.get(Draw.currentLineRef.id).joined = false;
-            // creo i primi due campi per le join
-            Draw.newJoin();
+            Draw.resetJoin();
         }
     }
 

@@ -612,6 +612,7 @@ class DrawSVG {
         const from = join.querySelector('div[data-field-from]');
         const to = join.querySelector('div[data-field-to]');
         const button = join.querySelector('button');
+        button.addEventListener('click', popoverShow);
 
         join.dataset.id = value;
         from.dataset.factId = this.currentLineRef.dataset.factId;
@@ -622,7 +623,7 @@ class DrawSVG {
         // rimuovo eventuali attributi [active] nelle joinField prima di aggiungere quelli nuovi
         this.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
         this.dialogJoin.querySelector('.joins').appendChild(join);
-        this.#_joinFields = { from, to, button };
+        this.#_joinFields = { from, to };
     }
 
     get joinFields() {
@@ -643,11 +644,16 @@ class DrawSVG {
     }
 
     /*
-     * Azzero il contatore #joinId per creare la prima sezione dei campi per le join
+     * Reset della prima join, elimino l'attributo data-field
      */
-    newJoin() {
+    resetJoin() {
         this.#joinId = 0;
-        this.joinFields = this.#joinId;
+        [...document.querySelectorAll(".joins > .join:not([data-id='0'])")].filter(join => join.remove());
+        [...document.querySelectorAll('.join-field[data-field]')].filter(join => {
+            delete join.dataset.field;
+            join.dataset.active = true;
+            join.innerHTML = 'Campo';
+        });
     }
 
     /*
@@ -690,11 +696,8 @@ class DrawSVG {
         // WorkBook.join_a = [];
         if (!this.currentLineRef.dataset.joinId) {
             // non ci sono join per questa relazione, la creo
-            // rimuovo le precedenti join
-            this.dialogJoin.querySelectorAll('.joins > .join').forEach(join => join.remove());
-            // join non ancora creata per questa relazione
-            // this.joinFields = this.rand().substring(0, 4);
-            this.newJoin();
+            // reset dei join-field
+            this.resetJoin();
             this.createHeaderSection();
         }
         this.dialogJoin.show();
@@ -705,6 +708,7 @@ class DrawSVG {
      * */
     editJoin() {
         // rimuovo le precedenti join
+        debugger;
         this.dialogJoin.querySelectorAll('.joins > .join').forEach(join => join.remove());
         // 1.Identifico la join selezionata
 
@@ -729,7 +733,7 @@ class DrawSVG {
                 this.joinFields.to.innerHTML = field.b;
             });
         } else {
-            this.newJoin();
+            this.resetJoin();
         }
         this.dialogJoin.show();
     }
