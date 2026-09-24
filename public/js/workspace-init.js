@@ -24,11 +24,12 @@ const btnOptions = document.getElementById('btnOptions');
 const btn__chartWrapper = document.getElementById('btn__chartWrapper');
 const btn__save_column = document.getElementById('btn__save_column');
 const btn__newVisualization = document.getElementById('btn__newVisualization');
-const btn__showAdvancedMetricsUsage = document.getElementById('btn__showAdvancedMetricsUsage')
-const btn__showCompositeMetricsUsage = document.getElementById('btn__showCompositeMetricsUsage')
-const btn__showCustomMetricsUsage = document.getElementById('btn__showCustomMetricsUsage')
-const btn__showFiltersUsage = document.getElementById('btn__showFiltersUsage')
-const btn__showCustomColumnsUsage = document.getElementById('btn__showCustomColumnsUsage')
+const btn__showAdvancedMetricsUsage = document.getElementById('btn__showAdvancedMetricsUsage');
+const btn__showCompositeMetricsUsage = document.getElementById('btn__showCompositeMetricsUsage');
+const btn__showCustomMetricsUsage = document.getElementById('btn__showCustomMetricsUsage');
+const btn__showFiltersUsage = document.getElementById('btn__showFiltersUsage');
+const btn__showCustomColumnsUsage = document.getElementById('btn__showCustomColumnsUsage');
+const btn__open_join_options = document.getElementById('btn__open_join_options');
 // Dialogs
 const dlg__filters = document.getElementById('dlg__filters');
 const dlg__custom_metric = document.getElementById('dlg__custom_metric');
@@ -1384,24 +1385,6 @@ const body = document.getElementById('body');
         document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
     }
 
-    // imposto la join selezionata come data-active
-    // TODO: potrebbe essere spostata in supportFn.js
-    app.setActiveJoin = (e) => {
-        console.log(e.currentTarget.dataset);
-        // 1. se la join è già attiva non cambio niente
-        if (e.currentTarget.dataset.active) {
-            return false;
-        } else {
-            // recupero i due field (Data-field-from e data-field-to della join selezionata)
-            const currentJoin = e.currentTarget.parentElement;
-            document.querySelectorAll('.join-field[data-active]').forEach(joinActive => delete joinActive.dataset.active);
-            currentJoin.querySelectorAll('.join-field').forEach(join => join.dataset.active = true);
-        }
-    }
-
-    // app.addJoin = () => Draw.joinFields = Draw.rand().substring(0, 4);
-    app.addJoin = () => Draw.addJoin();
-
 
     // apertura dialog TIME dimension dall'icona 'time' (modalità modifica)
     app.editTimeDimension = (e) => {
@@ -1622,20 +1605,39 @@ const body = document.getElementById('body');
 
     // NOTE: funzioni per le join
 
+    // imposto la join selezionata come data-active
+    app.setActiveJoin = (e) => {
+        console.log(e.currentTarget.dataset);
+        // 1. se la join è già attiva non cambio niente
+        if (e.currentTarget.dataset.active) {
+            return false;
+        } else {
+            // BUG: questo evento viene attivato anche quando si elimina una join (btn__remove_join)
+            // se è stato cliccato il tasto di elimina, da analizzare per possibilli bug
+            if (document.querySelector('.join[data-active]')) {
+                delete document.querySelector('.join[data-active]').dataset.active;
+                e.currentTarget.dataset.active = true;
+            }
+        }
+    }
+
+    // app.addJoin = () => Draw.joinFields = Draw.rand().substring(0, 4);
+    app.addJoin = () => Draw.addJoin();
+
     /*
      * clic sulla colonna selezionata per la join
      * inserisco la colonna selezionata per la creazione della join
      * */
     app.addFieldToJoin = (e) => {
         console.info('addFieldToJoin');
-        const fieldRef = document.querySelector(`.join-field[data-active][data-id='${e.currentTarget.dataset.tableId}']`);
+        const fieldRef = document.querySelector(`.join[data-active] > .join-field[data-id='${e.currentTarget.dataset.tableId}']`);
         fieldRef.dataset.field = e.currentTarget.dataset.label;
         fieldRef.innerHTML = e.currentTarget.dataset.label;
         // verifico se i due fieldRef[data-active] hanno il data-field impostato.
         // Se vero, posso creare la join tra le due tabelle.
 
         // Recupero i due field da mettere in join
-        const joins = [...document.querySelectorAll('section .join-field[data-active][data-field]')];
+        const joins = [...document.querySelectorAll('.join[data-active] .join-field[data-field]')];
         if (joins.length === 2) {
             // L'array WorkBook.join_a viene resettato quandi si apre di nuovo
             // la dialog per le join createJoin()
@@ -1651,6 +1653,7 @@ const body = document.getElementById('body');
             const to = Draw.tables.get(joins[1].dataset.id);
 
             WorkBook._joins = {
+                join_type: 'inner', // default
                 schema_from: from.schema,
                 table_from: from.table,
                 alias_from: from.alias,
@@ -1673,11 +1676,11 @@ const body = document.getElementById('body');
         }
     }
 
-
     /* Elimino una join
      * */
-    app.btnRemoveJoin = (e) => {
+    app.btn__remove_join = (e) => {
         // console.log(e.currentTarget.dataset);
+        debugger;
         const joinId = +e.currentTarget.dataset.id;
         // se viene utilizzato splice gli indici cambiano, scalando a sinistra, e cambia
         // anche la lunghezza dell'array. In questo caso andrò a modificare gli attributi data-id
@@ -1702,6 +1705,25 @@ const body = document.getElementById('body');
                 Draw.resetJoin();
             }
         }
+    }
+
+    /* imposto LEFT JOIN
+     * */
+    app.btn__join_type = (e) => {
+        // 1. Recupero la join attiva da WorkBook._joins
+        const tableId = document.querySelector('section[data-table-from]').dataset.tableId;
+        const alias = Draw.tables.get(tableId).alias;
+        // reset del data-selected per evidenziare il button attivo
+        delete document.querySelector("button[data-join-type]").dataset.selected;
+        e.currentTarget.dataset.selected = true;
+
+        // 2. Modifico la proprietà type che specifica il tipo di
+        // join (left, right, inner, cross). La proprietà type la posso recuperare
+        // dal data.join-type presente in e.currentTarget
+        if (WorkBook._joins.hasOwnProperty(alias)) WorkBook._joins.join_type = e.currentTarget.dataset.joinType;
+
+        // 3. TODO: potrei aggiungere uno stile linea di join diverso per i differenti
+        // tip di join, oppure potrei aggiungere un'icona della join vicino alla linea
     }
 
     /*

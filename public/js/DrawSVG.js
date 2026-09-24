@@ -612,7 +612,6 @@ class DrawSVG {
         const from = join.querySelector('div[data-field-from]');
         const to = join.querySelector('div[data-field-to]');
         const button = join.querySelector('button');
-        button.addEventListener('click', popoverShow);
 
         join.dataset.id = value;
         from.dataset.factId = this.currentLineRef.dataset.factId;
@@ -621,7 +620,7 @@ class DrawSVG {
         to.dataset.id = this.currentLineRef.dataset.to;
         button.dataset.id = value;
         // rimuovo eventuali attributi [active] nelle joinField prima di aggiungere quelli nuovi
-        this.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
+        this.dialogJoin.querySelectorAll('.join[data-active]').forEach(join => delete join.dataset.active);
         this.dialogJoin.querySelector('.joins').appendChild(join);
         this.#_joinFields = { from, to };
     }
@@ -648,10 +647,11 @@ class DrawSVG {
      */
     resetJoin() {
         this.#joinId = 0;
+        // rimuovo tutte le join nel DOM (tranne la prima)
         [...document.querySelectorAll(".joins > .join:not([data-id='0'])")].filter(join => join.remove());
         [...document.querySelectorAll('.join-field[data-field]')].filter(join => {
             delete join.dataset.field;
-            join.dataset.active = true;
+            join.parentElement.dataset.active = true;
             join.innerHTML = 'Campo';
         });
     }

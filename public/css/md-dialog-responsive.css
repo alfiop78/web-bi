@@ -260,9 +260,9 @@ dialog .buttons {
 
 dialog .table_headers {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-column-gap: 64px;
+    grid-template-columns: 1fr auto 1fr;
     font-weight: bold;
+    justify-items: center;
 }
 
 dialog .joins>.join {

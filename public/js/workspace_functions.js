@@ -1856,11 +1856,40 @@ function popoverChartWrappers(e) {
 
 // WARN: codice ripetuto popoverChartWrappers
 function popoverShow(e) {
+    // FIX: 24.09.2026 lo switch per position è stato creato per la poopver delle opzioni di join. Quando
+    // questa fn verrà utilizzata da altri tasti popover si verificherà un errore
     const popover = document.getElementById(e.target.dataset.popoverId);
+    // position : top, bottom, left, right, center. Posizione impostata sull'elemento html
+    const position = e.target.dataset.popoverPosition;
+    let x, y;
     popover.showPopover();
-    const { top, right } = e.currentTarget.getBoundingClientRect();
-    popover.style.top = `${top - popover.offsetHeight}px`;
-    popover.style.left = `${right}px`;
+    const { top, right, left, bottom, width, height } = e.currentTarget.getBoundingClientRect();
+    console.log(left, right, top, bottom, width, height);
+    switch (position) {
+        case 'top':
+            x = left + (popover.offsetWidth / 2);
+            y = top + popover.offsetHeight;
+            break;
+        case 'left':
+            x = left - popover.offsetWidth;
+            y = top - (popover.offsetHeight / 2);
+            break;
+        case 'right':
+            x = right + popover.offsetWidth;
+            y = top - (popover.offsetHeight / 2);
+            break;
+        case 'bottom':
+            x = left + (popover.offsetWidth / 2);
+            y = bottom;
+            break;
+        default:
+            x = (left + (e.target.offsetWidth / 2) - (popover.offsetWidth / 2));
+            y = (top + (e.target.offsetHeight / 2) - (popover.offsetHeight / 2));
+            break;
+    }
+    // popover.style.top = `${top - popover.offsetHeight}px`;
+    popover.style.top = `${y}px`;
+    popover.style.left = `${x}px`;
 }
 
 function loadEditor() {

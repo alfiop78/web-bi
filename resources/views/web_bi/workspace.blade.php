@@ -265,11 +265,10 @@
 
 	<main data-database-id="{{ session('db_id')}}">
 		<template id="tmpl-join-field">
-            <div class="join" data-join-id>
-                <div class="join-field" data-fn="setActiveJoin" data-field-from data-active>Campo</div>
-                <button type="button" class="material-symbols-rounded" data-popover-id="popover__join_options" data-name="join_option">more_horiz</button>
-                <!--<button type="button" class="material-symbols-rounded" data-fn="btnRemoveJoin" data-name="remove_join">delete_forever</button>-->
-                <div class="join-field" data-fn="setActiveJoin" data-field-to data-active>Campo</div>
+            <div class="join" data-fn="setActiveJoin" data-active>
+                <div class="join-field" data-field-from>Campo</div>
+                <button type="button" class="material-symbols-rounded" data-fn="btn__remove_join" data-name="remove_join">delete_forever</button>
+                <div class="join-field" data-field-to>Campo</div>
             </div>
 		</template>
 
@@ -417,11 +416,22 @@
 
 				<div id="popover__join_options" popover>
 					<nav data-popover-id="popover__join_options">
-						<button id="btn__inner_join">Inner Join</button>
-						<button id="btn__left_join">Left Join</button>
-						<button id="btn__right_join">Right Join</button>
-						<button id="btn__cross_join">Cross Join</button>
-						<button id="btn__delete_join">Elimina</button>
+						<button type="button" data-fn="btn__join_type" data-join-type="inner" data-selected>
+                            <i class="material-symbols-rounded">join_inner</i>
+                            <span>Inner join</span>
+                        </button>
+						<button type="button" data-fn="btn__join_type" data-join-type="left">
+                            <i class="material-symbols-rounded">join_left</i>
+                            <span>Left join</span>
+                        </button>
+						<button type="button" data-fn="btn__join_type" data-join-type="right">
+                            <i class="material-symbols-rounded">join_right</i>
+                            <span>Right join</span>
+                        </button>
+						<button type="button" data-fn="btn__join_type" data-join-type="cross">
+                            <i class="material-symbols-rounded">join</i>
+                            <span>Cross join</span>
+                        </button>
 					</nav>
 				</div>
 
@@ -801,10 +811,11 @@
 
 				<dialog id="dlg-join" data-x="0" data-y="40" class="absolute moveable smallSize">
 					<section class="dlg-grid">
-						<h5 class="title moveable">Creazione Join</h5>
+						<h5 class="title moveable">Relazione di Join</h5>
 						<section class="dlg-content col">
                             <section class="table_headers">
                                 <section data-table-from data-table-id></section>
+                                <button id="btn__open_join_options" type="button" class="material-symbols-rounded" data-fn="btnOpenJoinOptions" data-popover-id="popover__join_options" data-popover-position="center" data-name="join_option">join_inner</button>
                                 <section data-table-to data-table-id></section>
                             </section>
                             <section class="joins"></section>
