@@ -1607,17 +1607,13 @@ const body = document.getElementById('body');
 
     // imposto la join selezionata come data-active
     app.setActiveJoin = (e) => {
-        console.log(e.currentTarget.dataset);
+        // console.log(e.currentTarget.parentElement.dataset);
         // 1. se la join è già attiva non cambio niente
-        if (e.currentTarget.dataset.active) {
+        if (e.currentTarget.parentElement.dataset.active) {
             return false;
         } else {
-            // BUG: questo evento viene attivato anche quando si elimina una join (btn__remove_join)
-            // se è stato cliccato il tasto di elimina, da analizzare per possibilli bug
-            if (document.querySelector('.join[data-active]')) {
-                delete document.querySelector('.join[data-active]').dataset.active;
-                e.currentTarget.dataset.active = true;
-            }
+            delete document.querySelector('.join[data-active]').dataset.active;
+            e.currentTarget.parentElement.dataset.active = true;
         }
     }
 
@@ -1678,32 +1674,26 @@ const body = document.getElementById('body');
 
     /* Elimino una join
      * */
-    app.btn__remove_join = (e) => {
+    app.removeJoin = (e) => {
         // console.log(e.currentTarget.dataset);
-        debugger;
-        const joinId = +e.currentTarget.dataset.id;
+        const joinId = +e.currentTarget.parentElement.dataset.id;
         // se viene utilizzato splice gli indici cambiano, scalando a sinistra, e cambia
         // anche la lunghezza dell'array. In questo caso andrò a modificare gli attributi data-id
         // presenti negli elementi ..joins > .join per riorganizzarli
         WorkBook.join_a.splice(joinId, 1);
-        if (joinId === 0) {
-            // la prima join (con id=0 non può essere eliminata dal DOM, viene resettata)
+
+        // se non ci sono più campi in join tra le due tabelle viene contrassegnata la
+        // linea di join come NON legata (data-joined = false)
+        if (WorkBook.join_a.length === 0) {
+            Draw.currentLineRef.dataset.joined = false;
+            Draw.joinLines.get(Draw.currentLineRef.id).joined = false;
             Draw.resetJoin();
         } else {
+            // Sono presenti altre join
             // rimozione dal DOM
             document.querySelector(`.joins > .join[data-id='${joinId}']`).remove()
             // riorganizzazione joinId che rispettano l'ordine dell'array WorkBook.join_a
-            document.querySelectorAll('.joins > .join').forEach((join, index) => {
-                join.dataset.id = index;
-                join.querySelector('button').dataset.id = index;
-            });
-            // se non ci sono più campi in join tra le due tabelle viene contrassegnata la
-            // linea di join come NON legata (data-joined = false)
-            if (WorkBook.join_a.length === 0) {
-                Draw.currentLineRef.dataset.joined = false;
-                Draw.joinLines.get(Draw.currentLineRef.id).joined = false;
-                Draw.resetJoin();
-            }
+            document.querySelectorAll('.joins > .join').forEach((join, index) => join.dataset.id = index);
         }
     }
 

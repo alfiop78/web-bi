@@ -265,9 +265,10 @@
 
 	<main data-database-id="{{ session('db_id')}}">
 		<template id="tmpl-join-field">
-            <div class="join" data-fn="setActiveJoin" data-active>
+            <div class="join" data-active>
                 <div class="join-field" data-field-from>Campo</div>
-                <button type="button" class="material-symbols-rounded" data-fn="btn__remove_join" data-name="remove_join">delete_forever</button>
+                <button type="button" class="material-symbols-rounded" data-name="btn__active_join" data-fn="setActiveJoin">arrow_range</button>
+                <button type="button" class="material-symbols-rounded" data-name="btn__remove_join" data-fn="removeJoin">delete_forever</button>
                 <div class="join-field" data-field-to>Campo</div>
             </div>
 		</template>
