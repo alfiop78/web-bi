@@ -1606,6 +1606,7 @@ const body = document.getElementById('body');
     // NOTE: funzioni per le join
 
     // imposto la join selezionata come data-active
+
     app.setActiveJoin = (e) => {
         // console.log(e.currentTarget.parentElement.dataset);
         // 1. se la join è già attiva non cambio niente
@@ -1677,6 +1678,7 @@ const body = document.getElementById('body');
     app.removeJoin = (e) => {
         // console.log(e.currentTarget.dataset);
         const joinId = +e.currentTarget.parentElement.dataset.id;
+        const joins = document.querySelector('.joins');
         // se viene utilizzato splice gli indici cambiano, scalando a sinistra, e cambia
         // anche la lunghezza dell'array. In questo caso andrò a modificare gli attributi data-id
         // presenti negli elementi ..joins > .join per riorganizzarli
@@ -1691,15 +1693,17 @@ const body = document.getElementById('body');
         } else {
             // Sono presenti altre join
             // rimozione dal DOM
-            document.querySelector(`.joins > .join[data-id='${joinId}']`).remove()
+            joins.querySelector(`.join[data-id='${joinId}']`).remove()
             // riorganizzazione joinId che rispettano l'ordine dell'array WorkBook.join_a
-            document.querySelectorAll('.joins > .join').forEach((join, index) => join.dataset.id = index);
+            joins.querySelectorAll('.join').forEach((join, index) => join.dataset.id = index);
+            // imposto la join precedente a questa come attiva
+            joins.querySelector(`.join[data-id='${joinId - 1}']`).dataset.active = true;
         }
     }
 
     /* imposto LEFT JOIN
      * */
-    app.btn__join_type = (e) => {
+    app.setJoinType = (e) => {
         // 1. Recupero la join attiva da WorkBook._joins
         const tableId = document.querySelector('section[data-table-from]').dataset.tableId;
         const alias = Draw.tables.get(tableId).alias;
@@ -1727,6 +1731,14 @@ const body = document.getElementById('body');
             to: Draw.currentLineRef.dataset.to
         }
         Draw.editJoin();
+    }
+
+    /* TODO: 25.09.2026
+     * Abilito dei campi textarea per poter inserire SQL personalizzato per
+     * la creazione della join
+     * */
+    app.customJoin = (e) => {
+        debugger;
     }
 
     /*

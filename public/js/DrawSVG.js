@@ -611,14 +611,12 @@ class DrawSVG {
         const join = tmplJoin.querySelector('.join');
         const from = join.querySelector('div[data-field-from]');
         const to = join.querySelector('div[data-field-to]');
-        // const button = join.querySelector('button');
 
         join.dataset.id = value;
         from.dataset.factId = this.currentLineRef.dataset.factId;
         from.dataset.id = this.currentLineRef.dataset.from;
         to.dataset.factId = this.currentLineRef.dataset.factId;
         to.dataset.id = this.currentLineRef.dataset.to;
-        // button.dataset.id = value;
         // rimuovo eventuali attributi [active] nelle joinField prima di aggiungere quelli nuovi
         this.dialogJoin.querySelectorAll('.join[data-active]').forEach(join => delete join.dataset.active);
         this.dialogJoin.querySelector('.joins').appendChild(join);

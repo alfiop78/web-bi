@@ -266,10 +266,11 @@
 	<main data-database-id="{{ session('db_id')}}">
 		<template id="tmpl-join-field">
             <div class="join" data-active>
+                <button type="button" class="material-symbols-rounded" data-name="btn__sql_join" data-fn="customJoin" disabled>edit</button>
                 <div class="join-field" data-field-from>Campo</div>
                 <button type="button" class="material-symbols-rounded" data-name="btn__active_join" data-fn="setActiveJoin">arrow_range</button>
-                <button type="button" class="material-symbols-rounded" data-name="btn__remove_join" data-fn="removeJoin">delete_forever</button>
                 <div class="join-field" data-field-to>Campo</div>
+                <button type="button" class="material-symbols-rounded" data-name="btn__remove_join" data-fn="removeJoin">delete_forever</button>
             </div>
 		</template>
 
@@ -417,19 +418,19 @@
 
 				<div id="popover__join_options" popover>
 					<nav data-popover-id="popover__join_options">
-						<button type="button" data-fn="btn__join_type" data-join-type="inner" data-selected>
+						<button type="button" data-fn="setJoinType" data-join-type="inner" data-selected>
                             <i class="material-symbols-rounded">join_inner</i>
                             <span>Inner join</span>
                         </button>
-						<button type="button" data-fn="btn__join_type" data-join-type="left">
+						<button type="button" data-fn="setJoinType" data-join-type="left">
                             <i class="material-symbols-rounded">join_left</i>
                             <span>Left join</span>
                         </button>
-						<button type="button" data-fn="btn__join_type" data-join-type="right">
+						<button type="button" data-fn="setJoinType" data-join-type="right">
                             <i class="material-symbols-rounded">join_right</i>
                             <span>Right join</span>
                         </button>
-						<button type="button" data-fn="btn__join_type" data-join-type="cross">
+						<button type="button" data-fn="setJoinType" data-join-type="cross">
                             <i class="material-symbols-rounded">join</i>
                             <span>Cross join</span>
                         </button>

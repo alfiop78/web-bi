@@ -21,6 +21,16 @@
     --icon-disabled-fg: gainsboro;
     --button-disabled-bg: gainsboro;
     --button-disabled-fg: #494949;
+    --main-highlight-icons-color: sienna;
+    --columns-color: steelblue;
+    --metrics-color: darkgreen;
+    --btn-remove-column-defined: whitesmoke;
+    --danger-color: indianred;
+    --warning-color: #c5791b;
+    --done-color: seagreen;
+    --filters-color: #f2d98d;
+    --highlight-color: rosybrown;
+    --disabled-color: lightgray;
 }
 
 * {
