@@ -372,7 +372,8 @@ class WorkBooks {
     get activeTable() { return this.#activeTable; }
 
     set _joins(value) {
-        this.#_join[value.alias_from] = value;
+        // this.#_join[value.alias_from] = value;
+        this.#_join[value.alias_to] = value;
         console.log(this.#_join);
     }
 

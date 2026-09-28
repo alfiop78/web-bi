@@ -365,6 +365,11 @@ use.table[data-multifact] {
     color: var(--highlight-color);
 }
 
+/* colore disabled per arrow_range della join NON attiva */
+.join:not([data-active])>button:nth-of-type(2) {
+    color: var(--disabled-color);
+}
+
 .join:not([data-active])>button:first-of-type {
     color: var(--disabled-color);
 }

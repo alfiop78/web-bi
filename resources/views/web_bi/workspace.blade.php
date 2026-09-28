@@ -267,9 +267,9 @@
 		<template id="tmpl-join-field">
             <div class="join" data-active>
                 <button type="button" class="material-symbols-rounded" data-name="btn__sql_join" data-fn="customJoin" disabled>edit</button>
-                <div class="join-field" data-field-from>Campo</div>
-                <button type="button" class="material-symbols-rounded" data-name="btn__active_join" data-fn="setActiveJoin">arrow_range</button>
                 <div class="join-field" data-field-to>Campo</div>
+                <button type="button" class="material-symbols-rounded" data-name="btn__active_join" data-fn="setActiveJoin">arrow_range</button>
+                <div class="join-field" data-field-from>Campo</div>
                 <button type="button" class="material-symbols-rounded" data-name="btn__remove_join" data-fn="removeJoin">delete_forever</button>
             </div>
 		</template>
@@ -418,19 +418,19 @@
 
 				<div id="popover__join_options" popover>
 					<nav data-popover-id="popover__join_options">
-						<button type="button" data-fn="setJoinType" data-join-type="inner" data-selected>
+						<button type="button" data-fn="setJoinType" data-join-type="INNER" data-selected>
                             <i class="material-symbols-rounded">join_inner</i>
                             <span>Inner join</span>
                         </button>
-						<button type="button" data-fn="setJoinType" data-join-type="left">
+						<button type="button" data-fn="setJoinType" data-join-type="LEFT">
                             <i class="material-symbols-rounded">join_left</i>
                             <span>Left join</span>
                         </button>
-						<button type="button" data-fn="setJoinType" data-join-type="right">
+						<button type="button" data-fn="setJoinType" data-join-type="RIGHT">
                             <i class="material-symbols-rounded">join_right</i>
                             <span>Right join</span>
                         </button>
-						<button type="button" data-fn="setJoinType" data-join-type="cross">
+						<button type="button" data-fn="setJoinType" data-join-type="CROSS" disabled>
                             <i class="material-symbols-rounded">join</i>
                             <span>Cross join</span>
                         </button>
@@ -816,9 +816,9 @@
 						<h5 class="title moveable">Relazione di Join</h5>
 						<section class="dlg-content col">
                             <section class="table_headers">
-                                <section data-table-from data-table-id></section>
-                                <button id="btn__open_join_options" type="button" class="material-symbols-rounded" data-fn="btnOpenJoinOptions" data-popover-id="popover__join_options" data-popover-position="center" data-name="join_option">join_inner</button>
                                 <section data-table-to data-table-id></section>
+                                <button id="btn__open_join_options" type="button" class="material-symbols-rounded" data-join-type="inner" data-fn="btnOpenJoinOptions" data-popover-id="popover__join_options" data-popover-position="center" data-name="join_option">join_inner</button>
+                                <section data-table-from data-table-id></section>
                             </section>
                             <section class="joins"></section>
 							<section class="btn-link sp-between">
@@ -826,14 +826,6 @@
 								<button id="btn-remove-join" class="btn-link link important" data-fn="removeJoins" value="Elimina Join">Elimina join</button>
 							</section>
 							<div class="wj-fields-list">
-								<section data-table-from>
-									<section class="list-search">
-										<input type="search" id="field-from-search" placeholder="Ricerca" data-element-search="from-fields" autocomplete="off" />
-										<div class="relative-ul">
-											<ul id="ul-from-fields" data-search-id="field-from-search" class="custom-scrollbar"></ul>
-										</div>
-									</section>
-								</section>
 								<section data-table-to>
 									<section class="list-search">
 										<input type="search" id="field-to-search" placeholder="Ricerca" data-element-search="to-fields" autocomplete="off" />
@@ -842,6 +834,14 @@
 										</div>
 									</section>
 								</section>
+                                <section data-table-from>
+                                    <section class="list-search">
+                                        <input type="search" id="field-from-search" placeholder="Ricerca" data-element-search="from-fields" autocomplete="off" />
+                                        <div class="relative-ul">
+                                            <ul id="ul-from-fields" data-search-id="field-from-search" class="custom-scrollbar"></ul>
+                                        </div>
+                                    </section>
+                                </section>
 							</div>
 						</section>
 						<section class="dlg-buttons">

@@ -345,8 +345,10 @@ class DrawSVG {
             // perchè vengono prese da lì le coordinate finali della tabella droppata)
             // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
             // ho ancora l'elemento nel DOM
+            // WARN: modificato 28.09.2026
             this.joinLines.get(this.currentLineRef.id).from = id;
             this.currentLineRef.dataset.from = id;
+
             this.joinLines.get(this.currentLineRef.id).factId = this.nearestTable.dataset.factId;
             this.currentLineRef.dataset.factId = this.nearestTable.dataset.factId;
             this.currentLineRef.dataset.joined = false;
@@ -646,7 +648,12 @@ class DrawSVG {
     resetJoin() {
         this.#joinId = 0;
         // rimuovo tutte le join nel DOM (tranne la prima)
-        [...document.querySelectorAll(".joins > .join:not([data-id='0'])")].filter(join => join.remove());
+        // [...document.querySelectorAll(".joins > .join:not([data-id='0'])")].filter(join => join.remove());
+
+        // rimuovo tutte le join nel DOM
+        [...document.querySelectorAll(".joins > .join")].filter(join => join.remove());
+        // creo la prima join con joinId = 0
+        this.joinFields = this.#joinId;
         // reimposto come da default la prima join
         [...document.querySelectorAll(".join[data-id='0'] .join-field[data-field]")].filter(join => {
             delete join.dataset.field;
@@ -698,6 +705,9 @@ class DrawSVG {
             // reset dei join-field
             this.resetJoin();
             this.createHeaderSection();
+            // reimposto il tasto btn__open_join_options su 'inner' come default
+            btn__open_join_options.dataset.joinType = 'inner';
+            btn__open_join_options.innerText = 'join_inner';
         }
         this.dialogJoin.show();
     }
@@ -707,16 +717,14 @@ class DrawSVG {
      * */
     editJoin() {
         // rimuovo le precedenti join
-        debugger;
         this.dialogJoin.querySelectorAll('.joins > .join').forEach(join => join.remove());
         // 1.Identifico la join selezionata
 
         this.createHeaderSection();
+        debugger;
         const joinSelected = WorkBook._joins[this.currentLineRef.dataset.joinId];
-        // WorkBook.join_a = [];
-
-        // 2. popolo la dlg-join con le join impostate dall'utente
-        if (joinSelected.fields.length > 0) {
+        if (joinSelected) {
+            debugger;
             WorkBook.join_a = joinSelected.fields;
             // ciclo i campi messi in join presenti nell'array fields
             joinSelected.fields.forEach((field, index) => {
@@ -730,10 +738,40 @@ class DrawSVG {
                 // to
                 this.joinFields.to.dataset.field = field.b;
                 this.joinFields.to.innerHTML = field.b;
+                // imposto il tasto btn__open_join_options in base al tipo di join presente
+                // per questa relazione
+                btn__open_join_options.dataset.joinType = joinSelected.join_type;
+                btn__open_join_options.innerText = `join_${joinSelected.join_type}`;
             });
         } else {
-            this.resetJoin();
+            // nessuna join ancora presente tra le due tabelle
+            this.createJoin();
         }
+
+
+        // 2. popolo la dlg-join con le join impostate dall'utente
+        // if (joinSelected.fields.length > 0) {
+        //     WorkBook.join_a = joinSelected.fields;
+        //     // ciclo i campi messi in join presenti nell'array fields
+        //     joinSelected.fields.forEach((field, index) => {
+        //         // this.joinFields = this.rand().substring(0, 4);
+        //         this.#joinId = index;
+        //         this.joinFields = this.#joinId;
+        //
+        //         // from
+        //         this.joinFields.from.dataset.field = field.a;
+        //         this.joinFields.from.innerHTML = field.a;
+        //         // to
+        //         this.joinFields.to.dataset.field = field.b;
+        //         this.joinFields.to.innerHTML = field.b;
+        //         // imposto il tasto btn__open_join_options in base al tipo di join presente
+        //         // per questa relazione
+        //         btn__open_join_options.dataset.joinType = joinSelected.join_type;
+        //         btn__open_join_options.innerText = `join_${joinSelected.join_type}`;
+        //     });
+        // } else {
+        //     this.resetJoin();
+        // }
         this.dialogJoin.show();
     }
 

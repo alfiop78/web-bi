@@ -39,6 +39,7 @@ const dlg__custom_columns = document.getElementById('dlg__custom_column');
 const dlg__sheet = document.getElementById('dialog-sheet-open');
 const popover__chartOptions = document.getElementById('popover__chartOptions');
 const popover__chartWrappers = document.getElementById('popover__chartWrappers');
+const popover__joinOptions = document.getElementById('popover__join_options');
 // templates
 const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
@@ -695,6 +696,7 @@ const body = document.getElementById('body');
             for (const [token, field] of Sheet.fields) {
                 // verifico le tabelle da includere in tables Sheet.tables
                 // TEST: 11.04.2025 Funzionalità da testare su Sheet multiFact
+                debugger;
                 if (Sheet.checkMultiFactFields(token)) {
                     const origin_element = WorkBook.elements.get(token);
                     // Aggiorno le proprietà SQL, name di Sheet.fields recuperandole da WorkBook.elements
@@ -1304,6 +1306,7 @@ const body = document.getElementById('body');
     app.setFrom = () => {
         Sheet.fact.forEach(factId => {
             let from = {};
+            debugger;
             Sheet.tables.forEach(tableAlias => {
                 const tables = WorkBook.dataModel.get(factId);
                 if (tableAlias === 'time') tableAlias = 'WB_YEARS';
@@ -1641,6 +1644,7 @@ const body = document.getElementById('body');
 
             // se sto modificando la join corrente NON devo aggiungere join all'array join_a ma devo
             // modificarlo, per eseguire questo controllo ho bisogno del joinId (int)
+
             const joinId = +fieldRef.parentElement.dataset.id;
             (joinId in WorkBook.join_a) ?
                 WorkBook.join_a[joinId] = { a: joins[0].dataset.field, b: joins[1].dataset.field } :
@@ -1650,7 +1654,7 @@ const body = document.getElementById('body');
             const to = Draw.tables.get(joins[1].dataset.id);
 
             WorkBook._joins = {
-                join_type: 'inner', // default
+                join_type: btn__open_join_options.dataset.joinType,
                 schema_from: from.schema,
                 table_from: from.table,
                 alias_from: from.alias,
@@ -1714,7 +1718,15 @@ const body = document.getElementById('body');
         // 2. Modifico la proprietà type che specifica il tipo di
         // join (left, right, inner, cross). La proprietà type la posso recuperare
         // dal data.join-type presente in e.currentTarget
-        if (WorkBook._joins.hasOwnProperty(alias)) WorkBook._joins.join_type = e.currentTarget.dataset.joinType;
+        if (WorkBook._joins.hasOwnProperty(alias)) WorkBook._joins[alias].join_type = e.currentTarget.dataset.joinType;
+
+        // 3. aggiungo un attributo data-join-type selezionato dall'utente nel tasto btn__open_join_options
+        // cambiando anche l'icona in base al tipo di join scelto dall'utente. Il data-join-type
+        // verrà letto dalla fn addFieldToJoin() per impostare WorkBook._joins
+        btn__open_join_options.dataset.joinType = e.currentTarget.dataset.joinType;
+        btn__open_join_options.innerText = `join_${e.currentTarget.dataset.joinType}`;
+        // 3. chudo la popover
+        popover__joinOptions.hidePopover();
 
         // 3. TODO: potrei aggiungere uno stile linea di join diverso per i differenti
         // tip di join, oppure potrei aggiungere un'icona della join vicino alla linea

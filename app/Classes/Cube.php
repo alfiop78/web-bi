@@ -223,7 +223,9 @@ class Cube
                         $on[] = "{$value->alias_from}.{$field->a} = {$value->alias_to}.{$field->b}";
                     }
                 }
-                $this->from_clause[$this->factId][$value->alias_from] = ["schema" => $value->schema_from, "table" => $value->table_from, "joins" => $on];
+                // per le dimensioni temporali non è presente join_type, lo imposto a inner di default
+                $join_type = (property_exists($value, "join_type")) ? $value->join_type : "inner";
+                $this->from_clause[$this->factId][$value->alias_from] = ["schema" => $value->schema_from, "table" => $value->table_from, "joins" => $on, "join_type" => $join_type];
             } else {
                 // fact table
                 $this->from_clause[$this->factId][$value->alias] = "{$value->schema}.{$value->table}";
@@ -423,13 +425,14 @@ class Cube
             /* dump($table_alias); */
             /* dump($value); */
             if (is_array($value)) {
-                $sql .= "\nJOIN {$value["schema"]}.{$value["table"]} AS {$table_alias}";
+                $sql .= "\n {$value["join_type"]} JOIN {$value["schema"]}.{$value["table"]} AS {$table_alias}";
                 $sql .= "\nON " . implode("\nAND ", $value["joins"]);
             } else {
                 // fact table
                 $sql .= "{$value} AS $table_alias";
             }
         }
+        /* dd($sql); */
         // almeno un filtro nel report ci deve essere obbligatoriamente
         $sql .= self::WHERE . implode("\nAND ", $this->report_filters[$this->factId]);
         /* if (!is_null($this->report_filters[$this->factId])) $sql .= implode("\nAND ", $this->report_filters[$this->factId]); */
@@ -442,6 +445,7 @@ class Cube
         // ob_flush()
         $result = NULL;
         $create_stmt = NULL;
+        dd($sql);
         switch (session('db_driver')) {
             case 'odbc':
                 $create_stmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
