@@ -345,7 +345,6 @@ class DrawSVG {
             // perchè vengono prese da lì le coordinate finali della tabella droppata)
             // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
             // ho ancora l'elemento nel DOM
-            // WARN: modificato 28.09.2026
             this.joinLines.get(this.currentLineRef.id).from = id;
             this.currentLineRef.dataset.from = id;
 
