@@ -28,7 +28,6 @@
     --danger-color: indianred;
     --warning-color: #c5791b;
     --done-color: seagreen;
-    --filters-color: #f2d98d;
     --highlight-color: rosybrown;
     --disabled-color: lightgray;
 }
@@ -37,6 +36,12 @@
     box-sizing: border-box;
     font-family: 'Barlow';
     font-size: 1rem;
+}
+
+@media screen and (min-width: 1024px) {
+    * {
+        font-size: .9rem;
+    }
 }
 
 *::-webkit-scrollbar {
