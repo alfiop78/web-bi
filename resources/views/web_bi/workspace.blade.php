@@ -828,17 +828,17 @@
 							<div class="wj-fields-list">
 								<section data-table-from>
 									<section class="list-search">
-										<input type="search" id="field-from-search" placeholder="Ricerca" data-element-search="from-fields" autocomplete="off" />
+										<input type="search" id="field-join-search" placeholder="Ricerca" data-element-search="join-fields" autocomplete="off" />
 										<div class="relative-ul">
-											<ul id="ul-from-fields" data-search-id="field-from-search" class="custom-scrollbar"></ul>
+											<ul id="ul-from-fields" data-search-id="field-join-search" class="custom-scrollbar"></ul>
 										</div>
 									</section>
 								</section>
 								<section data-table-to>
 									<section class="list-search">
-										<input type="search" id="field-to-search" placeholder="Ricerca" data-element-search="to-fields" autocomplete="off" />
+										<input type="search" id="field-to-search" placeholder="Ricerca" data-element-search="join-fields" autocomplete="off" />
 										<div class="relative-ul">
-											<ul id="ul-to-fields" data-search-id="field-to-search" class="custom-scrollbar"></ul>
+											<ul id="ul-to-fields" data-search-id="field-join-search" class="custom-scrollbar"></ul>
 										</div>
 									</section>
 								</section>

@@ -838,7 +838,8 @@ class DrawSVG {
             const li = content.querySelector('li.select-list');
             const span = li.querySelector('span');
             li.dataset.label = value.column_name;
-            li.dataset.elementSearch = `${source}-fields`;
+            // li.dataset.elementSearch = `${source}-fields`;
+            li.dataset.elementSearch = 'join-fields';
             li.dataset.tableId = WorkBook.activeTable.id;
             // if (WorkBook.activeTable.classList.contains('common')) li.dataset.factId = WorkBook.activeTable.dataset.factId;
             li.dataset.table = WorkBook.activeTable.dataset.table;
