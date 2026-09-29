@@ -224,7 +224,7 @@ class Cube
                     }
                 }
                 // per le dimensioni temporali non è presente join_type, lo imposto a inner di default
-                $join_type = (property_exists($value, "join_type")) ? $value->join_type : "inner";
+                $join_type = (property_exists($value, "join_type")) ? $value->join_type : "INNER";
                 $this->from_clause[$this->factId][$value->alias_from] = ["schema" => $value->schema_from, "table" => $value->table_from, "joins" => $on, "join_type" => $join_type];
             } else {
                 // fact table
@@ -236,7 +236,7 @@ class Cube
             /*     $this->sql_info->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}"; */
             /* } */
         }
-        /* dd($this->from_clause); */
+        dd($this->from_clause);
         // dd($this->sql_info);
     }
 

@@ -1306,13 +1306,13 @@ const body = document.getElementById('body');
     app.setFrom = () => {
         Sheet.fact.forEach(factId => {
             let from = {};
-            debugger;
             Sheet.tables.forEach(tableAlias => {
                 const tables = WorkBook.dataModel.get(factId);
                 if (tableAlias === 'time') tableAlias = 'WB_YEARS';
 
                 if (tables.hasOwnProperty(tableAlias)) {
                     tables[tableAlias].forEach(table => {
+                        // debugger;
                         const data = Draw.tables.get(table.id);
                         // recupero la posizione di questa tabella in WorkBookMap
                         const position = [...WorkBook.workbookMap.keys()].indexOf(data.alias);
@@ -1321,11 +1321,53 @@ const body = document.getElementById('body');
                         // La Fact la imposto per prima nella clausola FROM, non ha
                         // la proprietà joins
                         from[position] = (data.id === factId) ?
-                            { schema: data.schema, table: data.table, alias: data.alias } : from[position] = joins;
+                            { schema_from: data.schema, table_from: data.table, alias_from: data.alias } : from[position] = joins;
                     });
                 }
             });
             console.log('FROM', from);
+            // TODO: 29.09.2026 se è presente una LEFT JOIN devo scambiare la posizione della tabella
+            // che contiene la left join con la tabella nella posizione precedente
+            for (const [key, value] of Object.entries(from)) {
+
+                if (value.join_type === 'LEFT') {
+                    // cerco la tabella legata a quella in ciclo (dove è presente il LEFT JOIN)
+                    // per recuperarne la posizione e poter fare lo swapping
+                    const index = Object.values(from).findIndex(element => element.alias_from === value.alias_to);
+                    // console.log(index);
+                    // scambio, oltre all'index, anche altre proprietà per consentire la corretta
+                    // costruzione della query
+                    // NOTE: Destrutturazione
+                    console.log('FROM', from);
+                    [from[+key], from[index]] = [from[index], from[+key]];
+                    from[+key] = {
+                        join_type: from[index].join_type,
+                        alias_to: from[index].alias_to,
+                        fields: from[index].fields,
+                        schema_to: from[index].schema_to,
+                        table_to: from[index].table_to,
+                        type: from[index].type
+                    };
+                    from[+key].join_type = from[index].join_type;
+                    from[+key].alias_to = from[index].alias_to;
+                    from[+key].schema_to = from[index].schema_to;
+                    from[+key].table_to = from[index].table_to;
+                    from[+key].fields = from[index].fields;
+                    from[+key].type = from[index].type;
+
+                    delete from[index].join_type;
+                    delete from[index].alias_to;
+                    delete from[index].schema_to;
+                    delete from[index].table_to;
+                    delete from[index].fields;
+                    delete from[index].type;
+                    console.log('FROM', from);
+
+                }
+
+            }
+            console.log('FROM', from);
+            debugger;
             Sheet.from[factId] = from;
         });
     }
