@@ -1326,7 +1326,8 @@ const body = document.getElementById('body');
                 }
             });
             console.log('FROM', from);
-            // TODO: 29.09.2026 se è presente una LEFT JOIN devo scambiare la posizione della tabella
+            debugger;
+            // 29.09.2026 se è presente una LEFT JOIN devo scambiare la posizione della tabella
             // che contiene la left join con la tabella nella posizione precedente
             for (const [key, value] of Object.entries(from)) {
 
@@ -1340,18 +1341,16 @@ const body = document.getElementById('body');
                     // NOTE: Destrutturazione
                     console.log('FROM', from);
                     [from[+key], from[index]] = [from[index], from[+key]];
-                    from[+key] = {
-                        join_type: from[index].join_type,
-                        alias_to: from[index].alias_to,
-                        fields: from[index].fields,
-                        schema_to: from[index].schema_to,
-                        table_to: from[index].table_to,
-                        type: from[index].type
-                    };
+                    // aggiungo
+                    debugger;
                     from[+key].join_type = from[index].join_type;
-                    from[+key].alias_to = from[index].alias_to;
-                    from[+key].schema_to = from[index].schema_to;
-                    from[+key].table_to = from[index].table_to;
+                    from[+key].factId = from[index].factId;
+                    from[+key].alias_from = from[index].alias_to;
+                    from[+key].alias_to = from[index].alias_from;
+                    from[+key].schema_to = from[index].schema_from;
+                    from[+key].schema_from = from[index].schema_to;
+                    from[+key].table_to = from[index].table_from;
+                    from[+key].table_from = from[index].table_to;
                     from[+key].fields = from[index].fields;
                     from[+key].type = from[index].type;
 
@@ -1361,6 +1360,7 @@ const body = document.getElementById('body');
                     delete from[index].table_to;
                     delete from[index].fields;
                     delete from[index].type;
+                    delete from[index].factId;
                     console.log('FROM', from);
 
                 }

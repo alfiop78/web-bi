@@ -228,7 +228,7 @@ class Cube
                 $this->from_clause[$this->factId][$value->alias_from] = ["schema" => $value->schema_from, "table" => $value->table_from, "joins" => $on, "join_type" => $join_type];
             } else {
                 // fact table
-                $this->from_clause[$this->factId][$value->alias] = "{$value->schema}.{$value->table}";
+                $this->from_clause[$this->factId][$value->alias_from] = "{$value->schema_from}.{$value->table_from}";
             }
 
             /* if (property_exists($this, 'sql_info')) { */
@@ -236,7 +236,7 @@ class Cube
             /*     $this->sql_info->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}"; */
             /* } */
         }
-        dd($this->from_clause);
+        /* dd($this->from_clause); */
         // dd($this->sql_info);
     }
 
@@ -499,9 +499,9 @@ class Cube
 
 
             // TODO: da testare con una metrica filtrata contenente la prop 'from'
-            if (property_exists($this, 'sql_info')) {
-                $this->json_info_advanced[$this->datamart_name_advanced_measures]->FROM->$alias = "{$prop->schema}.{$prop->table} AS {$alias}";
-            }
+            /* if (property_exists($this, 'sql_info')) { */
+            /*     $this->json_info_advanced[$this->datamart_name_advanced_measures]->FROM->$alias = "{$prop->schema}.{$prop->table} AS {$alias}"; */
+            /* } */
         }
         /* dd($this->FROM_metricTable, $this->from_clause); */
     }
