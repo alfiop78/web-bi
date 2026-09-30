@@ -1592,7 +1592,6 @@ const body = document.getElementById('body');
             schema_to: data.schema
         };
 
-        debugger;
         Draw.tables = {
             id: token_table,
             // id: `${data.descTable.id}-${WorkBook.activeTable.dataset.factId}`,
@@ -1635,11 +1634,9 @@ const body = document.getElementById('body');
     // ci sono dei "giri" troppo lunghi, da semplificare!!
     app.saveTimeDimension = async () => {
         const fieldsData = app.getFieldsFromTimeDimension();
-        debugger;
         // concateno il nome della tabella time (WB_YEARS) con le ultime 5 cifre della svg-data-XXXXX (factId)
         // const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
         const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.id}`;
-        debugger;
         app.setDataTimeDimension(token_table, fieldsData);
 
         Draw.currentTable = Draw.tables.get(token_table);

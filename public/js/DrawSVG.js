@@ -798,9 +798,11 @@ class DrawSVG {
                     schema_to: table.dataset.schema
                 };
             }
+
             debugger;
             this.tables = {
-                id: `${timeTable.dataset.alias}-${this.currentTable.factId}`,
+                // id: `${timeTable.dataset.alias}-${this.currentTable.factId}`,
+                id: `${timeTable.dataset.alias}-${this.currentTable.join}`,
                 key: 'related-time',
                 table: timeTable.dataset.table,
                 alias: timeTable.dataset.alias,
@@ -809,11 +811,13 @@ class DrawSVG {
                 joins: +timeTable.dataset.joins,
                 factId: this.currentTable.factId,
                 // factId: WorkBook.activeTable.dataset.factId,
-                join: `${timeTable.dataset.tableJoin}-${this.currentTable.factId}`,
-                // join: `${t.dataset.tableJoin}-${WorkBook.activeTable.dataset.factId}`,
+                // join: `${timeTable.dataset.tableJoin}-${this.currentTable.factId}`,
+                join: `${timeTable.dataset.tableJoin}-${this.currentTable.join}`,
                 joinField: timeTable.dataset.joinField,
             };
-            this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.factId}`);
+            // this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.factId}`);
+            debugger;
+            this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.join}`);
             this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
             if (timeTable.dataset.joinField) this.recursiveHier(timeTable, createJoin);
         });
@@ -1156,12 +1160,12 @@ class DrawSVG {
     drawTime(createJoin = true) {
         const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
         use.setAttribute('href', '#time');
+        debugger;
         use.id = this.currentTable.id;
         use.classList.add('table', 'time');
         use.dataset.type = 'time';
         use.dataset.table = this.currentTable.table;
         use.dataset.joins = this.currentTable.joins;
-        debugger;
         use.dataset.tableJoin = this.currentTable.join;
         use.dataset.joinField = this.currentTable.joinField;
         use.dataset.name = this.currentTable.name;
