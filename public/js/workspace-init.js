@@ -1465,7 +1465,6 @@ const body = document.getElementById('body');
 
     app.handlerTimeDimension = async (e) => {
         console.info('handlerTimeDimension');
-        debugger;
         console.log(e.target);
         Draw.contextMenu.toggleAttribute('open');
         /*
@@ -1568,18 +1567,21 @@ const body = document.getElementById('body');
 
     app.setDataTimeDimension = (token_table, data) => {
         // la proprietà dateTime è il campo, della Fact, legato alla dimensione TIME
+        debugger;
         WorkBook.dateTime[WorkBook.activeTable.dataset.factId] = {
             tableAlias: data.tableAlias, timeField: data.column, datatype: data.columnType
         };
         // WARN: solo per vertica in questo caso.
         // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
 
+        debugger;
         WorkBook._joins = {
             table_from: data.timeTable,
             schema_from: data.timeSchema,
             alias_from: data.timeTable,
             type: 'TIME',
             factId: WorkBook.activeTable.dataset.factId,
+            id: WorkBook.activeTable.id,
             fields: [
                 // per la join tra TIME e Fact devo verificare anche il datatype della tabella Fact.
                 // Se il datatype non è DATE dovrà essere convertito (eseguito da php)
@@ -1590,6 +1592,7 @@ const body = document.getElementById('body');
             schema_to: data.schema
         };
 
+        debugger;
         Draw.tables = {
             id: token_table,
             // id: `${data.descTable.id}-${WorkBook.activeTable.dataset.factId}`,
@@ -1629,12 +1632,14 @@ const body = document.getElementById('body');
 
     // salvataggio dimensione TIME dalla dialog-time
     // TODO: 01.09.2026 Ricostruire la logica per la dimensione TIME, non mi convince in questo modo, è troppo complessa e
-    // ci sono dei "giri" troppo lunghi, semplificare!!
+    // ci sono dei "giri" troppo lunghi, da semplificare!!
     app.saveTimeDimension = async () => {
         const fieldsData = app.getFieldsFromTimeDimension();
+        debugger;
         // concateno il nome della tabella time (WB_YEARS) con le ultime 5 cifre della svg-data-XXXXX (factId)
-        const token_join = `${fieldsData.descTable.id}-${WorkBook.activeTable.dataset.factId.substring(9)}`;
-        const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
+        // const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
+        const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.id}`;
+        debugger;
         app.setDataTimeDimension(token_table, fieldsData);
 
         Draw.currentTable = Draw.tables.get(token_table);

@@ -513,12 +513,15 @@ class WorkBooks {
                 // A questo punto, se sono in ciclo in una fact diversa da quella presente sulla
                 // tabella passata (tableRef) devo recuperare la tabella appartenente alla Fact in ciclo
                 // e che ha l'attributo data-shared_ref = tableRef.id
+                console.log(tableRef);
+                debugger;
                 const tableJoin = (tableRef.classList.contains('shared') && tableRef.dataset.factId !== fact.id) ?
                     Draw.svg.querySelector(`use.table[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
                     // Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
                     Draw.svg.querySelector(`use.table#${table}`);
                 // joinTables.push(tableJoin.dataset.alias);
                 joinTables.push({ table: tableJoin.dataset.alias, id: tableJoin.id });
+                debugger;
                 if (tableJoin.dataset.tableJoin) recursiveDimensionDown(tableJoin.dataset.tableJoin);
             }
             // verifico se, per la fact corrente, ci sono tabelle (quindi dimensioni) clonate.
@@ -561,6 +564,7 @@ class WorkBooks {
             dimensionTables.forEach(table => {
                 joinTables = [{ table: table.dataset.alias, id: table.id }];
                 // recupero la join associata alla tabella in ciclo
+                debugger;
                 if (table.dataset.tableJoin) recursiveDimensionDown(table.dataset.tableJoin);
                 tables[table.dataset.alias] = joinTables;
             });

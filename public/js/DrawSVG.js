@@ -798,6 +798,7 @@ class DrawSVG {
                     schema_to: table.dataset.schema
                 };
             }
+            debugger;
             this.tables = {
                 id: `${timeTable.dataset.alias}-${this.currentTable.factId}`,
                 key: 'related-time',
@@ -1160,6 +1161,7 @@ class DrawSVG {
         use.dataset.type = 'time';
         use.dataset.table = this.currentTable.table;
         use.dataset.joins = this.currentTable.joins;
+        debugger;
         use.dataset.tableJoin = this.currentTable.join;
         use.dataset.joinField = this.currentTable.joinField;
         use.dataset.name = this.currentTable.name;
@@ -1249,7 +1251,7 @@ class DrawSVG {
         // const btnCustomMetric = document.getElementById('context-custom-metric');
         // per le tabelle con data-shared_ref disabilito alcuni tasti
         btnAddFactJoin.disabled = (this.table.dataset.shared_ref || this.svg.querySelectorAll('use.table.fact').length === 1) ? true : false;
-        btnTimeDimension.disabled = (this.table.dataset.shared_ref || this.table.dataset.type === 'table') ? true : false;
+        // btnTimeDimension.disabled = (this.table.dataset.shared_ref || this.table.dataset.type === 'table') ? true : false;
         // btnCustomMetric.disabled = (this.table.dataset.shared_ref || this.table.dataset.type === 'table') ? true : false;
 
         // console.log(e.target.dataset);

@@ -210,6 +210,8 @@ class Cube
         foreach ($this->process->{"from"}->{$this->fact} as $value) {
             if (is_object($value) && property_exists($value, "fields")) {
                 $on = [];
+                // per le dimensioni temporali non è presente join_type, lo imposto a inner di default
+                $join_type = (property_exists($value, "join_type")) ? $value->join_type : "INNER";
                 foreach ($value->fields as $field) {
                     // 2026.09.01 Verifico il datatype della colonna della Fact per convertirla in
                     // DATE se ha un datatype diverso
@@ -220,11 +222,12 @@ class Cube
 
                         $on[] = "{$value->alias_from}.{$field->a} = {$cast_field}";
                     } else {
-                        $on[] = "{$value->alias_from}.{$field->a} = {$value->alias_to}.{$field->b}";
+                        $on[] = ($join_type === 'INNER') ? "{$value->alias_from}.{$field->a} = {$value->alias_to}.{$field->b}" :
+                            "{$value->alias_to}.{$field->a} = {$value->alias_from}.{$field->b}";
+
+                        /* $on[] = "{$value->alias_from}.{$field->a} = {$value->alias_to}.{$field->b}"; */
                     }
                 }
-                // per le dimensioni temporali non è presente join_type, lo imposto a inner di default
-                $join_type = (property_exists($value, "join_type")) ? $value->join_type : "INNER";
                 $this->from_clause[$this->factId][$value->alias_from] = ["schema" => $value->schema_from, "table" => $value->table_from, "joins" => $on, "join_type" => $join_type];
             } else {
                 // fact table
