@@ -799,10 +799,9 @@ class DrawSVG {
                 };
             }
 
-            debugger;
             this.tables = {
                 // id: `${timeTable.dataset.alias}-${this.currentTable.factId}`,
-                id: `${timeTable.dataset.alias}-${this.currentTable.join}`,
+                id: `${timeTable.dataset.alias}-${this.currentTable.tableJoinId}`,
                 key: 'related-time',
                 table: timeTable.dataset.table,
                 alias: timeTable.dataset.alias,
@@ -810,14 +809,12 @@ class DrawSVG {
                 schema: 'decisyon_cache',
                 joins: +timeTable.dataset.joins,
                 factId: this.currentTable.factId,
-                // factId: WorkBook.activeTable.dataset.factId,
-                // join: `${timeTable.dataset.tableJoin}-${this.currentTable.factId}`,
-                join: `${timeTable.dataset.tableJoin}-${this.currentTable.join}`,
+                join: this.currentTable.id,
+                tableJoinId: this.currentTable.tableJoinId,
                 joinField: timeTable.dataset.joinField,
             };
-            // this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.factId}`);
-            debugger;
-            this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.join}`);
+
+            this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.tableJoinId}`);
             this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
             if (timeTable.dataset.joinField) this.recursiveHier(timeTable, createJoin);
         });
@@ -1167,6 +1164,7 @@ class DrawSVG {
         use.dataset.table = this.currentTable.table;
         use.dataset.joins = this.currentTable.joins;
         use.dataset.tableJoin = this.currentTable.join;
+        use.dataset.tableJoinId = this.currentTable.tableJoinId;
         use.dataset.joinField = this.currentTable.joinField;
         use.dataset.name = this.currentTable.name;
         use.dataset.alias = this.currentTable.alias;

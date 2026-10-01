@@ -1339,10 +1339,10 @@ const body = document.getElementById('body');
                     // scambio, oltre all'index, anche altre proprietà per consentire la corretta
                     // costruzione della query
                     // NOTE: Destrutturazione
-                    console.log('FROM', from);
+
+                    // console.log('FROM', from);
                     [from[+key], from[index]] = [from[index], from[+key]];
                     // aggiungo
-                    debugger;
                     from[+key].join_type = from[index].join_type;
                     from[+key].factId = from[index].factId;
                     from[+key].alias_from = from[index].alias_to;
@@ -1354,17 +1354,21 @@ const body = document.getElementById('body');
                     from[+key].fields = from[index].fields;
                     from[+key].type = from[index].type;
 
-                    delete from[index].join_type;
-                    delete from[index].alias_to;
-                    delete from[index].schema_to;
-                    delete from[index].table_to;
-                    delete from[index].fields;
-                    delete from[index].type;
-                    delete from[index].factId;
-                    console.log('FROM', from);
-
+                    // clono l'oggetto from[index] escludendo i campi elencati prima dell'operatore spread
+                    const { join_type, alias_to, schema_to, table_to, fields, type, factId, ...from_cloned } = from[index];
+                    // se non viene clonato l'object from, gli elementi che dovranno essere
+                    // eliminati (campi esclusi prima di (...)), elimineranno le proprietà anche
+                    // da WorkBook._joins perchè gli object (o array) sono puntati per Riferimento e non per valore
+                    from[index] = from_cloned;
+                    // i delete qui sotto causano la cancellazione delle stesse proprietà, anche in WorkBook._joins
+                    // delete from[index].join_type;
+                    // delete from[index].alias_to;
+                    // delete from[index].schema_to;
+                    // delete from[index].table_to;
+                    // delete from[index].fields;
+                    // delete from[index].type;
+                    // delete from[index].factId;
                 }
-
             }
             console.log('FROM', from);
             debugger;
@@ -1567,7 +1571,6 @@ const body = document.getElementById('body');
 
     app.setDataTimeDimension = (token_table, data) => {
         // la proprietà dateTime è il campo, della Fact, legato alla dimensione TIME
-        debugger;
         WorkBook.dateTime[WorkBook.activeTable.dataset.factId] = {
             tableAlias: data.tableAlias, timeField: data.column, datatype: data.columnType
         };
@@ -1605,6 +1608,7 @@ const body = document.getElementById('body');
             joins: +data.descTable.dataset.joins,
             factId: WorkBook.activeTable.dataset.factId,
             join: WorkBook.activeTable.id,
+            tableJoinId: WorkBook.activeTable.id,
             joinField: data.descTable.dataset.joinField
         };
     }

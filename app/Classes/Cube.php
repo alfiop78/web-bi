@@ -435,7 +435,6 @@ class Cube
                 $sql .= "{$value} AS $table_alias";
             }
         }
-        /* dd($sql); */
         // almeno un filtro nel report ci deve essere obbligatoriamente
         $sql .= self::WHERE . implode("\nAND ", $this->report_filters[$this->factId]);
         /* if (!is_null($this->report_filters[$this->factId])) $sql .= implode("\nAND ", $this->report_filters[$this->factId]); */
@@ -448,7 +447,7 @@ class Cube
         // ob_flush()
         $result = NULL;
         $create_stmt = NULL;
-        dd($sql);
+        /* dd($sql); */
         switch (session('db_driver')) {
             case 'odbc':
                 $create_stmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
