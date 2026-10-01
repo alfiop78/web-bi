@@ -631,12 +631,12 @@ class DrawSVG {
     /*
      * Creo la lista dei campi delle due tabelle da mettere in join
      */
-    createListFields() {
+    async createListFields() {
         console.info('createListFields');
         // Ciclo i campi della tabella WorkBook.tableJoins e li aggiungo alla dlg-join
         for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
             WorkBook.activeTable = value.id;
-            const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+            const data = await WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
             this.addFields(key, data);
         }
     }

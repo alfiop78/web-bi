@@ -548,7 +548,7 @@
 									<section class="list-search">
 										<input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
 										<div class="relative-ul">
-											<ul id="ul-columns" data-search-id="time-column-search" class="custom-scrollbar"></ul>
+											<ul id="ul__table_join_time" data-search-id="time-column-search" class="custom-scrollbar"></ul>
 										</div>
 									</section>
 								</section>
