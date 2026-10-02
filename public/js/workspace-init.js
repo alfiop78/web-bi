@@ -10,7 +10,10 @@ var textareaCustomMetric = document.getElementById('textarea-custom-metric');
 var textarea__custom_column = document.getElementById('textarea__custom_column');
 var textarea__composite_metric = document.getElementById('textarea__composite-metric');
 // ul
-const ul__table_join_time = document.getElementById('ul__table_join_time');
+// elenco campi della tabella da mettere in join con la TIME
+const ul__time_table_join = document.getElementById('ul__time_table_join');
+// tabelle time nella dialog-time
+const ul__time_table = document.getElementById('ul__time_table');
 // inputs
 const input__sheetName = document.getElementById('sheet-name');
 const input__column_name = document.getElementById('input__column_name');
@@ -1440,8 +1443,8 @@ const body = document.getElementById('body');
     // apertura dialog TIME dimension dall'icona 'time' (modalità modifica)
     app.editTimeDimension = (e) => {
         // elimino le precedenti selezioni se ci sono
-        if (document.querySelector(`#time-fields > li[data-selected]`)) delete document.querySelector("#time-fields > li[data-selected]").dataset.selected;
-        if (ul__table_join_time.querySelector("li[data-selected]")) delete ul__table_join_time.querySelector("li[data-selected]").dataset.selected;
+        if (ul__time_table.querySelector('li[data-selected]')) delete ul__time_table.querySelector('li[data-selected]').dataset.selected;
+        if (ul__time_table_join.querySelector("li[data-selected]")) delete ul__time_table_join.querySelector("li[data-selected]").dataset.selected;
         //
         // valorizzo workbook.activeTable
         WorkBook.activeTable = e.target.dataset.tableJoin;
@@ -1456,15 +1459,15 @@ const body = document.getElementById('body');
         // FIX: 07.09.2026 WorkBook.join/s non più utilizzata
         const timeJoin = WorkBook.join.get(`${e.target.dataset.table}-${factId}`);
         // selezione delle colonne in base alla  WorkBook.join già presente
-        document.querySelector(`#time-fields > li[data-field='${timeJoin.from.field}']`).dataset.selected = true;
+        ul__time_table.querySelector(`li[data-field='${timeJoin.from.field}']`).dataset.selected = true;
         // recupero le colonne della tabella "to" in join con la TIME, quasi
         // sicuramente è già in sessionStorage
         app.addFields_test(WorkBookStorage.getTable(WorkBook.activeTable.dataset.table));
         // seleziono la colonna della tabella "to"
-        ul__table_join_time.querySelector(`li[data-field='${timeJoin.to.field}']`).dataset.selected = true;
+        ul__time_table_join.querySelector(`li[data-field='${timeJoin.to.field}']`).dataset.selected = true;
 
         // sto aggiornando la relazione con la TIME, nascondo "Salva" e visualizzo "Aggiorna"
-        document.querySelector("#btn-time-dimension-save").hidden = true;
+        document.querySelector("#btn__time_dimension_save").hidden = true;
         btnUpdate.hidden = false;
         app.dialogTime.show();
     }
@@ -1536,143 +1539,91 @@ const body = document.getElementById('body');
         WorkBook.checkChanges('canvas');
     }
 
-    // contrassegno con l'attributo [data-selected] il campo selezionato delle tabelle TIME
-    // TODO: 01.10.2026 implementare la stessa logica utilizzata nelle join tra
-    // tabelle, in addFieldToJoin()
+    // recupero i due campi selezionati da mettere in join (uno per la dimensione
+    // time e l'altro per la tabella in join, es. WB_DATE.id - DocVenditaDettaglio.DataDocumento)
     app.handlerTimeField = (e) => {
-        const table_data = e.currentTarget.parentElement.dataset;
-        console.log(table_data);
-        console.log(table_data.table);
-        debugger;
-        // INFO: 01.10.2026
-        // if (document.querySelector("#time-fields > li[data-selected]")) delete document.querySelector('#time-fields > li[data-selected]').dataset.selected;
-        // e.target.dataset.selected = true;
-        // INFO: 01.10.2026
+        // const table = e.currentTarget.parentElement.dataset;
+        const table = e.currentTarget.parentElement;
+        // pulisco, in riferimento alla table selezionata, le precedenti selezioni li[data-selected]
 
-        // recupero i due campi selezionati da mettere in join (uno per la dimensione
-        // time e l'altro per la tabella in join, es. WB_DATE.id - DocVenditaDettaglio.DataDocumento)
-        // const joins = document.querySelectorAll(`#time-fields > li[data-selected], `);
-    }
+        // INFO: operatore Optional Chaining (?.)
+        delete table.querySelector('li[data-selected]')?.dataset.selected;
 
-    app.getFieldsFromTimeDimension = () => {
-        console.info('getFieldsFromTimeDimension');
-        // Recupero lo schema dove sono memorizzate le tabelle TIME
-        const timeSchema = document.querySelector('#time-fields').dataset.schema;
-        // Recupero le due colonne selezionate per la relazione time->fact
-        const timeRef = document.querySelector('#time-fields > li[data-selected]');
-        // recupero l'elemento <g> con la propria tabella
-        const descTable = Draw.svg.getElementById(timeRef.dataset.table);
-        const timeTable = timeRef.dataset.table;
-        const timeColumn = timeRef.dataset.field;
-        const timeColumnType = timeRef.dataset.datatype;
+        // imposto la selezione sul campo corrente
+        e.currentTarget.dataset.selected = true;
+        // 1. recupero i campi selezionati da entrambe le <ul>
+        const fields = document.querySelectorAll('#ul__time_table > li[data-selected], #ul__time_table_join > li[data-selected]');
+        if (fields.length === 2) {
+            // effettuo la join
+            // recupero gli elementi presenti nel <svg> da cui prendere i dati relativi alle tabelle
+            const data_timeTable = Draw.svg.querySelector(`#time-dimension > #${fields[0].dataset.table}`);
+            const data_timeJoinTable = Draw.svg.querySelector(`#${fields[1].parentElement.dataset.tableId}`);
 
-        const factColumn = ul__table_join_time.querySelector("li[data-selected]");
-        const schema = ul__table_join_time.dataset.schema;
-        const column = factColumn.dataset.label;
-        const columnType = factColumn.dataset.datatype;
-        const tableAlias = factColumn.dataset.alias;
-        const table = factColumn.dataset.table;
-        debugger;
+            // la proprietà dateTime è il campo legato alla dimensione TIME
+            // fields[0] : tabella TIME, fields[1] tabella in relazione
+            WorkBook.dateTime[WorkBook.activeTable.dataset.factId] = {
+                // tableAlias: fields[1].parentElement.dataset.alias, timeField: fields[1].dataset.field, datatype: fields[1].dataset.datatype
+                tableAlias: data_timeJoinTable.dataset.alias, timeField: fields[1].dataset.field, datatype: fields[1].dataset.datatype
+            };
 
-        return {
-            // time field
-            timeSchema, descTable, timeTable, timeColumn, timeColumnType,
-            // fact field
-            schema, column, columnType, tableAlias, table
+            // creazione della join tra la TIME e la tabella scelta per associare
+            // la dimensione temporale (day, month, quarter,year)
+            WorkBook._joins = {
+                table_from: data_timeTable.dataset.table,
+                schema_from: data_timeTable.dataset.schema,
+                alias_from: data_timeTable.dataset.table,
+                type: 'TIME',
+                factId: WorkBook.activeTable.dataset.factId,
+                id: WorkBook.activeTable.id,
+                fields: [
+                    { a: fields[0].dataset.field, b: { field_name: fields[1].dataset.field, field_type: fields[1].dataset.datatype } }
+                ],
+                table_to: data_timeJoinTable.dataset.table,
+                alias_to: data_timeJoinTable.dataset.alias,
+                schema_to: data_timeJoinTable.dataset.schema
+            };
+
+            // in Draw.tables sono presenti tutte le tabelle aggiunte al <svg>
+            Draw.tables = {
+                id: `${data_timeTable.dataset.table}-${WorkBook.activeTable.id}`,
+                key: 'time',
+                // TODO: 02.10.2026 position : {x: ..., y: ...}
+                x: +WorkBook.activeTable.getAttribute('x'),
+                y: +WorkBook.activeTable.getAttribute('y') + 30,
+                table: data_timeTable.dataset.table,
+                alias: data_timeTable.dataset.table,
+                name: data_timeTable.dataset.table,
+                schema: data_timeTable.dataset.schema,
+                // numero di join presenti su questa tabella
+                joins: +data_timeTable.dataset.joins,
+                factId: WorkBook.activeTable.dataset.factId,
+                // tabella in relazione
+                join: WorkBook.activeTable.id,
+                tableJoinId: WorkBook.activeTable.id,
+                // campo in relazione
+                joinField: fields[0].dataset.field
+            };
+
+            // imposto id della tabella TIME selezionata sul tasto #btn__time_dimension_save
+            document.querySelector('#btn__time_dimension_save').dataset.timeTableId = `${data_timeTable.dataset.table}-${WorkBook.activeTable.id}`;
+
         }
     }
 
-    app.setDataTimeDimension = (token_table, data) => {
-        // la proprietà dateTime è il campo legato alla dimensione TIME
-        debugger;
-        WorkBook.dateTime[WorkBook.activeTable.dataset.factId] = {
-            tableAlias: data.tableAlias, timeField: data.column, datatype: data.columnType
-        };
-        // WARN: solo per vertica in questo caso.
-        // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
-
-        debugger;
-        // creazione della join tra la TIME e la tabella scelta per associare
-        // la dimensione temporale (day, month, quarter,year)
-        WorkBook._joins = {
-            table_from: data.timeTable,
-            schema_from: data.timeSchema,
-            alias_from: data.timeTable,
-            type: 'TIME',
-            factId: WorkBook.activeTable.dataset.factId,
-            id: WorkBook.activeTable.id,
-            fields: [
-                // per la join tra TIME<->Tabella devo verificare anche il datatype
-                // della tabella.
-                // Se il datatype non è DATE dovrà essere convertito (eseguito da php)
-                { a: data.timeColumn, b: { field_name: data.column, field_type: data.columnType } }
-            ],
-            table_to: data.table,
-            alias_to: data.tableAlias,
-            schema_to: data.schema
-        };
-
-        // in Draw.tables sono presenti tutte le tabelle aggiunte al <svg>
-        Draw.tables = {
-            id: token_table,
-            key: 'time',
-            x: +WorkBook.activeTable.getAttribute('x'),
-            y: +WorkBook.activeTable.getAttribute('y') + 30,
-            table: data.descTable.dataset.table,
-            alias: data.descTable.dataset.alias,
-            name: data.descTable.dataset.table,
-            // FIX: 01.09.2026 non impostare fisso lo schema
-            schema: 'decisyon_cache',
-            // numero di join presenti su questa tabella
-            joins: +data.descTable.dataset.joins,
-            factId: WorkBook.activeTable.dataset.factId,
-            // tabella in relazione
-            join: WorkBook.activeTable.id,
-            tableJoinId: WorkBook.activeTable.id,
-            // campo in relazione
-            joinField: data.descTable.dataset.joinField
-        };
-    }
-
-    app.setPropertyTimeDimension = (data) => {
-        // WorkBook.createDataModel();
-        // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
-        WorkBook.activeTable = `${data.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
-        // aggiungo i field delle tabelle time a WorkBook.fields
-        /* Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async (timeTable) => {
-          WorkBook.activeTable = timeTable.id;
-          WorkBook.field = {
-            token: `tok_${timeTable.dataset.table}`,
-            type: 'column',
-            schema: WorkBook.activeTable.dataset.schema,
-            tableAlias: WorkBook.activeTable.dataset.alias,
-            table: WorkBook.activeTable.dataset.table,
-            name: timeTable.dataset.table,
-            field: WorkBook.timeFields[timeTable.dataset.table]
-          };
-          WorkBook.fields = `tok_${timeTable.dataset.table}`;
-        }); */
-    }
-
     // salvataggio dimensione TIME dalla dialog-time
-    // TODO: 01.09.2026 Ricostruire la logica per la dimensione TIME, non mi convince in questo modo, è troppo complessa e
-    // ci sono dei "giri" troppo lunghi, da semplificare!!
-    app.saveTimeDimension = async () => {
-        debugger;
-        const fieldsData = app.getFieldsFromTimeDimension();
-        // concateno il nome della tabella time (WB_YEARS) con le ultime 5 cifre della svg-data-XXXXX (factId)
-        // const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
-        const token_table = `${fieldsData.descTable.id}-${WorkBook.activeTable.id}`;
-        debugger;
-        app.setDataTimeDimension(token_table, fieldsData);
+    // disegno l'elemento nell'svg
+    app.saveTimeDimension = (e) => {
+        const timeTableId = e.currentTarget.dataset.timeTableId;
+        Draw.currentTable = Draw.tables.get(timeTableId);
 
-        Draw.currentTable = Draw.tables.get(token_table);
+        debugger;
+        // incremento la proprietà joins sulla tabella legata alla TIME (di solito la fact)
         WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
         Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;
+        // disegno l'icona che rappresenta le tabelle time, nel svg.
+        // Inoltre, con una funzione ricorsiva, vengono messe in relazione anche le
+        // altre tabelle TIME gerarchicamente superiori
         Draw.drawTime();
-
-        debugger;
-        app.setPropertyTimeDimension(fieldsData);
 
         WorkBook.checkChanges('time');
         app.dialogTime.close();
@@ -1856,13 +1807,10 @@ const body = document.getElementById('body');
     // TODO: test fn
     app.addFields_test = (response) => {
         // reset
-        ul__table_join_time.querySelectorAll('li').forEach(li => li.remove());
+        ul__time_table_join.querySelectorAll('li').forEach(li => li.remove());
 
         // imposto gli attributi sulla <ul>
-        ul__table_join_time.dataset.schema = WorkBook.activeTable.dataset.schema;
-        ul__table_join_time.dataset.tableId = WorkBook.activeTable.id;
-        ul__table_join_time.dataset.table = WorkBook.activeTable.dataset.table;
-        ul__table_join_time.dataset.alias = WorkBook.activeTable.dataset.alias;
+        ul__time_table_join.dataset.tableId = WorkBook.activeTable.id;
 
         for (const [key, value] of Object.entries(response)) {
             const content = template_li.content.cloneNode(true);
@@ -1870,9 +1818,6 @@ const body = document.getElementById('body');
             const span = li.querySelector('span');
             li.dataset.label = value.column_name;
             li.dataset.elementSearch = 'time-column';
-            // li.dataset.tableId = WorkBook.activeTable.id;
-            // li.dataset.table = WorkBook.activeTable.dataset.table;
-            // li.dataset.alias = WorkBook.activeTable.dataset.alias;
             li.dataset.label = value.column_name;
             li.dataset.field = value.column_name;
             span.innerText = value.column_name;
@@ -1884,19 +1829,9 @@ const body = document.getElementById('body');
             // span.dataset.type = type;
             // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
             li.dataset.id = key;
-
-            // INFO: 01.10.2026 utilizzo lo stesso handler utilizzato
-            // fn da associare all'evento in 'mutation observe'
-            // li.addEventListener('click', (e) => {
-            //     // reset precedenti selezini
-            //     ul.querySelectorAll('li[data-selected]').forEach(element => delete element.dataset.selected);
-            //     (e.currentTarget.dataset.selected) ? delete e.currentTarget.dataset.selected : e.currentTarget.dataset.selected = 'true';
-            // });
-            // per le tabelle time
             li.dataset.fn = 'handlerTimeField';
-            // INFO: 01.10.2026 utilizzo lo stesso handler utilizzato
 
-            ul__table_join_time.appendChild(li);
+            ul__time_table_join.appendChild(li);
         }
     }
 
@@ -2079,6 +2014,7 @@ const body = document.getElementById('body');
 
     app.inputAdvMetricName.addEventListener("input", app.inputAdvancedMetric);
 
+    // creazione tabelle time
     document.querySelector("#btn-time-dimension").onclick = async () => {
         // debugger;
         // return;

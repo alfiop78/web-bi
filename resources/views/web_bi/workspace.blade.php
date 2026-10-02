@@ -535,7 +535,7 @@
 						<section class="dlg-content">
 							<section class="row">
 								<section class="col col-6-span">
-									<ul id="time-fields" data-schema="decisyon_cache">
+									<ul id="ul__time_table" data-schema="decisyon_cache">
 										<!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
 										<li class="select-list content" data-field="id" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
 										<li class="select-list content" data-field="id" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
@@ -548,7 +548,7 @@
 									<section class="list-search">
 										<input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
 										<div class="relative-ul">
-											<ul id="ul__table_join_time" data-search-id="time-column-search" class="custom-scrollbar"></ul>
+											<ul id="ul__time_table_join" data-search-id="time-column-search" class="custom-scrollbar"></ul>
 										</div>
 									</section>
 								</section>
@@ -556,7 +556,7 @@
 						</section>
 						<section class="dlg-buttons">
 							<button name="cancel" value="chiudi">Chiudi</button>
-							<button data-fn="saveTimeDimension" id="btn-time-dimension-save" value="salva">Salva</button>
+							<button data-fn="saveTimeDimension" id="btn__time_dimension_save" value="salva">Salva</button>
 							<!-- <button data-fn="updateTimeDimension" id="btn-time-dimension-update" value="Aggiorna" hidden>Aggiorna</button> -->
 						</section>
 					</section>
