@@ -407,7 +407,6 @@ class WorkBooks {
 
     // viene impostato in createDataModel() e in workbookSelected()
     set workbookMap(tables) {
-        debugger;
         tables.forEach(table => {
             let fields = {}, metrics = {};
             const props = {

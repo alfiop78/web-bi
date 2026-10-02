@@ -782,7 +782,6 @@ class DrawSVG {
         // es. Quando viene passata WB_QUARTERS, il primo ciclo processa WB_YEARS
         Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(timeTable => {
             if (createJoin) {
-                debugger;
                 // const token = this.rand().substring(0, 7);
                 // const token = `${timeTable.dataset.alias}-${this.currentTable.factId.substring(9)}`;
                 WorkBook._joins = {
@@ -1158,7 +1157,6 @@ class DrawSVG {
     drawTime(createJoin = true) {
         const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
         use.setAttribute('href', '#time');
-        debugger;
         use.id = this.currentTable.id;
         use.classList.add('table', 'time');
         use.dataset.type = 'time';

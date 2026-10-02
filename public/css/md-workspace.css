@@ -324,10 +324,10 @@ use.table[data-multifact] {
 
 
 .wj-joins,
-.wj-fields-list {
+.join__field_lists {
     display: grid;
-    grid-template-columns: 50% 50%;
-    /* grid-template-rows: 280px; */
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 1em;
 }
 
 .wj-joins>section {
@@ -337,11 +337,7 @@ use.table[data-multifact] {
     position: relative;
 }
 
-.wj-fields-list>section {
-    padding: .5em;
-}
-
-.wj-fields-list .list-search {
+.list-search {
     height: 100%;
 }
 

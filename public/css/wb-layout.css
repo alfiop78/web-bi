@@ -44,6 +44,12 @@
     }
 }
 
+@media screen and (min-width: 1921px) {
+    * {
+        font-size: 1rem;
+    }
+}
+
 *::-webkit-scrollbar {
     display: none;
 }
