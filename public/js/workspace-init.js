@@ -1600,8 +1600,8 @@ const body = document.getElementById('body');
                 // tabella in relazione
                 join: WorkBook.activeTable.id,
                 tableJoinId: WorkBook.activeTable.id,
-                // campo in relazione
-                joinField: fields[0].dataset.field
+                // campo in relazione con la tabella corrente (di solito WB_DATE, quindi il campo in relazione è WB_MONTHS.month_id)
+                joinField: data_timeTable.dataset.joinField
             };
 
             // imposto id della tabella TIME selezionata sul tasto #btn__time_dimension_save
@@ -1616,7 +1616,6 @@ const body = document.getElementById('body');
         const timeTableId = e.currentTarget.dataset.timeTableId;
         Draw.currentTable = Draw.tables.get(timeTableId);
 
-        debugger;
         // incremento la proprietà joins sulla tabella legata alla TIME (di solito la fact)
         WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
         Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;

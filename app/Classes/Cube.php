@@ -443,7 +443,7 @@ class Cube
         // dd($this->queries);
         $comment = "/*\nCreazione tabella per calcolo ... :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
         // dump($sql);
-        dd($sql);
+        /* dd($sql); */
         // ob_flush()
         $result = NULL;
         $create_stmt = NULL;
