@@ -35,6 +35,8 @@ const btn__showCustomMetricsUsage = document.getElementById('btn__showCustomMetr
 const btn__showFiltersUsage = document.getElementById('btn__showFiltersUsage');
 const btn__showCustomColumnsUsage = document.getElementById('btn__showCustomColumnsUsage');
 const btn__open_join_options = document.getElementById('btn__open_join_options');
+// input
+const input__field_join_search = document.getElementById('input__field_join_search');
 // Dialogs
 const dlg__filters = document.getElementById('dlg__filters');
 const dlg__custom_metric = document.getElementById('dlg__custom_metric');

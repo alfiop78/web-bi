@@ -817,7 +817,7 @@
 						<section class="dlg-content col">
                             <section class="table_headers">
                                 <section data-table-from data-table-id></section>
-                                <button id="btn__open_join_options" type="button" class="material-symbols-rounded" data-join-type="inner" data-fn="btnOpenJoinOptions" data-popover-id="popover__join_options" data-popover-position="center" data-name="join_option">join_inner</button>
+                                <button id="btn__open_join_options" type="button" class="material-symbols-rounded" data-join-type="INNER" data-fn="btnOpenJoinOptions" data-popover-id="popover__join_options" data-popover-position="center" data-name="join_option">join_inner</button>
                                 <section data-table-to data-table-id></section>
                             </section>
                             <section class="joins"></section>
@@ -826,27 +826,13 @@
 								<button id="btn-remove-join" class="btn-link link important" data-fn="removeJoins" value="Elimina Join">Elimina join</button>
 							</section>
 							<div class="list-search">
-                                <input type="search" id="field-join-search" placeholder="Ricerca" data-element-search="join-fields" autocomplete="off" />
+                                <input type="search" id="input__field_join_search" placeholder="Ricerca" data-element-search="join-fields" autocomplete="off" />
                                 <section class="join__field_lists">
                                     <section data-table-from class="relative-ul">
-                                        <ul id="ul-from-fields" data-search-id="field-join-search" class="custom-scrollbar"></ul>
-                                            <!--
-                                        <section class="list-search">
-                                            <input type="search" id="field-join-search" placeholder="Ricerca" data-element-search="join-fields" autocomplete="off" />
-                                            <div class="relative-ul">
-                                                <ul id="ul-from-fields" data-search-id="field-join-search" class="custom-scrollbar"></ul>
-                                            </div>
-                                        </section> -->
+                                        <ul id="ul-from-fields" data-search-id="input__field_join_search" class="custom-scrollbar"></ul>
                                     </section>
                                     <section data-table-to class="relative-ul">
-                                        <ul id="ul-to-fields" data-search-id="field-join-search" class="custom-scrollbar"></ul>
-                                            <!--
-                                        <section class="list-search">
-                                            <input type="search" id="field-to-search" placeholder="Ricerca" data-element-search="join-fields" autocomplete="off" />
-                                            <div class="relative-ul">
-                                                <ul id="ul-to-fields" data-search-id="field-join-search" class="custom-scrollbar"></ul>
-                                            </div>
-                                        </section> -->
+                                        <ul id="ul-to-fields" data-search-id="input__field_join_search" class="custom-scrollbar"></ul>
                                     </section>
                                 </section>
 							</div>

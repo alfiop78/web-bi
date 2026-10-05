@@ -666,6 +666,10 @@ class DrawSVG {
      */
     addJoin() {
         this.joinFields = ++this.#joinId;
+        // reset della input di ricerca input__field_join_search
+        input__field_join_search.value = '';
+        input__field_join_search.focus();
+
     }
 
     /*
@@ -687,6 +691,9 @@ class DrawSVG {
         joinSectionFrom.innerHTML = from.table;
         joinSectionTo.dataset.tableId = to.key;
         joinSectionTo.innerHTML = to.table;
+        // reset della input di ricerca input__field_join_search
+        input__field_join_search.value = '';
+        input__field_join_search.focus();
         this.createListFields();
     }
 
@@ -704,8 +711,8 @@ class DrawSVG {
             // reset dei join-field
             this.resetJoin();
             this.createHeaderSection();
-            // reimposto il tasto btn__open_join_options su 'inner' come default
-            btn__open_join_options.dataset.joinType = 'inner';
+            // reimposto il tasto btn__open_join_options su 'INNER' come default
+            btn__open_join_options.dataset.joinType = 'INNER';
             btn__open_join_options.innerText = 'join_inner';
         }
         this.dialogJoin.show();
@@ -720,10 +727,8 @@ class DrawSVG {
         // 1.Identifico la join selezionata
 
         this.createHeaderSection();
-        debugger;
         const joinSelected = WorkBook._joins[this.currentLineRef.dataset.joinId];
         if (joinSelected) {
-            debugger;
             WorkBook.join_a = joinSelected.fields;
             // ciclo i campi messi in join presenti nell'array fields
             joinSelected.fields.forEach((field, index) => {
