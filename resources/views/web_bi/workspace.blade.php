@@ -705,7 +705,7 @@
 						</section>
 						<section class="dlg-buttons">
 							<button name="cancel" value="chiudi">Chiudi</button>
-							<button id="btn-metric-save" value="salva">Salva</button>
+							<button id="btn__adv_metric_save" value="salva">Salva</button>
 						</section>
 					</section>
 				</dialog>

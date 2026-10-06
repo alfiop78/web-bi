@@ -22,7 +22,7 @@ const input__filter_name = document.getElementById('input__filter_name');
 const btnFilterSave = document.getElementById('btn-filter-save');
 const btnCustomMetricSave = document.getElementById('btn-custom-metric-save');
 const btnCompositeMetricSave = document.getElementById('btn-composite-metric-save');
-const btnAdvancedMetricSave = document.getElementById('btn-metric-save');
+const btn__advMetricSave = document.getElementById('btn__adv_metric_save');
 const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
 const btnNewCompositeMeasure = document.getElementById('btnNewCompositeMeasure');
 const btnOptions = document.getElementById('btnOptions');
@@ -75,8 +75,6 @@ const body = document.getElementById('body');
 
 (() => {
     var app = {
-        // TODO: 15.05.2025 Aggiungere qui solo le variabili che vengono utilizzate in questa IIEF
-        // templates
         tmplDetails: document.getElementById('tmpl-details-element'),
         tmplAdvMetricsDefined: document.getElementById('tmpl-adv-metric'),
         dialogRename: document.getElementById('dialog-rename'),
@@ -84,7 +82,6 @@ const body = document.getElementById('body');
         dialogTime: document.getElementById('dialog-time'),
         dialogSchema: document.getElementById('dlg-schema'),
         dialogNewSheet: document.getElementById('dialog-new-sheet'),
-        btnAdvancedMetricSave: document.getElementById("btn-metric-save"),
         // btnWorkBook: document.getElementById('workbook'),
         btnSheet: document.getElementById('sheet'),
         btnShowInfo: document.getElementById('btnShowInfo'),
@@ -1100,7 +1097,6 @@ const body = document.getElementById('body');
         const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
         const field = tmpl.querySelector('#adv-metric-defined');
         const formula = field.querySelector('.formula');
-        const btnSave = document.getElementById('btn-metric-save');
         const aggregateFn = formula.querySelector('code[data-aggregate]');
         const fieldName = formula.querySelector('span');
         document.getElementById('check-distinct').checked = metric.distinct;
@@ -1108,12 +1104,12 @@ const body = document.getElementById('body');
         fieldName.innerText = `( ${metric.alias} )`;
         input.appendChild(field);
         // Nella creazione di una metrica filtrata, alcune proprietà, vengono "riprese" dalla metrica di base da cui deriva.
-        // Per questo motivo ho bisogno sempre del token della metrica di base, lo imposto sul btn-metric-save[data-origin-token]
-        btnSave.dataset.originToken = metric.originToken;
+        // Per questo motivo ho bisogno sempre del token della metrica di base, lo imposto sul btn__advMetricSave[data-origin-token]
+        btn__advMetricSave.dataset.originToken = metric.originToken;
         // ...inoltre, siccome questo tasto entra in 'edit' della metrica, aggiungo anche il token
         // della metrica che si sta modificando. In questo modo, in saveMetric() posso usare la logica di
         // aggiornamento/creazione in base al data-token presente su btnSave
-        btnSave.dataset.token = e.target.dataset.token;
+        btn__advMetricSave.dataset.token = e.target.dataset.token;
         btn__showAdvancedMetricsUsage.dataset.token = e.target.dataset.token;
         // reimposto le proprietà della metrica nella dialog
         app.inputAdvMetricName.value = metric.alias;
@@ -1314,72 +1310,9 @@ const body = document.getElementById('body');
         Sheet.fact.forEach(factId => {
             let from = {};
             Sheet.tables.forEach(tableAlias => {
-                const tables = WorkBook.dataModel.get(factId);
-                if (tableAlias === 'time') tableAlias = 'WB_YEARS';
-
-                if (tables.hasOwnProperty(tableAlias)) {
-                    tables[tableAlias].forEach(table => {
-                        // debugger;
-                        const data = Draw.tables.get(table.id);
-                        // recupero la posizione di questa tabella in WorkBookMap
-                        const position = [...WorkBook.workbookMap.keys()].indexOf(data.alias);
-                        const joins = WorkBook._joins[data.alias] || false;
-
-                        // La Fact la imposto per prima nella clausola FROM, non ha
-                        // la proprietà joins
-                        from[position] = (data.id === factId) ?
-                            { schema_from: data.schema, table_from: data.table, alias_from: data.alias } : from[position] = joins;
-                    });
-                }
+                from = setFromClause(factId, tableAlias, from);
             });
-            console.log('FROM', from);
-            debugger;
-            // 29.09.2026 se è presente una LEFT JOIN devo scambiare la posizione della tabella
-            // che contiene la left join con la tabella nella posizione precedente
-            for (const [key, value] of Object.entries(from)) {
-
-                if (value.join_type === 'LEFT') {
-                    // cerco la tabella legata a quella in ciclo (dove è presente il LEFT JOIN)
-                    // per recuperarne la posizione e poter fare lo swapping
-                    const index = Object.values(from).findIndex(element => element.alias_from === value.alias_to);
-                    // console.log(index);
-                    // scambio, oltre all'index, anche altre proprietà per consentire la corretta
-                    // costruzione della query
-                    // NOTE: Destrutturazione
-
-                    // console.log('FROM', from);
-                    [from[+key], from[index]] = [from[index], from[+key]];
-                    // aggiungo le proprietà che erano presenti nel from prima dello scambio
-                    from[+key].join_type = from[index].join_type;
-                    from[+key].factId = from[index].factId;
-                    from[+key].alias_from = from[index].alias_to;
-                    from[+key].alias_to = from[index].alias_from;
-                    from[+key].schema_to = from[index].schema_from;
-                    from[+key].schema_from = from[index].schema_to;
-                    from[+key].table_to = from[index].table_from;
-                    from[+key].table_from = from[index].table_to;
-                    from[+key].fields = from[index].fields;
-                    from[+key].type = from[index].type;
-
-                    // clono l'oggetto from[index] escludendo i campi elencati prima dell'operatore spread
-                    const { join_type, alias_to, schema_to, table_to, fields, type, factId, ...from_cloned } = from[index];
-                    // se non viene clonato l'object from, gli elementi che dovranno essere
-                    // eliminati (campi esclusi prima di (...)), elimineranno le proprietà anche
-                    // da WorkBook._joins perchè gli object (o array) sono puntati per Riferimento e non per valore
-                    from[index] = from_cloned;
-                    // i delete qui sotto causano la cancellazione delle stesse proprietà, anche in WorkBook._joins
-                    // delete from[index].join_type;
-                    // delete from[index].alias_to;
-                    // delete from[index].schema_to;
-                    // delete from[index].table_to;
-                    // delete from[index].fields;
-                    // delete from[index].type;
-                    // delete from[index].factId;
-                }
-            }
-            console.log('FROM', from);
-            debugger;
-            Sheet.from[factId] = from;
+            Sheet.from[factId] = checkJoinType(from);
         });
     }
 
@@ -1628,6 +1561,7 @@ const body = document.getElementById('body');
 
         WorkBook.checkChanges('time');
         app.dialogTime.close();
+
     }
 
     // NOTE: funzioni per le join
@@ -1849,7 +1783,6 @@ const body = document.getElementById('body');
         const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
         const field = tmpl.querySelector('#adv-metric-defined');
         const formula = field.querySelector('.formula');
-        const btnSave = document.getElementById('btn-metric-save');
         const aggregateFn = formula.querySelector('code[data-aggregate]');
         const fieldName = formula.querySelector('span');
         document.getElementById('check-distinct').checked = false;
@@ -1857,8 +1790,8 @@ const body = document.getElementById('body');
         fieldName.innerText = `( ${metric.alias} )`;
         input.appendChild(field);
         // Nella creazione di una metrica filtrata, alcune proprietà, vengono "riprese" dalla metrica di base da cui deriva.
-        // Per questo motivo ho bisogno sempre del token della metrica di base, lo imposto sul btn-metric-save[data-origin-token]
-        btnSave.dataset.originToken = e.target.dataset.token;
+        // Per questo motivo ho bisogno sempre del token della metrica di base, lo imposto sul btn__advMetricSave[data-origin-token]
+        btn__advMetricSave.dataset.originToken = e.target.dataset.token;
         // TODO: valutare se spostarla in Application.js oppure in supportFn
         app.openDialogMetric();
     }
@@ -2004,11 +1937,11 @@ const body = document.getElementById('body');
         // lo stesso non nome NON possono essere presenti sotto la stessa tabella
         // ma in tabelle diverse si, verrà gestita, il nome duplicato della metrica, quando
         // verranno aggiunte allo Sheet.
-        const originToken = app.btnAdvancedMetricSave.dataset.originToken;
+        const originToken = btn__advMetricSave.dataset.originToken;
         const element = document.querySelector(`li.drag-list.metrics[data-id='${originToken}']`);
         console.log(element.dataset.factId, e.target.value);
         const check = WorkBook.checkMetricNames(element.dataset.factId, e.target.value);
-        app.btnAdvancedMetricSave.disabled = check;
+        btn__advMetricSave.disabled = check;
         console.log("check : ", check);
 
     }

@@ -367,6 +367,7 @@ class WorkBooks {
     set activeTable(id) {
         // id : `svg-data-x`
         this.#activeTable = Draw.svg.querySelector(`#${id}`);
+        // console.log('this.activeTable :', this.activeTable);
     }
 
     get activeTable() { return this.#activeTable; }
@@ -514,9 +515,9 @@ class WorkBooks {
                 // e che ha l'attributo data-shared_ref = tableRef.id
                 console.log(tableRef);
                 const tableJoin = (tableRef.classList.contains('shared') && tableRef.dataset.factId !== fact.id) ?
-                    Draw.svg.querySelector(`use.table[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
+                    Draw.svg.querySelector(`use[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
                     // Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
-                    Draw.svg.querySelector(`use.table#${table}`);
+                    Draw.svg.querySelector(`use#${table}`);
                 // joinTables.push(tableJoin.dataset.alias);
                 joinTables.push({ table: tableJoin.dataset.alias, id: tableJoin.id });
                 if (tableJoin.dataset.tableJoin) recursiveDimensionDown(tableJoin.dataset.tableJoin);

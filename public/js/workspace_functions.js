@@ -54,13 +54,83 @@ const findIndexOfCurrentWord = (textarea, caretPosition) => {
     return startIndex;
 };
 
+function setFromClause(factId, tableAlias, from) {
+    const tables = WorkBook.dataModel.get(factId);
+    if (tableAlias === 'time') tableAlias = 'WB_YEARS';
+
+    if (tables.hasOwnProperty(tableAlias)) {
+        tables[tableAlias].forEach(table => {
+            // debugger;
+            const data = Draw.tables.get(table.id);
+            // recupero la posizione di questa tabella in WorkBookMap
+            const position = [...WorkBook.workbookMap.keys()].indexOf(data.alias);
+            const joins = WorkBook._joins[data.alias] || false;
+
+            // La Fact la imposto per prima nella clausola FROM, non ha
+            // la proprietà joins
+            from[position] = (data.id === factId) ?
+                { schema_from: data.schema, table_from: data.table, alias_from: data.alias } : from[position] = joins;
+        });
+    }
+
+    return from;
+}
+
+function checkJoinType(from) {
+    // 29.09.2026 se è presente una LEFT JOIN devo scambiare la posizione della tabella
+    // che contiene la left join con la tabella nella posizione precedente
+
+    for (const [key, value] of Object.entries(from)) {
+
+        if (value.join_type === 'LEFT') {
+            // cerco la tabella legata a quella in ciclo (dove è presente il LEFT JOIN)
+            // per recuperarne la posizione e poter fare lo swapping
+            const index = Object.values(from).findIndex(element => element.alias_from === value.alias_to);
+            // console.log(index);
+            // scambio, oltre all'index, anche altre proprietà per consentire la corretta
+            // costruzione della query
+            // NOTE: Destrutturazione
+
+            // console.log('FROM', from);
+            [from[+key], from[index]] = [from[index], from[+key]];
+            // aggiungo le proprietà che erano presenti nel from prima dello scambio
+            from[+key].join_type = from[index].join_type;
+            from[+key].factId = from[index].factId;
+            from[+key].alias_from = from[index].alias_to;
+            from[+key].alias_to = from[index].alias_from;
+            from[+key].schema_to = from[index].schema_from;
+            from[+key].schema_from = from[index].schema_to;
+            from[+key].table_to = from[index].table_from;
+            from[+key].table_from = from[index].table_to;
+            from[+key].fields = from[index].fields;
+            from[+key].type = from[index].type;
+
+            // clono l'oggetto from[index] escludendo i campi elencati prima dell'operatore spread
+            const { join_type, alias_to, schema_to, table_to, fields, type, factId, ...from_cloned } = from[index];
+            // se non viene clonato l'object from, gli elementi che dovranno essere
+            // eliminati (campi esclusi prima di (...)), elimineranno le proprietà anche
+            // da WorkBook._joins perchè gli object (o array) sono puntati per Riferimento e non per valore
+            from[index] = from_cloned;
+            // i delete qui sotto causano la cancellazione delle stesse proprietà, anche in WorkBook._joins
+            // delete from[index].join_type;
+            // delete from[index].alias_to;
+            // delete from[index].schema_to;
+            // delete from[index].table_to;
+            // delete from[index].fields;
+            // delete from[index].type;
+            // delete from[index].factId;
+        }
+    }
+
+    return from;
+}
+
 /*
   * Tasto di salvataggio/aggiornamento filtro
   * sql : viene passato alla procedura .php che elabora il report
   * formula : è la formula scritta nella textarea, verrà utilizzata per ripristinarla nella textarea in case di edit
 */
 function filterSave(e) {
-    debugger;
     if (textareaFilter.firstChild.nodeType !== 3) return;
     const name = input__filter_name.value;
     // in edit recupero il token presente sul tasto
@@ -102,26 +172,12 @@ function filterSave(e) {
     for (const factId of WorkBook.dataModel.keys()) {
         let from = {};
         object.tables.forEach(tableAlias => {
-            const tables = WorkBook.dataModel.get(factId);
-            if (tableAlias === 'time') tableAlias = 'WB_YEARS';
-
-            if (tables.hasOwnProperty(tableAlias)) {
-                tables[tableAlias].forEach(table => {
-                    const data = Draw.tables.get(table.id);
-                    // recupero la posizione di questa tabella in WorkBookMap
-                    const position = [...WorkBook.workbookMap.keys()].indexOf(data.alias);
-                    const joins = WorkBook._joins[data.alias] || false;
-
-                    // from[position] = { table: data.table, alias: data.alias, joins };
-                    // La Fact la imposto per prima nella clausola FROM, non ha
-                    // la proprietà joins
-                    from[position] = (data.id === factId) ?
-                        { schema: data.schema, table: data.table, alias: data.alias } : from[position] = joins;
-                });
-            }
+            from = setFromClause(factId, tableAlias, from);
         });
         console.log('FROM', from);
-        object.from[factId] = from;
+        // verifico se sono presenti LEFT JOIN ed effettuo lo scambio delle posizioni
+        // con la fn checkJoinType()
+        object.from[factId] = checkJoinType(from);
     }
 
     WorkBook.elements = object;

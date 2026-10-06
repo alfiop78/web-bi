@@ -79,6 +79,8 @@ class DrawSVG {
         e.target.classList.add('dragging');
         this.dragElementPosition.x = e.offsetX;
         this.dragElementPosition.y = e.offsetY;
+        // elimino momentaneamente la cssClass 'table' dagli elementi <use.table.time>
+        // this.svg.querySelectorAll('.time').forEach(timeTable => timeTable.classList.remove('table'));
         // console.log(this.dragElementPosition);
         e.dataTransfer.setData('text/plain', e.target.id);
         // creo la linea
@@ -104,10 +106,11 @@ class DrawSVG {
             if (this.countTables > 0) {
                 // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
                 this.nearestTable = [...this.svg.querySelectorAll('use.table:not([data-shared_ref])')].reduce((prev, current) => {
-                    // this.nearetestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
+                    // console.log(current, prev);
                     return (Math.hypot(e.offsetX - (+current.dataset.anchorXTo), e.offsetY - (+current.dataset.anchorYTo)) < Math.hypot(e.offsetX - (+prev.dataset.anchorXTo), e.offsetY - (+prev.dataset.anchorYTo))) ? current : prev;
                     // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
                 });
+                // console.log('nearestTable :', this.nearestTable);
                 const rectBounding = this.nearestTable.getBoundingClientRect();
 
                 // let testCoords = [{ x: 305, y: 70 }, { x: 210, y: 85 }];
@@ -123,8 +126,11 @@ class DrawSVG {
                 // ...se sto droppando in 'bottom' o in 'right'
                 // OPTIMIZE: 2024.02.01 - calcolo controlPoint dinamici
                 // console.log(this.currentLineRef.getTotalLength());
+                // if (!this.nearestTable.classList.contains('time')) {
+
                 const anchorPoints = (this.countJoins >= 1 && this.nearestTable.classList.contains('fact')) ?
                     [
+                        // punto di ancoraggio di destra per la tabella Fact
                         {
                             x: +this.nearestTable.dataset.anchorXTo,
                             y: +this.nearestTable.dataset.anchorYTo,
@@ -138,6 +144,7 @@ class DrawSVG {
                             y2: (e.offsetY - this.dragElementPosition.y + 15),
                             anchor: 'right'
                         }, // right
+                        // punto di ancoraggio di sotto per la tabella Fact
                         {
                             x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2),
                             y: +this.nearestTable.getAttribute('y') + (rectBounding.height + 9),
@@ -150,6 +157,7 @@ class DrawSVG {
                         } // bottom
                     ] :
                     [
+                        // punto di ancoraggio di destra per le tabelle dimensionali
                         {
                             x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo,
                             p1x: +this.nearestTable.dataset.anchorXTo + 40,
@@ -161,13 +169,14 @@ class DrawSVG {
                         }, // right
                         // { x: +nearestTable.dataset.x - 10, y: this.tableJoin.y, anchor: 'left' } // left
                     ];
+                if (this.nearestTable.classList.contains('time')) debugger;
 
                 // il nearestPoint restituisce anchorPoints qui sopra definito, al suo interno le coordinate per disegnare la linea
                 this.nearestPoint = anchorPoints.reduce((prev, current) => {
                     return (Math.hypot(e.offsetX - current.x, e.offsetY - current.y) < Math.hypot(e.offsetX - prev.x, e.offsetY - prev.y)) ? current : prev;
                 });
 
-                // console.log(this.nearestPoint);
+                // console.log('nearestPoint :', this.nearestPoint);
                 if (this.currentLineRef) {
                     this.currentLineRef.dataset.startX = this.nearestPoint.x; // start point x
                     this.currentLineRef.dataset.startY = this.nearestPoint.y; // start point y
@@ -197,6 +206,7 @@ class DrawSVG {
                         }
                     });
 
+                    // console.log(this.nearestPoint);
                     const d = `M${this.nearestPoint.x},${this.nearestPoint.y} C${this.nearestPoint.p1x},${this.nearestPoint.p1y} ${this.nearestPoint.p2x},${this.nearestPoint.p2y} ${this.nearestPoint.x2},${this.nearestPoint.y2}`;
                     this.currentLineRef.setAttribute('d', d);
                     // console.log(this.currentLineRef.getTotalLength());
@@ -228,6 +238,8 @@ class DrawSVG {
 
     handlerDrop(e) {
         e.preventDefault();
+        // ripristino la cssClass 'table' dagli elementi <use.table.time>
+        // this.svg.querySelectorAll('.time').forEach(timeTable => timeTable.classList.add('table'));
         // console.log('handlerDrop()');
         e.currentTarget.classList.replace('dropping', 'dropped');
         if (!e.currentTarget.classList.contains('dropzone')) return;
@@ -339,6 +351,7 @@ class DrawSVG {
                 }
             });
             this.currentTable = this.tables.get(id);
+            console.log('this.currentTable : ', this.currentTable);
             // aggiungo qui l'evento click sulla linea perchè sulla line.fact non deve essere presente
             this.currentLineRef.dataset.fn = 'editJoin';
             // linea di join da tableJoin alla tabella droppata (questa deve essere impostata DOPO this.currentTable
@@ -631,12 +644,15 @@ class DrawSVG {
     /*
      * Creo la lista dei campi delle due tabelle da mettere in join
      */
-    async createListFields() {
+    createListFields() {
         console.info('createListFields');
         // Ciclo i campi della tabella WorkBook.tableJoins e li aggiungo alla dlg-join
         for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+            console.log(key, value);
             WorkBook.activeTable = value.id;
-            const data = await WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+            // const data = await WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+            const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+            console.log('aggiungo i campi per la tabella : ', WorkBook.activeTable.dataset.table);
             this.addFields(key, data);
         }
     }
@@ -669,7 +685,6 @@ class DrawSVG {
         // reset della input di ricerca input__field_join_search
         input__field_join_search.value = '';
         input__field_join_search.focus();
-
     }
 
     /*
@@ -840,6 +855,7 @@ class DrawSVG {
          */
         // console.log(source, response);
         const ul = this.dialogJoin.querySelector(`section[data-table-${source}] ul`);
+        console.log(WorkBook.activeTable.dataset.table);
         for (const [key, value] of Object.entries(response)) {
             const content = this.tmplList.content.cloneNode(true);
             const li = content.querySelector('li.select-list');
@@ -1146,7 +1162,8 @@ class DrawSVG {
             // debugger;
             // use.dataset.id = this.currentTable.id;
             use.id = this.currentTable.id;
-            use.classList.add('table', 'time');
+            // use.classList.add('table', 'time');
+            use.classList.add('time');
             use.dataset.type = 'time';
             use.dataset.table = this.currentTable.table;
             use.dataset.joins = this.currentTable.joins;
@@ -1163,7 +1180,8 @@ class DrawSVG {
         const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
         use.setAttribute('href', '#time');
         use.id = this.currentTable.id;
-        use.classList.add('table', 'time');
+        // use.classList.add('table', 'time');
+        use.classList.add('time');
         use.dataset.type = 'time';
         use.dataset.table = this.currentTable.table;
         use.dataset.joins = this.currentTable.joins;

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // metrica custom di base
     btnCustomMetricSave.addEventListener('click', customBaseMetricSave);
     // metriche avanzate
-    btnAdvancedMetricSave.addEventListener('click', advancedMetricSave);
+    btn__advMetricSave.addEventListener('click', advancedMetricSave);
     // metriche composite
     btnCompositeMetricSave.addEventListener('click', compositeMetricSave);
     // dialog creazione filtri
