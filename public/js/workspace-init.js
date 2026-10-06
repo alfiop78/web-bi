@@ -700,7 +700,7 @@ const body = document.getElementById('body');
             for (const [token, field] of Sheet.fields) {
                 // verifico le tabelle da includere in tables Sheet.tables
                 // TEST: 11.04.2025 Funzionalità da testare su Sheet multiFact
-                debugger;
+                // debugger;
                 if (Sheet.checkMultiFactFields(token)) {
                     const origin_element = WorkBook.elements.get(token);
                     // Aggiorno le proprietà SQL, name di Sheet.fields recuperandole da WorkBook.elements
@@ -1579,7 +1579,6 @@ const body = document.getElementById('body');
         }
     }
 
-    // app.addJoin = () => Draw.joinFields = Draw.rand().substring(0, 4);
     app.addJoin = () => Draw.addJoin();
 
     /*

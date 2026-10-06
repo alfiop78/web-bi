@@ -222,10 +222,7 @@ class Cube
 
                         $on[] = "{$value->alias_from}.{$field->a} = {$cast_field}";
                     } else {
-                        $on[] = ($join_type === 'INNER') ? "{$value->alias_from}.{$field->a} = {$value->alias_to}.{$field->b}" :
-                            "{$value->alias_to}.{$field->a} = {$value->alias_from}.{$field->b}";
-
-                        /* $on[] = "{$value->alias_from}.{$field->a} = {$value->alias_to}.{$field->b}"; */
+                        $on[] = "{$value->alias_from}.{$field->a} = {$value->alias_to}.{$field->b}";
                     }
                 }
                 $this->from_clause[$this->factId][$value->alias_from] = ["schema" => $value->schema_from, "table" => $value->table_from, "joins" => $on, "join_type" => $join_type];

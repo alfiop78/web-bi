@@ -513,7 +513,7 @@ class WorkBooks {
                 // A questo punto, se sono in ciclo in una fact diversa da quella presente sulla
                 // tabella passata (tableRef) devo recuperare la tabella appartenente alla Fact in ciclo
                 // e che ha l'attributo data-shared_ref = tableRef.id
-                console.log(tableRef);
+                // console.log(tableRef);
                 const tableJoin = (tableRef.classList.contains('shared') && tableRef.dataset.factId !== fact.id) ?
                     Draw.svg.querySelector(`use[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
                     // Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :

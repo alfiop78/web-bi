@@ -83,42 +83,35 @@ function checkJoinType(from) {
     for (const [key, value] of Object.entries(from)) {
 
         if (value.join_type === 'LEFT') {
-            // cerco la tabella legata a quella in ciclo (dove è presente il LEFT JOIN)
+            // cerco la tabella legata a quella in ciclo (join_type: LEFT)
             // per recuperarne la posizione e poter fare lo swapping
             const index = Object.values(from).findIndex(element => element.alias_from === value.alias_to);
-            // console.log(index);
             // scambio, oltre all'index, anche altre proprietà per consentire la corretta
             // costruzione della query
             // NOTE: Destrutturazione
+            // [from[+key], from[index]] = [from[index], from[+key]];
 
-            // console.log('FROM', from);
-            [from[+key], from[index]] = [from[index], from[+key]];
-            // aggiungo le proprietà che erano presenti nel from prima dello scambio
-            from[+key].join_type = from[index].join_type;
-            from[+key].factId = from[index].factId;
-            from[+key].alias_from = from[index].alias_to;
-            from[+key].alias_to = from[index].alias_from;
-            from[+key].schema_to = from[index].schema_from;
-            from[+key].schema_from = from[index].schema_to;
-            from[+key].table_to = from[index].table_from;
-            from[+key].table_from = from[index].table_to;
-            from[+key].fields = from[index].fields;
-            from[+key].type = from[index].type;
+            // Effettuo uno swapping sulla 'from' utilizzando gli object clonati altrimenti
+            // le modifiche a questi object si ripercuotono anche wwu WorkBook._joins
+            const { join_type, alias_to, schema_to, table_to, fields, type, factId, ...clone_left_join } = from[+key];
+            const clone_related_join = from[index];
+            clone_related_join.join_type = from[+key].join_type;
+            clone_related_join.factId = from[+key].factId;
+            clone_related_join.alias_from = from[+key].alias_to;
+            clone_related_join.alias_to = from[+key].alias_from;
+            clone_related_join.schema_to = from[+key].schema_from;
+            clone_related_join.schema_from = from[+key].schema_to;
+            clone_related_join.table_to = from[+key].table_from;
+            clone_related_join.table_from = from[+key].table_to;
+            // inverto i valori in fields
+            clone_related_join.fields = from[+key].fields.map(item => ({ a: item.b, b: item.a }));
+            clone_related_join.type = from[+key].type;
 
-            // clono l'oggetto from[index] escludendo i campi elencati prima dell'operatore spread
-            const { join_type, alias_to, schema_to, table_to, fields, type, factId, ...from_cloned } = from[index];
-            // se non viene clonato l'object from, gli elementi che dovranno essere
-            // eliminati (campi esclusi prima di (...)), elimineranno le proprietà anche
-            // da WorkBook._joins perchè gli object (o array) sono puntati per Riferimento e non per valore
-            from[index] = from_cloned;
-            // i delete qui sotto causano la cancellazione delle stesse proprietà, anche in WorkBook._joins
-            // delete from[index].join_type;
-            // delete from[index].alias_to;
-            // delete from[index].schema_to;
-            // delete from[index].table_to;
-            // delete from[index].fields;
-            // delete from[index].type;
-            // delete from[index].factId;
+            // effettuo lo swapping nella from
+            [from[+key], from[index]] = [clone_related_join, clone_left_join];
+            // console.log(from);
+            // console.log(WorkBook._joins);
+            // debugger;
         }
     }
 

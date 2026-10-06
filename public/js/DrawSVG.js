@@ -729,6 +729,13 @@ class DrawSVG {
             // reimposto il tasto btn__open_join_options su 'INNER' come default
             btn__open_join_options.dataset.joinType = 'INNER';
             btn__open_join_options.innerText = 'join_inner';
+            // NOTE: 06.10.2026al momento sono supportate solo le LEFT JOIN che si collegano alla fact table
+            // Le LEFT JOIN che si potranno impostare sulle tabelle di gerarchia superiori devono, a
+            // cascata impostare tutte le join delle gerarchie inferiori come LEFT JOIN
+
+            // Per disabilitare il tasto btn__open_join_options devo verificare se la tabella di destra
+            // è la fact
+            btn__open_join_options.disabled = (this.currentLineRef.dataset.to === this.currentLineRef.dataset.factId) ? false : true;
         }
         this.dialogJoin.show();
     }
@@ -761,6 +768,14 @@ class DrawSVG {
                 // per questa relazione
                 btn__open_join_options.dataset.joinType = joinSelected.join_type;
                 btn__open_join_options.innerText = `join_${joinSelected.join_type}`;
+                // NOTE: 06.10.2026al momento sono supportate solo le LEFT JOIN che si collegano alla fact table
+                // Le LEFT JOIN che si potranno impostare sulle tabelle di gerarchia superiori devono, a
+                // cascata impostare tutte le join delle gerarchie inferiori come LEFT JOIN
+
+                // Per disabilitare il tasto btn__open_join_options devo verificare se la tabella di destra
+                // è la fact
+                btn__open_join_options.disabled = (this.currentLineRef.dataset.to === this.currentLineRef.dataset.factId) ? false : true;
+
             });
         } else {
             // nessuna join ancora presente tra le due tabelle
